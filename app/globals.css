@@ -3,4 +3,12 @@
 @theme inline {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  
+  /* FixIt 2.0 Premium Palette */
+  --color-slate-900: #0F172A; /* Primary Background */
+  --color-slate-800: #1E293B; /* Secondary Background */
+  --color-orange-500: #F97316; /* Action / CTA */
+  --color-emerald-500: #10B981; /* Success / Trust */
+  --color-slate-50: #F8FAFC; /* Text Primary */
+  --color-slate-400: #94A3B8; /* Text Muted */
 }

@@ -71,7 +71,8 @@ function BookingForm() {
       }
 
       alert("Pesanan berhasil dibuat! Teknisi kami akan segera menghubungi Anda.");
-      router.push("/");
+      router.push("/dashboard");
+      router.refresh();
     } catch (error: any) {
       setErrorMsg(error.message);
     } finally {
@@ -80,81 +81,84 @@ function BookingForm() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 py-12">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
+    <div className="min-h-screen bg-slate-900 text-slate-50 py-12 relative overflow-hidden">
+      {/* Background Accent */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-500/5 blur-[120px] rounded-full pointer-events-none" />
+
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl relative z-10">
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-blue-950">Lengkapi Data Pesanan</h1>
-          <p className="mt-2 text-slate-600">Satu langkah lagi menuju barang elektronik yang kembali prima.</p>
+          <h1 className="text-3xl font-bold text-slate-50">Lengkapi Data Pesanan</h1>
+          <p className="mt-2 text-slate-400">Satu langkah lagi menuju barang elektronik yang kembali prima.</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Form Utama */}
           <div className="md:col-span-2">
-            <Card>
+            <Card className="bg-slate-800/40 border-slate-700/50 backdrop-blur-md">
               <CardContent className="p-6">
                 <form onSubmit={handleSubmit} className="space-y-6">
                   {/* Tipe Layanan (Tabs Style) */}
                   <div className="space-y-3">
-                    <label className="text-sm font-semibold text-slate-700">Pilih Metode Layanan</label>
+                    <label className="text-sm font-semibold text-slate-300">Pilih Metode Layanan</label>
                     <div className="grid grid-cols-2 gap-3">
                       <button
                         type="button"
                         onClick={() => setServiceType("HOME_SERVICE")}
-                        className={`p-4 rounded-lg border-2 text-left transition-all ${
+                        className={`p-4 rounded-xl border-2 text-left transition-all ${
                           serviceType === "HOME_SERVICE" 
-                            ? "border-orange-500 bg-orange-50" 
-                            : "border-slate-200 bg-white hover:border-orange-200"
+                            ? "border-orange-500 bg-orange-500/10 backdrop-blur-md" 
+                            : "border-slate-800 bg-slate-900/50 hover:border-orange-500/30"
                         }`}
                       >
-                        <h4 className={`font-semibold ${serviceType === "HOME_SERVICE" ? "text-orange-700" : "text-slate-700"}`}>Panggil ke Rumah</h4>
-                        <p className="text-sm text-slate-500 mt-1">Teknisi datang ke lokasi Anda.</p>
+                        <h4 className={`font-semibold ${serviceType === "HOME_SERVICE" ? "text-orange-400" : "text-slate-300"}`}>Panggil ke Rumah</h4>
+                        <p className="text-xs text-slate-500 mt-1">Teknisi datang ke lokasi Anda.</p>
                       </button>
                       
                       <button
                         type="button"
                         onClick={() => setServiceType("WORKSHOP_VISIT")}
-                        className={`p-4 rounded-lg border-2 text-left transition-all ${
+                        className={`p-4 rounded-xl border-2 text-left transition-all ${
                           serviceType === "WORKSHOP_VISIT" 
-                            ? "border-blue-500 bg-blue-50" 
-                            : "border-slate-200 bg-white hover:border-blue-200"
+                            ? "border-blue-500 bg-blue-500/10 backdrop-blur-md" 
+                            : "border-slate-800 bg-slate-900/50 hover:border-blue-500/30"
                         }`}
                       >
-                        <h4 className={`font-semibold ${serviceType === "WORKSHOP_VISIT" ? "text-blue-700" : "text-slate-700"}`}>Bawa ke Bengkel</h4>
-                        <p className="text-sm text-slate-500 mt-1">Jaga privasi, antar barang ke kami.</p>
+                        <h4 className={`font-semibold ${serviceType === "WORKSHOP_VISIT" ? "text-blue-400" : "text-slate-300"}`}>Bawa ke Bengkel</h4>
+                        <p className="text-xs text-slate-500 mt-1">Jaga privasi, antar barang ke kami.</p>
                       </button>
                     </div>
                   </div>
 
-                  <hr className="border-slate-100" />
+                  <hr className="border-slate-800" />
 
                   {/* Data Diri */}
                   <div className="space-y-4">
-                    <label className="text-sm font-semibold text-slate-700">Informasi Kontak</label>
+                    <label className="text-sm font-semibold text-slate-300">Informasi Kontak</label>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-1">
-                        <label className="text-xs text-slate-500">Nama Lengkap *</label>
-                        <input required type="text" value={name} onChange={(e) => setName(e.target.value)} className="w-full rounded-md border border-slate-300 px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none" />
+                        <label className="text-xs text-slate-400">Nama Lengkap *</label>
+                        <input required type="text" value={name} onChange={(e) => setName(e.target.value)} className="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-3 py-2 text-slate-200 focus:border-orange-500 outline-none" />
                       </div>
                       <div className="space-y-1">
-                        <label className="text-xs text-slate-500">Email *</label>
-                        <input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full rounded-md border border-slate-300 px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none" />
+                        <label className="text-xs text-slate-400">Email *</label>
+                        <input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-3 py-2 text-slate-200 focus:border-orange-500 outline-none" />
                       </div>
                     </div>
                     <div className="space-y-1">
-                      <label className="text-xs text-slate-500">Nomor WhatsApp *</label>
-                      <input required type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className="w-full rounded-md border border-slate-300 px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none" />
+                      <label className="text-xs text-slate-400">Nomor WhatsApp *</label>
+                      <input required type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-3 py-2 text-slate-200 focus:border-orange-500 outline-none" />
                     </div>
                   </div>
 
                   {/* Alamat (Kondisional) */}
                   {serviceType === "HOME_SERVICE" ? (
                     <div className="space-y-1 animate-in fade-in slide-in-from-top-2">
-                      <label className="text-xs text-slate-500">Alamat Lengkap Kunjungan *</label>
-                      <textarea required rows={3} value={address} onChange={(e) => setAddress(e.target.value)} className="w-full rounded-md border border-slate-300 px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none" placeholder="Jalan, RT/RW, Patokan..." />
+                      <label className="text-xs text-slate-400">Alamat Lengkap Kunjungan *</label>
+                      <textarea required rows={3} value={address} onChange={(e) => setAddress(e.target.value)} className="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-3 py-2 text-slate-200 focus:border-orange-500 outline-none placeholder-slate-500" placeholder="Jalan, RT/RW, Patokan..." />
                     </div>
                   ) : (
-                    <div className="rounded-md bg-blue-50 p-4 border border-blue-100 animate-in fade-in slide-in-from-top-2">
-                      <p className="text-sm text-blue-800">
+                    <div className="rounded-xl bg-blue-500/10 p-4 border border-blue-500/20 animate-in fade-in slide-in-from-top-2">
+                      <p className="text-sm text-slate-300">
                         <strong>Lokasi Bengkel FixIt:</strong><br />
                         Jl. Sudirman No. 99, Jakarta Pusat. Kami akan mengirimkan jam operasional bengkel ke WhatsApp Anda setelah pesanan dibuat.
                       </p>
@@ -162,7 +166,7 @@ function BookingForm() {
                   )}
 
                   {errorMsg && (
-                    <div className="p-3 rounded-md bg-red-50 text-red-600 text-sm border border-red-200">
+                    <div className="p-3 rounded-xl bg-red-500/10 text-red-400 text-sm border border-red-500/30">
                       {errorMsg}
                     </div>
                   )}
@@ -177,25 +181,25 @@ function BookingForm() {
 
           {/* Ringkasan Pesanan (Sidebar) */}
           <div className="md:col-span-1">
-            <Card className="sticky top-24 border-orange-200 bg-orange-50/30">
-              <CardHeader className="border-b border-orange-100 bg-orange-50/50 pb-4">
-                <CardTitle className="text-lg text-orange-900">Ringkasan Servis</CardTitle>
+            <Card className="sticky top-24 border-orange-500/30 bg-orange-500/5 backdrop-blur-md">
+              <CardHeader className="border-b border-orange-500/20 pb-4">
+                <CardTitle className="text-lg text-orange-400">Ringkasan Servis</CardTitle>
               </CardHeader>
               <CardContent className="p-5 space-y-4">
                 <div>
                   <p className="text-xs text-slate-500 uppercase tracking-wider font-semibold">Barang</p>
-                  <p className="font-medium text-slate-800">{appliance || "Tidak disebutkan"} {brand && `(${brand})`}</p>
+                  <p className="font-medium text-slate-200">{appliance || "Tidak disebutkan"} {brand && `(${brand})`}</p>
                 </div>
                 <div>
                   <p className="text-xs text-slate-500 uppercase tracking-wider font-semibold">Keluhan</p>
-                  <p className="font-medium text-slate-800">{problem || "Tidak disebutkan"}</p>
+                  <p className="font-medium text-slate-200">{problem || "Tidak disebutkan"}</p>
                 </div>
-                <div className="pt-4 border-t border-orange-100">
+                <div className="pt-4 border-t border-orange-500/20">
                   <p className="text-xs text-slate-500 uppercase tracking-wider font-semibold mb-1">Maksimal Estimasi Biaya</p>
-                  <p className="text-2xl font-bold text-orange-600">
+                  <p className="text-2xl font-bold text-orange-500">
                     {maxCost ? formatRupiah(parseInt(maxCost, 10)) : "Rp -"}
                   </p>
-                  <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                  <p className="text-xs text-slate-400 mt-1 leading-relaxed">
                     Harga final akan ditentukan oleh teknisi setelah pengecekan langsung.
                   </p>
                 </div>
@@ -210,7 +214,7 @@ function BookingForm() {
 
 export default function BookingPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Memuat data pesanan...</div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-slate-900 text-slate-50">Memuat data pesanan...</div>}>
       <BookingForm />
     </Suspense>
   );
