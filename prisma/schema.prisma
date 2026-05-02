@@ -1,0 +1,72 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql" // Karena kita pakai TiDB Cloud
+  url      = env("DATABASE_URL")
+}
+
+// Tabel Pelanggan
+model User {
+  id            String       @id @default(uuid())
+  name          String
+  email         String       @unique
+  phone         String?
+  address       String?      // Alamat rumah untuk opsi Home Service
+  role          Role         @default(CUSTOMER)
+  memberships   Membership[] // Relasi ke sistem langganan rutin
+  appliances    Appliance[]  // Relasi ke barang elektronik yg didaftarkan
+  orders        Order[]      // Relasi ke riwayat pesanan servis
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+}
+
+// Tabel Barang Elektronik (Biar Smart Scheduling bekerja otomatis)
+model Appliance {
+  id            String       @id @default(uuid())
+  userId        String
+  user          User         @relation(fields: [userId], references: [id])
+  type          String       // Contoh: "AC", "Kulkas", "Mesin Cuci"
+  brand         String?      // Contoh: "Daikin", "Sharp"
+  orders        Order[]
+  createdAt     DateTime     @default(now())
+}
+
+// Tabel Membership (Untuk otomatisasi perawatan rutin)
+model Membership {
+  id            String       @id @default(uuid())
+  userId        String
+  user          User         @relation(fields: [userId], references: [id])
+  status        String       // "ACTIVE", "EXPIRED"
+  startDate     DateTime     @default(now())
+  endDate       DateTime
+}
+
+// Tabel Order / Pesanan Servis
+model Order {
+  id            String       @id @default(uuid())
+  userId        String
+  user          User         @relation(fields: [userId], references: [id])
+  applianceId   String
+  appliance     Appliance    @relation(fields: [applianceId], references: [id])
+  serviceType   String       // "HOME_SERVICE", "WORKSHOP_VISIT", "EXPRESS"
+  status        String       // "PENDING", "ON_THE_WAY", "WORKING", "DONE"
+  problem       String       // Keluhan (misal: "AC Kurang Dingin")
+  estimatedCost Int?         // Transparansi harga awal dari kalkulator
+  finalCost     Int?         // Harga riil setelah teknisi mengecek
+  createdAt     DateTime     @default(now())
+}
+
+enum Role {
+  CUSTOMER
+  TECHNICIAN
+  ADMIN
+}
