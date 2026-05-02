@@ -1,11 +1,4 @@
-export type ApplianceType = "AC" | "Kulkas" | "Mesin Cuci";
-export type ProblemType = "Mati Total" | "Kurang Dingin" | "Bocor" | "Suara Kasar" | "Error Code" | "Lainnya";
-
-export interface CostEstimate {
-  minCost: number;
-  maxCost: number;
-  description: string;
-}
+import { ApplianceType, ProblemType, CostEstimate } from "@/types";
 
 export function calculateEstimatedCost(
   appliance: ApplianceType | "",
@@ -22,8 +15,8 @@ export function calculateEstimatedCost(
   switch (appliance) {
     case "AC":
       if (problem === "Kurang Dingin") {
-        minCost += 150000; // Tambah freon
-        maxCost += 350000; // Cuci besar + freon
+        minCost += 150000;
+        maxCost += 350000;
         description = "Termasuk biaya cuci dan penambahan freon standar.";
       } else if (problem === "Bocor") {
         minCost += 100000;
@@ -75,12 +68,4 @@ export function calculateEstimatedCost(
   }
 
   return { minCost, maxCost, description };
-}
-
-export function formatRupiah(amount: number): string {
-  return new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
-    minimumFractionDigits: 0,
-  }).format(amount);
 }

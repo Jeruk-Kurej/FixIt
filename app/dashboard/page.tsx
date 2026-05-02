@@ -1,25 +1,9 @@
 import { PrismaClient } from "@prisma/client";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
+import { formatDate, calculateNextService } from "@/lib/utils";
 
 const prisma = new PrismaClient();
-
-// Fungsi bantuan untuk format tanggal
-function formatDate(date: Date) {
-  return new Intl.DateTimeFormat("id-ID", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  }).format(date);
-}
-
-// Fungsi menghitung jadwal servis berikutnya (Smart Scheduling: per 3 bulan)
-function calculateNextService(lastServiceDate: Date | null, membershipStartDate: Date) {
-  const baseDate = lastServiceDate ? new Date(lastServiceDate) : new Date(membershipStartDate);
-  // Tambah 3 bulan
-  baseDate.setMonth(baseDate.getMonth() + 3);
-  return baseDate;
-}
 
 export default async function DashboardPage() {
   // Karena belum ada sistem autentikasi (Login), 

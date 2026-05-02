@@ -4,7 +4,8 @@ import { useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
-import { formatRupiah } from "@/lib/price-logic";
+import { formatRupiah } from "@/lib/utils";
+import { bookingSchema } from "@/lib/validations";
 
 function BookingForm() {
   const searchParams = useSearchParams();
@@ -34,8 +35,24 @@ function BookingForm() {
     setIsSubmitting(true);
     setErrorMsg("");
 
-    if (serviceType === "HOME_SERVICE" && !address) {
-      setErrorMsg("Alamat lengkap wajib diisi untuk layanan Home Service.");
+    const formData = {
+      name,
+      email,
+      phone,
+      address: serviceType === "HOME_SERVICE" ? address : null,
+      appliance,
+      brand,
+      problem,
+      serviceType,
+      estimatedCost: maxCost,
+    };
+
+    // Validasi Zod Client-Side
+    const validationResult = bookingSchema.safeParse(formData);
+    
+    if (!validationResult.success) {
+      const firstError = validationResult.error.issues[0]?.message || "Silakan periksa kembali isian form Anda.";
+      setErrorMsg(firstError);
       setIsSubmitting(false);
       return;
     }
@@ -44,17 +61,7 @@ function BookingForm() {
       const response = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name,
-          email,
-          phone,
-          address: serviceType === "HOME_SERVICE" ? address : null,
-          appliance,
-          brand,
-          problem,
-          serviceType,
-          estimatedCost: maxCost,
-        }),
+        body: JSON.stringify(validationResult.data),
       });
 
       const data = await response.json();

@@ -1,17 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
+import { bookingSchema } from "@/lib/validations";
 
 const prisma = new PrismaClient();
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { name, email, phone, address, appliance, brand, problem, serviceType, estimatedCost } = body;
-
-    // Validasi data penting
-    if (!name || !email || !appliance || !problem || !serviceType) {
-      return NextResponse.json({ error: "Data tidak lengkap. Pastikan semua kolom berlabel wajib sudah diisi." }, { status: 400 });
+    
+    // Validasi menggunakan Zod
+    const validationResult = bookingSchema.safeParse(body);
+    
+    if (!validationResult.success) {
+      const firstError = validationResult.error.issues[0]?.message || "Data tidak valid.";
+      return NextResponse.json({ error: firstError }, { status: 400 });
     }
+
+    const { name, email, phone, address, appliance, brand, problem, serviceType, estimatedCost } = validationResult.data;
 
     // 1. Cari atau Buat Akun Pengguna (berdasarkan Email)
     const user = await prisma.user.upsert({
