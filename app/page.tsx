@@ -2,8 +2,12 @@ import Link from "next/link";
 import Button from "@/components/ui/Button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { ShieldCheck, Calendar, Activity, Wrench, Shield, Clock } from "lucide-react";
+import { cookies } from "next/headers";
 
-export default function Home() {
+export default async function Home() {
+  const cookieStore = await cookies();
+  const isLoggedIn = !!cookieStore.get("user_email")?.value;
+
   return (
     <div className="flex flex-col w-full bg-slate-900 text-slate-50 min-h-screen relative">
       {/* Visual Background Accent */}
@@ -28,11 +32,11 @@ export default function Home() {
             </p>
             
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4 animate-in fade-in slide-in-from-bottom-3 duration-1000">
-              <Button href="/book" variant="primary" size="lg" className="w-full sm:w-auto font-semibold h-12 shadow-[0_0_15px_rgba(249,115,22,0.3)]">
-                Pesan Sekarang
+              <Button href={isLoggedIn ? "/book" : "/login"} variant="primary" size="lg" className="w-full sm:w-auto font-semibold h-12 shadow-[0_0_15px_rgba(249,115,22,0.3)]">
+                {isLoggedIn ? "Pesan Servis Sekarang" : "Pesan Sekarang"}
               </Button>
-              <Button href="/calculator" variant="outline" size="lg" className="w-full sm:w-auto font-semibold h-12 border-slate-700 hover:bg-slate-800">
-                Cek Estimasi Harga
+              <Button href={isLoggedIn ? "/dashboard" : "/calculator"} variant="outline" size="lg" className="w-full sm:w-auto font-semibold h-12 border-slate-700 hover:bg-slate-800">
+                {isLoggedIn ? "Dasbor Saya" : "Cek Estimasi Harga"}
               </Button>
             </div>
           </div>
@@ -129,8 +133,8 @@ export default function Home() {
                 </li>
               </ul>
               <div className="pt-4">
-                <Button href="/register" variant="outline" className="border-slate-700 hover:bg-slate-800">
-                  Daftar Sekarang
+                <Button href={isLoggedIn ? "/dashboard" : "/register"} variant="outline" className="border-slate-700 hover:bg-slate-800">
+                  {isLoggedIn ? "Masuk Dasbor" : "Daftar Sekarang"}
                 </Button>
               </div>
             </div>

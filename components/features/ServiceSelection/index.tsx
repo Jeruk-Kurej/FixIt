@@ -4,10 +4,10 @@ import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import type { ApplianceCategory } from "@prisma/client";
 import { useRouter } from "next/navigation";
-import StepAppliance from "./StepAppliance";
-import StepDiagnostics from "./StepDiagnostics";
+import StepDiagnosticsNew from "./StepDiagnosticsNew";
+import StepProfileCheck from "./StepProfileCheck";
 import StepSchedule from "./StepSchedule";
-import StepPriceBreakdown from "./StepPriceBreakdown";
+import StepTechnicianConfirmation from "./StepTechnicianConfirmation";
 
 export type BookingState = {
   categoryId: string;
@@ -16,13 +16,16 @@ export type BookingState = {
   serviceType: "HOME_SERVICE" | "WORKSHOP_VISIT";
   scheduledDate: Date | null;
   address: string;
+  phone: string;
 };
 
 interface ServiceSelectionProps {
   categories: ApplianceCategory[];
+  initialPhone: string;
+  initialAddress: string;
 }
 
-export default function ServiceSelection({ categories }: ServiceSelectionProps) {
+export default function ServiceSelection({ categories, initialPhone, initialAddress }: ServiceSelectionProps) {
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [direction, setDirection] = useState(1); // 1 = Maju, -1 = Mundur
@@ -32,7 +35,8 @@ export default function ServiceSelection({ categories }: ServiceSelectionProps) 
     problem: "",
     serviceType: "HOME_SERVICE",
     scheduledDate: null,
-    address: "",
+    address: initialAddress || "",
+    phone: initialPhone || "",
   });
 
   const nextStep = () => {
@@ -49,15 +53,15 @@ export default function ServiceSelection({ categories }: ServiceSelectionProps) 
     setBookingData((prev) => ({ ...prev, ...data }));
   };
 
-  const handleFinish = async (name: string, email: string, phone: string) => {
+  const handleFinish = async () => {
     try {
       const res = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name,
-          email,
-          phone,
+          name: "Pelanggan", // Digunakan fallback karena dibaca di api/orders via cookies/email
+          email: "budi@example.com", // Ini opsional di API karena API membaca dari cookies atau session
+          phone: bookingData.phone,
           address: bookingData.serviceType === "HOME_SERVICE" ? bookingData.address : null,
           appliance: bookingData.categoryName,
           brand: null,
@@ -70,7 +74,7 @@ export default function ServiceSelection({ categories }: ServiceSelectionProps) 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Gagal membuat pesanan.");
 
-      alert("Pesanan berhasil dibuat! Teknisi kami akan segera menghubungi Anda.");
+      alert("Pesanan berhasil dibuat! Teknisi Supriyadi Wijaya segera berangkat.");
       router.push("/dashboard");
       router.refresh();
     } catch (err: any) {
@@ -125,10 +129,10 @@ export default function ServiceSelection({ categories }: ServiceSelectionProps) 
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
             className="w-full"
           >
-            <StepAppliance 
+            <StepDiagnosticsNew 
               categories={categories} 
-              onNext={(id, name) => {
-                updateData({ categoryId: id, categoryName: name });
+              onNext={(id, name, problem, serviceType) => {
+                updateData({ categoryId: id, categoryName: name, problem, serviceType });
                 nextStep();
               }} 
             />
@@ -146,10 +150,12 @@ export default function ServiceSelection({ categories }: ServiceSelectionProps) 
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
             className="w-full"
           >
-            <StepDiagnostics 
-              applianceName={bookingData.categoryName}
-              onNext={(problem, serviceType) => {
-                updateData({ problem, serviceType });
+            <StepProfileCheck 
+              initialPhone={bookingData.phone}
+              initialAddress={bookingData.address}
+              serviceType={bookingData.serviceType}
+              onNext={(phone, address) => {
+                updateData({ phone, address });
                 nextStep();
               }}
               onBack={prevStep}
@@ -190,7 +196,7 @@ export default function ServiceSelection({ categories }: ServiceSelectionProps) 
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
             className="w-full"
           >
-            <StepPriceBreakdown 
+            <StepTechnicianConfirmation 
               categoryName={bookingData.categoryName}
               problem={bookingData.problem}
               serviceType={bookingData.serviceType}

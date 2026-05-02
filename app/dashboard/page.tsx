@@ -3,6 +3,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import { formatDate, calculateNextService } from "@/lib/utils";
 import { cookies } from "next/headers";
+import ProfileEditor from "@/components/features/ProfileEditor";
 
 const prisma = new PrismaClient();
 
@@ -48,30 +49,37 @@ export default async function DashboardPage() {
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-orange-500/5 blur-[150px] rounded-full pointer-events-none" />
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl relative z-10">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-50">Dashboard Anda</h1>
-          <p className="text-slate-400 mt-1">Selamat datang kembali, {user.name}!</p>
+        <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-slate-50">Dashboard Anda</h1>
+            <p className="text-slate-400 mt-1">Selamat datang kembali, <span className="text-orange-400 font-semibold">{user.name}</span></p>
+          </div>
+          <Button href="/book" variant="primary" className="shadow-[0_0_15px_rgba(249,115,22,0.3)]">
+            Pesan Servis Baru
+          </Button>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Kolom Kiri: Profil & Membership */}
           <div className="space-y-6 lg:col-span-1">
             <Card className="border-slate-800/80 bg-slate-800/40 backdrop-blur-md">
-              <CardHeader className="border-b border-slate-800 pb-4">
+              <CardHeader className="border-b border-slate-800/60 pb-4">
                 <CardTitle className="text-lg">Profil Saya</CardTitle>
               </CardHeader>
-              <CardContent className="p-5 space-y-3">
+              <CardContent className="p-5 space-y-4">
                 <div>
                   <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider">Email</p>
                   <p className="font-medium text-slate-300">{user.email}</p>
                 </div>
+                
+                <hr className="border-slate-800/60" />
+
                 <div>
-                  <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider">Nomor HP</p>
-                  <p className="font-medium text-slate-300">{user.phone || "-"}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider">Alamat Utama</p>
-                  <p className="font-medium text-slate-300">{user.address || "-"}</p>
+                  <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider mb-2">Lengkapi Data</p>
+                  <ProfileEditor 
+                    initialPhone={user.phone || ""} 
+                    initialAddress={user.address || ""}
+                  />
                 </div>
               </CardContent>
             </Card>
@@ -93,7 +101,7 @@ export default async function DashboardPage() {
                       <p className="text-xs text-slate-500 uppercase font-semibold">Berlaku Sampai</p>
                       <p className="font-medium text-slate-300">{formatDate(activeMembership.endDate)}</p>
                     </div>
-                    <Button variant="outline" size="sm" className="w-full mt-2 border-orange-500 text-orange-400 hover:bg-orange-500/10">
+                    <Button href="/membership" variant="outline" size="sm" className="w-full mt-2 border-orange-500 text-orange-400 hover:bg-orange-500/10">
                       Perpanjang Langganan
                     </Button>
                   </div>
@@ -144,7 +152,7 @@ export default async function DashboardPage() {
             <Card className="border-slate-800/80 bg-slate-800/40 backdrop-blur-md">
               <CardHeader className="border-b border-slate-800 pb-4 flex flex-row items-center justify-between">
                 <CardTitle className="text-lg">Riwayat Pesanan</CardTitle>
-                <Button variant="ghost" size="sm" className="text-orange-500 hover:text-orange-400">Lihat Semua</Button>
+                <Button href="/book" variant="ghost" size="sm" className="text-orange-500 hover:text-orange-400">Pesan Lagi</Button>
               </CardHeader>
               <CardContent className="p-0">
                 {user.orders.length > 0 ? (
