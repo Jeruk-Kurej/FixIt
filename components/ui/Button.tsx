@@ -19,10 +19,10 @@ export default function Button({
   const baseClass = "inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 disabled:opacity-50 disabled:pointer-events-none";
   
   const variantClasses = {
-    primary: "bg-blue-900 text-white hover:bg-orange-500 shadow-sm",
-    secondary: "bg-orange-500 text-white hover:bg-orange-600 shadow-sm",
-    outline: "border border-blue-900 text-blue-900 hover:bg-blue-50",
-    ghost: "text-blue-950 hover:text-orange-500 hover:bg-slate-100",
+    primary: "bg-orange-600 text-white hover:bg-orange-500 shadow-sm",
+    secondary: "bg-slate-700 text-slate-100 hover:bg-slate-600 shadow-sm",
+    outline: "border border-slate-600 text-slate-300 hover:bg-slate-800",
+    ghost: "text-slate-300 hover:text-orange-500 hover:bg-slate-800/50",
   };
   
   const sizeClasses = {

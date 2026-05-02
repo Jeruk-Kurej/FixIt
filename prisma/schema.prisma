@@ -25,16 +25,26 @@ model User {
   memberships   Membership[] // Relasi ke sistem langganan rutin
   appliances    Appliance[]  // Relasi ke barang elektronik yg didaftarkan
   orders        Order[]      // Relasi ke riwayat pesanan servis
+  technician    Technician?  // Relasi jika user adalah teknisi
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
 }
 
-// Tabel Barang Elektronik (Biar Smart Scheduling bekerja otomatis)
+// Tabel Katalog Kategori Barang (FixIt 2.0)
+model ApplianceCategory {
+  id             String       @id @default(uuid())
+  name           String       // "AC", "Kulkas", dll
+  iconUrl        String       // Lottie animation URL
+  baseServiceFee Int          // Harga dasar inspeksi
+  createdAt      DateTime     @default(now())
+}
+
+// Tabel Barang Elektronik (Milik Pelanggan)
 model Appliance {
   id            String       @id @default(uuid())
   userId        String
   user          User         @relation(fields: [userId], references: [id])
-  type          String       // Contoh: "AC", "Kulkas", "Mesin Cuci"
+  type          String       // Menyimpan nama dari ApplianceCategory
   brand         String?      // Contoh: "Daikin", "Sharp"
   orders        Order[]
   createdAt     DateTime     @default(now())
@@ -50,11 +60,25 @@ model Membership {
   endDate       DateTime
 }
 
+// Profil Teknisi (FixIt 2.0)
+model Technician {
+  id            String       @id @default(uuid())
+  userId        String       @unique
+  user          User         @relation(fields: [userId], references: [id])
+  trustScore    Float        @default(5.0)
+  currentLat    Float?
+  currentLng    Float?
+  isAvailable   Boolean      @default(true)
+  orders        Order[]      // Pesanan yang ditugaskan ke teknisi ini
+}
+
 // Tabel Order / Pesanan Servis
 model Order {
   id            String       @id @default(uuid())
   userId        String
   user          User         @relation(fields: [userId], references: [id])
+  technicianId  String?
+  technician    Technician?  @relation(fields: [technicianId], references: [id])
   applianceId   String
   appliance     Appliance    @relation(fields: [applianceId], references: [id])
   serviceType   String       // "HOME_SERVICE", "WORKSHOP_VISIT", "EXPRESS"
@@ -62,6 +86,7 @@ model Order {
   problem       String       // Keluhan (misal: "AC Kurang Dingin")
   estimatedCost Int?         // Transparansi harga awal dari kalkulator
   finalCost     Int?         // Harga riil setelah teknisi mengecek
+  scheduledDate DateTime?    // Waktu pemesanan untuk Smart Scheduling
   createdAt     DateTime     @default(now())
 }
 

@@ -4,7 +4,7 @@ import Button from "./Button";
 
 export default function Navbar() {
   return (
-    <nav className="sticky top-0 z-50 w-full border-b bg-white shadow-sm">
+    <nav className="sticky top-0 z-50 w-full border-b border-slate-800 bg-slate-900/80 backdrop-blur-md shadow-sm">
       <div className="container mx-auto flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Logo */}
         <div className="flex items-center shrink-0">
@@ -21,13 +21,13 @@ export default function Navbar() {
         
         {/* Navigation Links */}
         <div className="hidden md:flex items-center justify-center space-x-8 flex-1 px-8">
-          <Link href="/" className="text-sm font-medium text-blue-950 hover:text-orange-500 transition-colors">
+          <Link href="/" className="text-sm font-medium text-slate-300 hover:text-orange-500 transition-colors">
             Beranda
           </Link>
-          <Link href="/layanan" className="text-sm font-medium text-blue-950 hover:text-orange-500 transition-colors">
+          <Link href="/layanan" className="text-sm font-medium text-slate-300 hover:text-orange-500 transition-colors">
             Layanan
           </Link>
-          <Link href="/membership" className="text-sm font-medium text-blue-950 hover:text-orange-500 transition-colors">
+          <Link href="/membership" className="text-sm font-medium text-slate-300 hover:text-orange-500 transition-colors">
             Membership
           </Link>
         </div>

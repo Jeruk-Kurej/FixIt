@@ -4,6 +4,13 @@ const prisma = new PrismaClient()
 async function main() {
   console.log('Seeding data...')
 
+  // Hapus data lama agar seed tidak duplikat
+  await prisma.order.deleteMany()
+  await prisma.appliance.deleteMany()
+  await prisma.technician.deleteMany()
+  await prisma.membership.deleteMany()
+  await prisma.applianceCategory.deleteMany()
+
   // 1. Buat Akun Admin
   const admin = await prisma.user.upsert({
     where: { email: 'admin@fixit.com' },
@@ -31,18 +38,57 @@ async function main() {
   })
   console.log('Customer created:', customer.name)
 
-  // 3. Buat Barang Elektronik (Appliances) untuk Customer
-  // Kita pastikan id statis agar mudah untuk upsert atau biarkan auto-generate kalau tidak pakai upsert.
-  // Tapi karena Prisma relasi bisa di-create bersamaan, lebih aman pakai createMany atau individual create.
-  
-  // Hapus data lama agar seed tidak duplikat (Optional, tergantung kebutuhan)
-  await prisma.order.deleteMany()
-  await prisma.appliance.deleteMany()
-  
+  // 3. Buat Akun & Profil Teknisi
+  const techUser = await prisma.user.upsert({
+    where: { email: 'joko.tech@fixit.com' },
+    update: {},
+    create: {
+      name: 'Joko Teknisi',
+      email: 'joko.tech@fixit.com',
+      phone: '08111222333',
+      role: 'TECHNICIAN',
+    },
+  })
+  const technician = await prisma.technician.create({
+    data: {
+      userId: techUser.id,
+      trustScore: 4.8,
+      currentLat: -6.200000,
+      currentLng: 106.816666,
+      isAvailable: true,
+    }
+  })
+  console.log('Technician created:', techUser.name)
+
+  // 4. Buat Kategori Appliance (FixIt 2.0)
+  const acCat = await prisma.applianceCategory.create({
+    data: {
+      name: 'AC',
+      iconUrl: 'https://assets3.lottiefiles.com/packages/lf20_Q895iE.json', // Placeholder
+      baseServiceFee: 100000,
+    }
+  })
+  const kulkasCat = await prisma.applianceCategory.create({
+    data: {
+      name: 'Kulkas',
+      iconUrl: 'https://assets5.lottiefiles.com/packages/lf20_t2XoZl.json', // Placeholder
+      baseServiceFee: 150000,
+    }
+  })
+  const mesinCuciCat = await prisma.applianceCategory.create({
+    data: {
+      name: 'Mesin Cuci',
+      iconUrl: 'https://assets9.lottiefiles.com/packages/lf20_4kji20.json', // Placeholder
+      baseServiceFee: 120000,
+    }
+  })
+  console.log('Appliance Categories created')
+
+  // 5. Buat Barang Elektronik (Appliances) untuk Customer
   const ac = await prisma.appliance.create({
     data: {
       userId: customer.id,
-      type: 'AC',
+      type: acCat.name,
       brand: 'Daikin',
     }
   })
@@ -50,29 +96,23 @@ async function main() {
   const kulkas = await prisma.appliance.create({
     data: {
       userId: customer.id,
-      type: 'Kulkas',
+      type: kulkasCat.name,
       brand: 'Sharp',
-    }
-  })
-
-  const mesinCuci = await prisma.appliance.create({
-    data: {
-      userId: customer.id,
-      type: 'Mesin Cuci',
-      brand: 'Samsung',
     }
   })
   console.log('Appliances created for customer')
 
-  // 4. Buat Contoh Order (Pesanan)
+  // 6. Buat Contoh Order (Pesanan) dengan fitur Smart Scheduling (ada scheduledDate dan technicianId)
   const orderAC = await prisma.order.create({
     data: {
       userId: customer.id,
       applianceId: ac.id,
+      technicianId: technician.id,
       serviceType: 'HOME_SERVICE',
-      status: 'PENDING',
+      status: 'ON_THE_WAY',
       problem: 'AC kurang dingin, mungkin freon habis',
-      estimatedCost: 150000,
+      estimatedCost: 250000,
+      scheduledDate: new Date(),
     }
   })
 
@@ -84,13 +124,12 @@ async function main() {
       status: 'WORKING',
       problem: 'Kulkas tidak bisa beku, suara mesin kasar',
       estimatedCost: 350000,
-      finalCost: 400000, // Misal teknisi sudah mengecek dan memberikan harga final
+      finalCost: 400000, 
     }
   })
   console.log('Orders created')
 
-  // 5. Buat Membership untuk Customer
-  await prisma.membership.deleteMany()
+  // 7. Buat Membership untuk Customer
   const membership = await prisma.membership.create({
     data: {
       userId: customer.id,
