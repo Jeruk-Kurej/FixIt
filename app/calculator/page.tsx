@@ -134,7 +134,12 @@ export default function CalculatorPage() {
                   </div>
 
                   <div className="pt-6">
-                    <Button variant="primary" size="lg" className="w-full font-semibold shadow-md">
+                    <Button 
+                      href={`/booking?appliance=${encodeURIComponent(appliance)}&brand=${encodeURIComponent(brand)}&problem=${encodeURIComponent(problem)}&maxCost=${estimate.maxCost}`}
+                      variant="primary" 
+                      size="lg" 
+                      className="w-full font-semibold shadow-md"
+                    >
                       Lanjutkan Booking Servis
                     </Button>
                   </div>
