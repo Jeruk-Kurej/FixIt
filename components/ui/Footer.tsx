@@ -15,19 +15,18 @@ export default function Footer() {
           <div>
             <h4 className="text-slate-50 font-semibold mb-4">Layanan</h4>
             <ul className="space-y-2 text-sm text-slate-400">
-              <li><Link href="#" className="hover:text-orange-500 transition-colors">Servis AC</Link></li>
-              <li><Link href="#" className="hover:text-orange-500 transition-colors">Servis Kulkas</Link></li>
-              <li><Link href="#" className="hover:text-orange-500 transition-colors">Servis Mesin Cuci</Link></li>
-              <li><Link href="/book" className="hover:text-orange-500 transition-colors text-orange-500/80">Pesan Sekarang &rarr;</Link></li>
+              <li><Link href="/layanan" className="hover:text-orange-500 transition-colors">Semua Layanan</Link></li>
+              <li><Link href="/cara-kerja" className="hover:text-orange-500 transition-colors">Cara Kerja</Link></li>
+              <li><Link href="/book" className="hover:text-orange-500 transition-colors text-orange-500/80 font-medium">Pesan Sekarang &rarr;</Link></li>
             </ul>
           </div>
 
           <div>
             <h4 className="text-slate-50 font-semibold mb-4">Perusahaan</h4>
             <ul className="space-y-2 text-sm text-slate-400">
-              <li><Link href="#" className="hover:text-orange-500 transition-colors">Tentang Kami</Link></li>
+              <li><Link href="/testimoni" className="hover:text-orange-500 transition-colors">Testimoni</Link></li>
+              <li><Link href="/bantuan" className="hover:text-orange-500 transition-colors">Bantuan</Link></li>
               <li><Link href="/membership" className="hover:text-orange-500 transition-colors">Membership</Link></li>
-              <li><Link href="#" className="hover:text-orange-500 transition-colors">Karir</Link></li>
             </ul>
           </div>
 
