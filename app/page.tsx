@@ -32,10 +32,10 @@ export default async function Home() {
             </p>
             
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4 animate-in fade-in slide-in-from-bottom-3 duration-1000">
-              <Button href={isLoggedIn ? "/book" : "/login"} variant="primary" size="lg" className="w-full sm:w-auto font-semibold h-12 shadow-[0_0_15px_rgba(249,115,22,0.3)]">
+              <Button href={isLoggedIn ? "/booking" : "/login"} variant="primary" size="lg" className="w-full sm:w-auto font-semibold h-12 shadow-[0_0_15px_rgba(249,115,22,0.3)]">
                 {isLoggedIn ? "Pesan Servis Sekarang" : "Pesan Sekarang"}
               </Button>
-              <Button href={isLoggedIn ? "/dashboard" : "/calculator"} variant="outline" size="lg" className="w-full sm:w-auto font-semibold h-12 border-slate-700 hover:bg-slate-800">
+              <Button href={isLoggedIn ? "/dashboard" : "/booking"} variant="outline" size="lg" className="w-full sm:w-auto font-semibold h-12 border-slate-700 hover:bg-slate-800">
                 {isLoggedIn ? "Dasbor Saya" : "Cek Estimasi Harga"}
               </Button>
             </div>

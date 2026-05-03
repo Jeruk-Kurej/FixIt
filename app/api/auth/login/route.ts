@@ -19,6 +19,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Pengguna tidak ditemukan." }, { status: 404 });
     }
 
+    if (user.password !== password) {
+      return NextResponse.json({ error: "Password salah." }, { status: 401 });
+    }
+
     // Untuk simplicity di MVP ini, password langsung dicocokkan (plain text) 
     // atau jika Anda ingin menambahkan bcrypt nanti.
     const response = NextResponse.json({ success: true, message: "Login berhasil" });

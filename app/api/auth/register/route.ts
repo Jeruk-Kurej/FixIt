@@ -23,6 +23,7 @@ export async function POST(req: NextRequest) {
       data: {
         name,
         email,
+        password, // Simpan password (idealnya harus di-hash menggunakan bcrypt, tapi untuk MVP mock ini disimpan plain/hash sesuai kebutuhan)
         role: "CUSTOMER",
       },
     });

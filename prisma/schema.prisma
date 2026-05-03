@@ -19,8 +19,11 @@ model User {
   id            String       @id @default(uuid())
   name          String
   email         String       @unique
+  password      String?      // Menambahkan password untuk login
   phone         String?
   address       String?      // Alamat rumah untuk opsi Home Service
+  age           Int?         // Umur pengguna
+  gender        String?      // Jenis kelamin pengguna
   role          Role         @default(CUSTOMER)
   memberships   Membership[] // Relasi ke sistem langganan rutin
   appliances    Appliance[]  // Relasi ke barang elektronik yg didaftarkan
@@ -86,7 +89,8 @@ model Order {
   problem       String       // Keluhan (misal: "AC Kurang Dingin")
   estimatedCost Int?         // Transparansi harga awal dari kalkulator
   finalCost     Int?         // Harga riil setelah teknisi mengecek
-  scheduledDate DateTime?    // Waktu pemesanan untuk Smart Scheduling
+  scheduledDate DateTime?    // Tanggal pemesanan untuk Smart Scheduling
+  scheduledTime String?      // Waktu pemesanan (e.g., "10:00")
   createdAt     DateTime     @default(now())
 }
 

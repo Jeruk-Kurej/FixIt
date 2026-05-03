@@ -25,16 +25,16 @@ export default async function Navbar() {
         
         {/* Navigation Links */}
         <div className="hidden md:flex items-center justify-center gap-x-8 gap-8 flex-1">
-          <Link href="/layanan" className="text-sm font-medium text-slate-300 hover:text-orange-500 transition-colors">
+          <Link href="/about-us" className="text-sm font-medium text-slate-300 hover:text-orange-500 transition-colors">
             About Us
           </Link>
-          <Link href="/cara-kerja" className="text-sm font-medium text-slate-300 hover:text-orange-500 transition-colors">
+          <Link href="/how-it-works" className="text-sm font-medium text-slate-300 hover:text-orange-500 transition-colors">
             How It Works
           </Link>
           <Link href="/membership" className="text-sm font-medium text-slate-300 hover:text-orange-500 transition-colors">
             Membership
           </Link>
-          <Link href="/bantuan" className="text-sm font-medium text-slate-300 hover:text-orange-500 transition-colors">
+          <Link href="/contact" className="text-sm font-medium text-slate-300 hover:text-orange-500 transition-colors">
             Contact
           </Link>
           {isLoggedIn && (

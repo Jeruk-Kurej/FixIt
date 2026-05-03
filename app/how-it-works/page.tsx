@@ -56,7 +56,7 @@ export default function CaraKerjaPage() {
               Mulai dari deteksi masalah awal hingga penyerahan laporan digital lengkap dan garansi resmi. FixIt merancang alur pengerjaan yang transparan, mudah, dan aman.
             </p>
             <div className="flex justify-center pt-4">
-              <Button href="/book" variant="primary" size="lg" className="h-12 shadow-[0_0_15px_rgba(249,115,22,0.3)]">
+              <Button href="/booking" variant="primary" size="lg" className="h-12 shadow-[0_0_15px_rgba(249,115,22,0.3)]">
                 Pesan Servis Sekarang <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </div>
@@ -153,7 +153,7 @@ export default function CaraKerjaPage() {
             Tidak ada lagi kejutan biaya di akhir atau rasa was-was. Coba rasakan kemudahan proses kami sekarang juga.
           </p>
           <div className="flex justify-center pt-2">
-            <Button href="/book" variant="primary" size="lg" className="h-12 shadow-[0_0_15px_rgba(249,115,22,0.3)]">
+            <Button href="/booking" variant="primary" size="lg" className="h-12 shadow-[0_0_15px_rgba(249,115,22,0.3)]">
               Mulai Sekarang
             </Button>
           </div>

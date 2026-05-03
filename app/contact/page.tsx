@@ -158,12 +158,15 @@ export default function BantuanPage() {
                   Jika Anda tidak menemukan jawaban untuk pertanyaan Anda, Anda dapat langsung menghubungi kami melalui opsi bantuan langsung di bawah ini.
                 </p>
               </div>
-              <div className="flex flex-col sm:flex-row gap-4 shrink-0">
+              <div className="flex flex-col sm:flex-row gap-4 shrink-0 flex-wrap justify-end">
                 <Button href="https://wa.me/6280012345678" variant="outline" className="border-emerald-500/30 hover:bg-emerald-500/10 text-emerald-400 flex items-center justify-center gap-2 h-12 px-6">
                   <MessageCircle className="w-5 h-5" /> WhatsApp CS
                 </Button>
                 <Button href="mailto:cs@fixit.com" variant="outline" className="border-slate-700 hover:bg-slate-700 flex items-center justify-center gap-2 h-12 px-6">
                   <Mail className="w-5 h-5" /> Kirim Tiket
+                </Button>
+                <Button href="/partner-registration" variant="primary" className="flex items-center justify-center gap-2 h-12 px-6 shadow-[0_0_15px_rgba(249,115,22,0.3)]">
+                  Bergabung sebagai Mitra
                 </Button>
               </div>
             </div>
