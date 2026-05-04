@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: firstError }, { status: 400 });
     }
 
-    const { name, email, phone, address, appliance, brand, problem, serviceType, estimatedCost } = validationResult.data;
+    const { name, email, phone, address, appliance, brand, problem, serviceType, estimatedCost, scheduled_date_time } = validationResult.data;
 
     // 1. Cari atau Buat Akun Pengguna (berdasarkan Email)
     const user = await prisma.user.upsert({
@@ -66,9 +66,10 @@ export async function POST(req: NextRequest) {
         status: "PENDING",
         problem: problem,
         estimated_cost: estimatedCost ? parseInt(estimatedCost.toString(), 10) : 250000,
-        scheduled_date_time: new Date(),
+        scheduled_date_time: new Date(scheduled_date_time),
       },
     });
+
 
     return NextResponse.json({ success: true, orderId: newOrder.id, message: "Pesanan berhasil dibuat!" }, { status: 201 });
   } catch (error) {

@@ -11,7 +11,8 @@ export const bookingSchema = z.object({
   appliance: z.string().min(1, "Jenis barang elektronik wajib diisi."),
   brand: z.string().optional().nullable(),
   problem: z.string().min(1, "Keluhan utama wajib diisi."),
-  estimatedCost: z.string().optional().nullable()
+  estimatedCost: z.string().optional().nullable(),
+  scheduled_date_time: z.string().min(1, "Jadwal servis wajib dipilih."),
 }).refine((data) => {
   // Jika Home Service, alamat WAJIB diisi
   if (data.serviceType === "HOME_SERVICE" && (!data.address || data.address.trim() === "")) {
