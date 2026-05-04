@@ -14,7 +14,9 @@ export default function NavLinks({ isLoggedIn }: NavLinksProps) {
     ? [
         { href: "/dashboard", label: "Dashboard" },
         { href: "/technician/dashboard", label: "Mode Teknisi" },
+        { href: "/chat", label: "Chat" },
         { href: "/membership", label: "Membership" },
+
         { href: "/how-it-works", label: "How It Works" },
         { href: "/contact", label: "Contact" },
       ]

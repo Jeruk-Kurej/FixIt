@@ -95,6 +95,7 @@ model Order {
 
   // Relationships
   order_details OrderDetail[]
+  messages Message[]
 }
 
 // 7. Tabel: OrderDetail (Rincian Pekerjaan)
@@ -106,6 +107,18 @@ model OrderDetail {
   price        Int
   is_confirmed Boolean @default(false)
 }
+
+// 8. Tabel: ChatMessage (Komunikasi Pelanggan & Teknisi)
+model Message {
+  id        String   @id @default(uuid())
+  order_id  String
+  order     Order    @relation(fields: [order_id], references: [id], onDelete: Cascade)
+  sender_id String
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+}
+
+
 
 enum Gender {
   MALE
