@@ -10,16 +10,19 @@ interface NavLinksProps {
 export default function NavLinks({ isLoggedIn }: NavLinksProps) {
   const pathname = usePathname();
 
-  const links = [
-    { href: "/about-us", label: "About Us" },
-    { href: "/how-it-works", label: "How It Works" },
-    { href: "/membership", label: "Membership" },
-    { href: "/contact", label: "Contact" },
-  ];
-
-  if (isLoggedIn) {
-    links.push({ href: "/dashboard", label: "Dashboard" });
-  }
+  const links = isLoggedIn 
+    ? [
+        { href: "/dashboard", label: "Dashboard" },
+        { href: "/membership", label: "Membership" },
+        { href: "/how-it-works", label: "How It Works" },
+        { href: "/contact", label: "Contact" },
+      ]
+    : [
+        { href: "/about-us", label: "About Us" },
+        { href: "/how-it-works", label: "How It Works" },
+        { href: "/membership", label: "Membership" },
+        { href: "/contact", label: "Contact" },
+      ];
 
   return (
     <div className="hidden md:flex items-center justify-center gap-x-8 gap-8 flex-1">

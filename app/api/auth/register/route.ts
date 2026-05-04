@@ -34,6 +34,8 @@ export async function POST(req: NextRequest) {
     response.cookies.set("user_email", newUser.email, { path: "/", maxAge: 60 * 60 * 24 * 7 }); // 7 hari
     return response;
   } catch (err: any) {
-    return NextResponse.json({ error: "Terjadi kesalahan server." }, { status: 500 });
+    console.error("Register Error:", err);
+    return NextResponse.json({ error: "Terjadi kesalahan server: " + err.message }, { status: 500 });
   }
+
 }

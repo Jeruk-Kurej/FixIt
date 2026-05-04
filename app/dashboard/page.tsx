@@ -83,8 +83,11 @@ export default async function DashboardPage() {
             <Card className="border-slate-800/80 bg-slate-800/40 backdrop-blur-md">
               <CardHeader className="border-b border-slate-800 pb-4 flex flex-row items-center justify-between">
                 <CardTitle className="text-lg">Riwayat Pesanan</CardTitle>
-                <Button href="/book" variant="ghost" size="sm" className="text-orange-500 hover:text-orange-400">Pesan Lagi</Button>
+                {user.orders.length > 0 && (
+                  <Button href="/book" variant="ghost" size="sm" className="text-orange-500 hover:text-orange-400">Pesan Lagi</Button>
+                )}
               </CardHeader>
+
               <CardContent className="p-0">
                 {user.orders.length > 0 ? (
                   <div className="divide-y divide-slate-800/60">
