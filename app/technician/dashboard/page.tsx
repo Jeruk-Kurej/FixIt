@@ -37,9 +37,9 @@ export default async function TechnicianDashboardPage() {
   if (!tech) {
     tech = await prisma.technician.create({
       data: {
-        userId: user.id,
-        trustScore: 4.8,
-        isAvailable: true,
+        user_id: user.id,
+        rating: 4.8,
+        is_available: true,
       }
     });
   }
@@ -51,7 +51,7 @@ export default async function TechnicianDashboardPage() {
       user: true,
       appliance: {
         include: {
-          applianceType: true,
+          appliance_type: true,
         },
       },
     },
@@ -60,12 +60,12 @@ export default async function TechnicianDashboardPage() {
 
   // 2. Orders accepted by THIS technician
   const myAcceptedOrders = await prisma.order.findMany({
-    where: { technicianId: tech.id },
+    where: { technician_id: tech.id },
     include: {
       user: true,
       appliance: {
         include: {
-          applianceType: true,
+          appliance_type: true,
         },
       },
     },
@@ -109,12 +109,12 @@ export default async function TechnicianDashboardPage() {
                       <div key={order.id} className="p-5 flex flex-col justify-between gap-4 hover:bg-slate-800/20 transition-colors">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                           <div>
-                            <h4 className="font-semibold text-slate-200">{order.appliance?.applianceType?.name || "Barang Elektronik"} ({order.appliance?.brand || "General"})</h4>
+                            <h4 className="font-semibold text-slate-200">{order.appliance?.appliance_type?.name || "Barang Elektronik"} ({order.appliance?.brand || "General"})</h4>
                             <p className="text-xs text-slate-500 mt-0.5">Pemesan: {order.user?.name || "N/A"}</p>
                           </div>
-                          <p className="text-lg font-bold text-orange-400">{formatRupiah(order.estimatedCost)}</p>
+                          <p className="text-lg font-bold text-orange-400">{formatRupiah(order.estimated_cost)}</p>
                         </div>
-                        <p className="text-sm text-slate-400">{order.problemDescription}</p>
+                        <p className="text-sm text-slate-400">{order.problem}</p>
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-2">
                           <p className="text-xs text-slate-500">{formatDate(order.createdAt)}</p>
                           <AcceptButton orderId={order.id} />
@@ -147,16 +147,16 @@ export default async function TechnicianDashboardPage() {
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                           <div>
                             <div className="flex items-center gap-2">
-                              <h4 className="font-semibold text-slate-200">{order.appliance?.applianceType?.name || "Barang Elektronik"}</h4>
+                              <h4 className="font-semibold text-slate-200">{order.appliance?.appliance_type?.name || "Barang Elektronik"}</h4>
                               <span className="px-2 py-0.5 rounded bg-green-500/10 text-green-400 border border-green-500/20 text-xs font-medium">
                                 {order.status}
                               </span>
                             </div>
                             <p className="text-xs text-slate-500 mt-0.5">Pemesan: {order.user?.name || "N/A"}</p>
                           </div>
-                          <p className="text-lg font-bold text-orange-400">{formatRupiah(order.estimatedCost)}</p>
+                          <p className="text-lg font-bold text-orange-400">{formatRupiah(order.estimated_cost)}</p>
                         </div>
-                        <p className="text-sm text-slate-400 mt-2">{order.problemDescription}</p>
+                        <p className="text-sm text-slate-400 mt-2">{order.problem}</p>
                         <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-800">
                           <p className="text-xs text-slate-500">{formatDate(order.createdAt)}</p>
                           <span className="text-xs text-green-400 font-medium">Pesanan Anda Tangani</span>

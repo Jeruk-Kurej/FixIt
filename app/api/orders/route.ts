@@ -43,8 +43,7 @@ export async function POST(req: NextRequest) {
       appType = await prisma.applianceType.create({
         data: {
           name: appliance,
-          baseServiceFee: 100000,
-          iconUrl: "https://assets3.lottiefiles.com/packages/lf20_Q895iE.json"
+          base_service_fee: 100000,
         }
       });
     }
@@ -52,22 +51,22 @@ export async function POST(req: NextRequest) {
     // 2. Daftarkan Barang Elektronik ke akun pengguna
     const newAppliance = await prisma.appliance.create({
       data: {
-        userId: user.id,
-        applianceTypeId: appType.id,
+        user_id: user.id,
+        appliance_type_id: appType.id,
         brand: brand || "General",
-        modelNumber: "N/A",
+        model_number: "N/A",
       },
     });
 
     // 3. Simpan Riwayat Pesanan
     const newOrder = await prisma.order.create({
       data: {
-        userId: user.id,
-        applianceId: newAppliance.id,
+        user_id: user.id,
+        appliance_id: newAppliance.id,
         status: "PENDING",
-        problemDescription: problem,
-        estimatedCost: estimatedCost ? parseInt(estimatedCost.toString(), 10) : 250000,
-        scheduledDateTime: new Date(),
+        problem: problem,
+        estimated_cost: estimatedCost ? parseInt(estimatedCost.toString(), 10) : 250000,
+        scheduled_date_time: new Date(),
       },
     });
 

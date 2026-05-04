@@ -16,7 +16,7 @@ export async function GET(
       include: {
         appliance: {
           include: {
-            applianceType: true,
+            appliance_type: true,
           },
         },
         technician: {

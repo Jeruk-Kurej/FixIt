@@ -38,7 +38,7 @@ export default function StepAppliance({ categories, onNext }: StepApplianceProps
             </h3>
             
             <p className="text-xs text-slate-500 mt-2 font-mono">
-              Biaya Dasar: Rp {category.baseServiceFee.toLocaleString('id-ID')}
+              Biaya Dasar: Rp {category.base_service_fee.toLocaleString('id-ID')}
             </p>
           </button>
         ))}

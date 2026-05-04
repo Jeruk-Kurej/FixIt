@@ -25,9 +25,9 @@ export async function POST(req: NextRequest) {
     if (!tech) {
       tech = await prisma.technician.create({
         data: {
-          userId: user.id,
-          trustScore: 4.8,
-          isAvailable: true,
+          user_id: user.id,
+          rating: 4.8,
+          is_available: true,
         },
       });
     }
@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
       where: { id: orderId },
       data: {
         status: "ACCEPTED",
-        technicianId: tech.id,
+        technician_id: tech.id,
       },
     });
 

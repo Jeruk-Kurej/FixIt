@@ -10,88 +10,104 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Tabel User
+// 1. Tabel: User (Pusat Autentikasi)
 model User {
-  id         String       @id @default(uuid())
+  id         String   @id @default(uuid())
   name       String
-  email      String       @unique
+  email      String   @unique
   password   String
   phone      String
-  address    String       @db.Text
-  role       Role         @default(CUSTOMER)
-  createdAt  DateTime     @default(now())
+  address    String   @db.Text
+  age        Int?
+  gender     Gender?
+  role       Role     @default(CUSTOMER)
+  createdAt  DateTime @default(now())
+
+  // Relationships
   appliances Appliance[]
   orders     Order[]
   technician Technician?
 }
 
-// Tabel Technician
+// 2. Tabel: Technician (Profil Profesional)
 model Technician {
-  id          String      @id @default(uuid())
-  userId      String      @unique
-  user        User        @relation(fields: [userId], references: [id])
-  trustScore  Float       @default(5.0)
-  isAvailable Boolean     @default(true)
-  orders      Order[]
+  id           String  @id @default(uuid())
+  user_id      String  @unique
+  user         User    @relation(fields: [user_id], references: [id])
+  rating       Float   @default(5.0)
+  is_available Boolean @default(true)
+
+  // Relationships
+  orders Order[]
 }
 
-// Tabel ApplianceType
+// 3. Tabel: ApplianceType (Kategori Barang)
 model ApplianceType {
-  id             String        @id @default(uuid())
-  name           String
-  baseServiceFee Int
-  iconUrl        String
-  appliances     Appliance[]
-  serviceTasks   ServiceTask[]
+  id                String        @id @default(uuid())
+  name              String
+  base_service_fee  Int
+  
+  // Relationships
+  appliances   Appliance[]
+  serviceTasks ServiceTask[]
 }
 
-// Tabel Appliance
+// 4. Tabel: Appliance (Aset User)
 model Appliance {
-  id              String        @id @default(uuid())
-  userId          String
-  user            User          @relation(fields: [userId], references: [id])
-  applianceTypeId String
-  applianceType   ApplianceType @relation(fields: [applianceTypeId], references: [id])
-  brand           String
-  modelNumber     String
-  orders          Order[]
+  id                String        @id @default(uuid())
+  user_id           String
+  user              User          @relation(fields: [user_id], references: [id])
+  appliance_type_id String
+  appliance_type    ApplianceType @relation(fields: [appliance_type_id], references: [id])
+  brand             String
+  model_number      String?
+
+  // Relationships
+  orders Order[]
 }
 
-// Tabel ServiceTask
+// 5. Tabel: ServiceTask (Katalog Kerusakan)
 model ServiceTask {
-  id              String        @id @default(uuid())
-  applianceTypeId String
-  applianceType   ApplianceType @relation(fields: [applianceTypeId], references: [id])
-  taskName        String
-  standardPrice   Int
+  id                String        @id @default(uuid())
+  appliance_type_id String
+  appliance_type    ApplianceType @relation(fields: [appliance_type_id], references: [id])
+  task_name         String
+  standard_price    Int
 }
 
-// Tabel Order
+// 6. Tabel: Order (Transaksi & History)
 model Order {
-  id                 String        @id @default(uuid())
-  userId             String
-  user               User          @relation(fields: [userId], references: [id])
-  technicianId       String?
-  technician         Technician?   @relation(fields: [technicianId], references: [id])
-  applianceId        String
-  appliance          Appliance     @relation(fields: [applianceId], references: [id])
-  status             OrderStatus   @default(PENDING)
-  problemDescription String        @db.Text
-  estimatedCost      Int
-  finalCost          Int?
-  scheduledDateTime  DateTime
-  createdAt          DateTime      @default(now())
-  orderDetails       OrderDetail[]
+  id                  String      @id @default(uuid())
+  user_id             String
+  user                User        @relation(fields: [user_id], references: [id])
+  technician_id       String?
+  technician          Technician? @relation(fields: [technician_id], references: [id])
+  appliance_id        String
+  appliance           Appliance   @relation(fields: [appliance_id], references: [id])
+  status              OrderStatus @default(PENDING)
+  problem             String      @db.Text
+  scheduled_date_time DateTime
+  estimated_cost      Int
+  final_cost          Int?
+  createdAt           DateTime    @default(now())
+
+  // Relationships
+  order_details OrderDetail[]
 }
 
-// Tabel OrderDetail
+// 7. Tabel: OrderDetail (Rincian Pekerjaan)
 model OrderDetail {
-  id                String  @id @default(uuid())
-  orderId           String
-  order             Order   @relation(fields: [orderId], references: [id])
-  taskName          String
-  price             Int
-  isConfirmedByTech Boolean @default(false)
+  id           String  @id @default(uuid())
+  order_id     String
+  order        Order   @relation(fields: [order_id], references: [id])
+  task_name    String
+  price        Int
+  is_confirmed Boolean @default(false)
+}
+
+enum Gender {
+  MALE
+  FEMALE
 }
 
 enum Role {

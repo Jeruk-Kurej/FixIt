@@ -120,7 +120,7 @@ export default function OrderStatusPage({ params }: OrderStatusProps) {
                       </div>
                       <div className="bg-orange-500/10 border border-orange-500/20 rounded-xl px-3 py-1.5 text-center">
                         <p className="text-xs text-slate-500 font-medium">Reputasi</p>
-                        <p className="text-sm font-bold text-orange-400">⭐ {order.technician.trustScore || "5.0"}</p>
+                        <p className="text-sm font-bold text-orange-400">⭐ {order.technician.rating || "5.0"}</p>
                       </div>
                     </div>
                   </div>
@@ -136,7 +136,7 @@ export default function OrderStatusPage({ params }: OrderStatusProps) {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-900/40 border border-slate-800/60 rounded-xl p-4">
                 <div>
                   <p className="text-xs text-slate-500 uppercase tracking-wider">Kategori Barang</p>
-                  <p className="font-medium text-slate-300">{order.appliance?.applianceType?.name || "Barang Elektronik"}</p>
+                  <p className="font-medium text-slate-300">{order.appliance?.appliance_type?.name || "Barang Elektronik"}</p>
                 </div>
                 <div>
                   <p className="text-xs text-slate-500 uppercase tracking-wider">Merek / Brand</p>
@@ -144,15 +144,15 @@ export default function OrderStatusPage({ params }: OrderStatusProps) {
                 </div>
                 <div className="sm:col-span-2">
                   <p className="text-xs text-slate-500 uppercase tracking-wider">Keluhan</p>
-                  <p className="font-medium text-slate-300">{order.problemDescription || "-"}</p>
+                  <p className="font-medium text-slate-300">{order.problem || "-"}</p>
                 </div>
                 <div>
                   <p className="text-xs text-slate-500 uppercase tracking-wider">Estimasi Biaya</p>
-                  <p className="font-bold text-orange-400">{order.estimatedCost ? formatRupiah(order.estimatedCost) : "-"}</p>
+                  <p className="font-bold text-orange-400">{order.estimated_cost ? formatRupiah(order.estimated_cost) : "-"}</p>
                 </div>
                 <div>
                   <p className="text-xs text-slate-500 uppercase tracking-wider">Waktu Kunjungan</p>
-                  <p className="font-medium text-slate-300">{order.scheduledDateTime ? formatDate(order.scheduledDateTime) : "-"}</p>
+                  <p className="font-medium text-slate-300">{order.scheduled_date_time ? formatDate(order.scheduled_date_time) : "-"}</p>
                 </div>
               </div>
             </div>

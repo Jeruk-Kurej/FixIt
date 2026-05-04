@@ -1,185 +1,111 @@
-import { PrismaClient } from '@prisma/client'
-const prisma = new PrismaClient()
+import { PrismaClient, Role, OrderStatus, Gender } from "@prisma/client";
+
+const prisma = new PrismaClient();
 
 async function main() {
-  console.log('Seeding data...')
+  console.log("Starting seed...");
 
-  // Hapus data lama agar seed tidak duplikat
-  await prisma.orderDetail.deleteMany()
-  await prisma.order.deleteMany()
-  await prisma.serviceTask.deleteMany()
-  await prisma.appliance.deleteMany()
-  await prisma.technician.deleteMany()
-  await prisma.applianceType.deleteMany()
-  await prisma.user.deleteMany()
+  // 1. Cleanup
+  await prisma.orderDetail.deleteMany();
+  await prisma.order.deleteMany();
+  await prisma.serviceTask.deleteMany();
+  await prisma.appliance.deleteMany();
+  await prisma.applianceType.deleteMany();
+  await prisma.technician.deleteMany();
+  await prisma.user.deleteMany();
 
-  // 1. Buat Akun Admin
-  const admin = await prisma.user.upsert({
-    where: { email: 'admin@fixit.com' },
-    update: {},
-    create: {
-      name: 'Admin FixIt',
-      email: 'admin@fixit.com',
-      password: 'password_admin',
-      phone: '081234567890',
-      address: 'Kantor Pusat FixIt, Jakarta',
-      role: 'ADMIN',
-    },
-  })
-  console.log('Admin created:', admin.name)
-
-  // 2. Buat Akun Customer
-  const customer = await prisma.user.upsert({
-    where: { email: 'budi@example.com' },
-    update: {},
-    create: {
-      name: 'Budi Santoso',
-      email: 'budi@example.com',
-      password: 'password_budi',
-      phone: '089876543210',
-      address: 'Jl. Sudirman No. 45, Jakarta',
-      role: 'CUSTOMER',
-    },
-  })
-  console.log('Customer created:', customer.name)
-
-  // 3. Buat Akun & Profil Teknisi
-  const techUser = await prisma.user.upsert({
-    where: { email: 'joko.tech@fixit.com' },
-    update: {},
-    create: {
-      name: 'Joko Teknisi',
-      email: 'joko.tech@fixit.com',
-      password: 'password_joko',
-      phone: '08111222333',
-      address: 'Jl. Pemuda No. 12, Jakarta',
-      role: 'TECHNICIAN',
-    },
-  })
-  const technician = await prisma.technician.create({
+  // 2. Create Users
+  const userBudi = await prisma.user.create({
     data: {
-      userId: techUser.id,
-      trustScore: 4.8,
-      isAvailable: true,
-    }
-  })
-  console.log('Technician created:', techUser.name)
+      name: "Budi Santoso",
+      email: "budi@example.com",
+      password: "password_budi",
+      phone: "08123456789",
+      address: "Jl. Melati No. 12, Jakarta",
+      age: 28,
+      gender: Gender.MALE,
+      role: Role.CUSTOMER,
+    },
+  });
 
-  // 4. Buat Master Data Kategori Barang (ApplianceType)
+  const userJoko = await prisma.user.create({
+    data: {
+      name: "Joko Teknisi",
+      email: "joko.tech@fixit.com",
+      password: "password_joko",
+      phone: "08987654321",
+      address: "Jl. Bengkel No. 5, Bekasi",
+      age: 35,
+      gender: Gender.MALE,
+      role: Role.TECHNICIAN,
+    },
+  });
+
+  // 3. Create Technician Profile
+  const techJoko = await prisma.technician.create({
+    data: {
+      user_id: userJoko.id,
+      rating: 4.9,
+      is_available: true,
+    },
+  });
+
+  // 4. Create Appliance Types
   const acType = await prisma.applianceType.create({
     data: {
-      name: 'AC',
-      iconUrl: 'https://assets3.lottiefiles.com/packages/lf20_Q895iE.json',
-      baseServiceFee: 100000,
-    }
-  })
+      name: "Air Conditioner (AC)",
+      base_service_fee: 50000,
+    },
+  });
+
   const kulkasType = await prisma.applianceType.create({
     data: {
-      name: 'Kulkas',
-      iconUrl: 'https://assets5.lottiefiles.com/packages/lf20_t2XoZl.json',
-      baseServiceFee: 150000,
-    }
-  })
-  const mesinCuciType = await prisma.applianceType.create({
-    data: {
-      name: 'Mesin Cuci',
-      iconUrl: 'https://assets9.lottiefiles.com/packages/lf20_4kji20.json',
-      baseServiceFee: 120000,
-    }
-  })
-  console.log('Appliance Types created')
+      name: "Kulkas / Refrigerator",
+      base_service_fee: 75000,
+    },
+  });
 
-  // 5. Buat ServiceTask untuk Kategori Barang
-  const cuciAC = await prisma.serviceTask.create({
-    data: {
-      applianceTypeId: acType.id,
-      taskName: 'Cuci AC',
-      standardPrice: 75000,
-    }
-  })
-  const isiFreonAC = await prisma.serviceTask.create({
-    data: {
-      applianceTypeId: acType.id,
-      taskName: 'Isi Freon AC',
-      standardPrice: 150000,
-    }
-  })
-  console.log('Service Tasks created')
+  // 5. Create Service Tasks
+  await prisma.serviceTask.createMany({
+    data: [
+      { appliance_type_id: acType.id, task_name: "Cuci AC Standar", standard_price: 75000 },
+      { appliance_type_id: acType.id, task_name: "Tambah Freon R32", standard_price: 150000 },
+      { appliance_type_id: kulkasType.id, task_name: "Ganti Kompresor", standard_price: 450000 },
+    ],
+  });
 
-  // 6. Buat Barang Elektronik (Appliances) untuk Customer
-  const customerAC = await prisma.appliance.create({
+  // 6. Create User Appliances
+  const budiAC = await prisma.appliance.create({
     data: {
-      userId: customer.id,
-      applianceTypeId: acType.id,
-      brand: 'Daikin',
-      modelNumber: 'DK-1234',
-    }
-  })
+      user_id: userBudi.id,
+      appliance_type_id: acType.id,
+      brand: "Panasonic",
+      model_number: "PN-123-X",
+    },
+  });
 
-  const customerKulkas = await prisma.appliance.create({
+  // 7. Create Orders
+  await prisma.order.create({
     data: {
-      userId: customer.id,
-      applianceTypeId: kulkasType.id,
-      brand: 'Sharp',
-      modelNumber: 'SP-K567',
-    }
-  })
-  console.log('Appliances created for customer')
+      user_id: userBudi.id,
+      appliance_id: budiAC.id,
+      status: OrderStatus.DONE,
+      problem: "AC tidak dingin dan berbunyi bising",
+      scheduled_date_time: new Date(),
+      estimated_cost: 150000,
+      final_cost: 150000,
+      technician_id: techJoko.id,
+    },
+  });
 
-  // 7. Buat Order (Pesanan)
-  const orderAC = await prisma.order.create({
-    data: {
-      userId: customer.id,
-      applianceId: customerAC.id,
-      technicianId: technician.id,
-      status: 'ACCEPTED',
-      problemDescription: 'AC kurang dingin, mungkin freon habis',
-      estimatedCost: 250000,
-      scheduledDateTime: new Date(),
-    }
-  })
-
-  const orderKulkas = await prisma.order.create({
-    data: {
-      userId: customer.id,
-      applianceId: customerKulkas.id,
-      status: 'WORKING',
-      problemDescription: 'Kulkas tidak bisa beku, suara mesin kasar',
-      estimatedCost: 350000,
-      finalCost: 400000,
-      scheduledDateTime: new Date(),
-    }
-  })
-  console.log('Orders created')
-
-  // 8. Buat OrderDetail
-  await prisma.orderDetail.create({
-    data: {
-      orderId: orderAC.id,
-      taskName: cuciAC.taskName,
-      price: cuciAC.standardPrice,
-      isConfirmedByTech: true,
-    }
-  })
-
-  await prisma.orderDetail.create({
-    data: {
-      orderId: orderAC.id,
-      taskName: isiFreonAC.taskName,
-      price: isiFreonAC.standardPrice,
-      isConfirmedByTech: true,
-    }
-  })
-  console.log('Order Details created')
-
-  console.log('Seeding finished.')
+  console.log("Seed finished successfully!");
 }
 
 main()
   .catch((e) => {
-    console.error(e)
-    process.exit(1)
+    console.error(e);
+    process.exit(1);
   })
   .finally(async () => {
-    await prisma.$disconnect()
-  })
+    await prisma.$disconnect();
+  });

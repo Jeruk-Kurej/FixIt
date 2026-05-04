@@ -19,7 +19,7 @@ export default async function DashboardPage() {
         include: {
           appliance: {
             include: {
-              applianceType: true
+              appliance_type: true
             }
           }
         },
@@ -97,7 +97,7 @@ export default async function DashboardPage() {
                       <div key={order.id} className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-slate-800/20 transition-colors">
                         <div>
                           <div className="flex items-center gap-3 mb-1">
-                            <h4 className="font-semibold text-slate-200">{order.appliance?.applianceType?.name || "Barang Elektronik"}</h4>
+                            <h4 className="font-semibold text-slate-200">{order.appliance?.appliance_type?.name || "Barang Elektronik"}</h4>
                             <span className={`px-2 py-0.5 rounded text-xs font-medium ${
                               order.status === 'DONE' ? 'bg-green-500/10 text-green-400 border border-green-500/20' :
                               order.status === 'PENDING' ? 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20' :
@@ -106,13 +106,13 @@ export default async function DashboardPage() {
                               {order.status}
                             </span>
                           </div>
-                          <p className="text-sm text-slate-400">{order.problemDescription}</p>
+                          <p className="text-sm text-slate-400">{order.problem}</p>
                           <p className="text-xs text-slate-500 mt-2">{formatDate(order.createdAt)} • {order.appliance?.brand || "Brand N/A"}</p>
                         </div>
                         <div className="text-left sm:text-right">
                           <p className="text-xs text-slate-500 mb-1">Estimasi Harga</p>
                           <p className="font-bold text-slate-200">
-                            {order.estimatedCost ? new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(order.estimatedCost) : "-"}
+                            {order.estimated_cost ? new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(order.estimated_cost) : "-"}
                           </p>
                         </div>
                       </div>
