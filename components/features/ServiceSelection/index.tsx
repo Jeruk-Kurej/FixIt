@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import type { ApplianceCategory } from "@prisma/client";
+import type { ApplianceType } from "@prisma/client";
 import { useRouter } from "next/navigation";
 import StepDiagnosticsNew from "./StepDiagnosticsNew";
 import StepProfileCheck from "./StepProfileCheck";
@@ -20,10 +20,11 @@ export type BookingState = {
 };
 
 interface ServiceSelectionProps {
-  categories: ApplianceCategory[];
+  categories: ApplianceType[];
   initialPhone: string;
   initialAddress: string;
 }
+
 
 export default function ServiceSelection({ categories, initialPhone, initialAddress }: ServiceSelectionProps) {
   const router = useRouter();

@@ -1,10 +1,10 @@
 "use client";
 
-import type { ApplianceCategory } from "@prisma/client";
+import type { ApplianceType } from "@prisma/client";
 import { Wrench } from "lucide-react"; // Fallback icon jika Lottie gagal
 
 interface StepApplianceProps {
-  categories: ApplianceCategory[];
+  categories: ApplianceType[];
   onNext: (id: string, name: string) => void;
 }
 
@@ -46,3 +46,4 @@ export default function StepAppliance({ categories, onNext }: StepApplianceProps
     </div>
   );
 }
+

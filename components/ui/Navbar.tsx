@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import Button from "./Button";
+import NavLinks from "./NavLinks";
 
 export default async function Navbar() {
   const cookieStore = await cookies();
@@ -24,25 +25,7 @@ export default async function Navbar() {
         </div>
         
         {/* Navigation Links */}
-        <div className="hidden md:flex items-center justify-center gap-x-8 gap-8 flex-1">
-          <Link href="/about-us" className="text-sm font-medium text-slate-300 hover:text-orange-500 transition-colors">
-            About Us
-          </Link>
-          <Link href="/how-it-works" className="text-sm font-medium text-slate-300 hover:text-orange-500 transition-colors">
-            How It Works
-          </Link>
-          <Link href="/membership" className="text-sm font-medium text-slate-300 hover:text-orange-500 transition-colors">
-            Membership
-          </Link>
-          <Link href="/contact" className="text-sm font-medium text-slate-300 hover:text-orange-500 transition-colors">
-            Contact
-          </Link>
-          {isLoggedIn && (
-            <Link href="/dashboard" className="text-sm font-medium text-slate-300 hover:text-orange-500 transition-colors">
-              Dashboard
-            </Link>
-          )}
-        </div>
+        <NavLinks isLoggedIn={isLoggedIn} />
         
         {/* Action Buttons */}
         <div className="flex items-center space-x-3 shrink-0 w-[180px] justify-end">
@@ -56,9 +39,9 @@ export default async function Navbar() {
               </Button>
             </>
           ) : (
-            <Button href="/api/auth/logout" variant="outline" className="border-slate-800 text-slate-300 hover:bg-slate-800 hover:text-slate-100">
+            <a href="/api/auth/logout" className="inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 disabled:opacity-50 disabled:pointer-events-none h-10 px-4 py-2 text-sm border border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-slate-100">
               Keluar
-            </Button>
+            </a>
           )}
         </div>
       </div>

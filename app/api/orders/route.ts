@@ -23,24 +23,39 @@ export async function POST(req: NextRequest) {
       where: { email },
       update: {
         name,
-        phone: phone || null,
-        // Update alamat hanya jika pengguna memilih Home Service dan mengisi alamat
-        ...(address && { address }),
+        phone: phone || "",
+        address: address || "",
       },
       create: {
         name,
         email,
-        phone: phone || null,
-        address: address || null,
+        password: "password123", // fallback password
+        phone: phone || "",
+        address: address || "",
       },
     });
+
+    // Cari atau buat master data ApplianceType
+    let appType = await prisma.applianceType.findFirst({
+      where: { name: appliance }
+    });
+    if (!appType) {
+      appType = await prisma.applianceType.create({
+        data: {
+          name: appliance,
+          baseServiceFee: 100000,
+          iconUrl: "https://assets3.lottiefiles.com/packages/lf20_Q895iE.json"
+        }
+      });
+    }
 
     // 2. Daftarkan Barang Elektronik ke akun pengguna
     const newAppliance = await prisma.appliance.create({
       data: {
         userId: user.id,
-        type: appliance,
-        brand: brand || null,
+        applianceTypeId: appType.id,
+        brand: brand || "General",
+        modelNumber: "N/A",
       },
     });
 
@@ -49,10 +64,10 @@ export async function POST(req: NextRequest) {
       data: {
         userId: user.id,
         applianceId: newAppliance.id,
-        serviceType, // "HOME_SERVICE" atau "WORKSHOP_VISIT"
         status: "PENDING",
-        problem,
-        estimatedCost: estimatedCost ? parseInt(estimatedCost.toString(), 10) : null,
+        problemDescription: problem,
+        estimatedCost: estimatedCost ? parseInt(estimatedCost.toString(), 10) : 250000,
+        scheduledDateTime: new Date(),
       },
     });
 

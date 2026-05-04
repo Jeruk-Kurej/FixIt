@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 
 export async function POST(req: NextRequest) {
   try {
-    const { name, email, password } = await req.json();
+    const { name, email, password, phone, address } = await req.json();
 
     if (!name || !email || !password) {
       return NextResponse.json({ error: "Semua kolom wajib diisi." }, { status: 400 });
@@ -24,6 +24,8 @@ export async function POST(req: NextRequest) {
         name,
         email,
         password, // Simpan password (idealnya harus di-hash menggunakan bcrypt, tapi untuk MVP mock ini disimpan plain/hash sesuai kebutuhan)
+        phone: phone || "08123456789", // fallback
+        address: address || "N/A", // fallback
         role: "CUSTOMER",
       },
     });
