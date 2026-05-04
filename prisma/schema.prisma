@@ -87,8 +87,10 @@ model Order {
   status              OrderStatus @default(PENDING)
   problem             String      @db.Text
   scheduled_date_time DateTime
+  service_type        ServiceType @default(HOME_SERVICE)
   estimated_cost      Int
   final_cost          Int?
+
   createdAt           DateTime    @default(now())
 
   // Relationships
@@ -122,4 +124,9 @@ enum OrderStatus {
   WORKING
   DONE
   CANCELLED
+}
+
+enum ServiceType {
+  HOME_SERVICE
+  WORKSHOP_VISIT
 }

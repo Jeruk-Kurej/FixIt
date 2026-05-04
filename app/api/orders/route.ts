@@ -67,8 +67,10 @@ export async function POST(req: NextRequest) {
         problem: problem,
         estimated_cost: estimatedCost ? parseInt(estimatedCost.toString(), 10) : 250000,
         scheduled_date_time: new Date(scheduled_date_time),
+        service_type: serviceType as any,
       },
     });
+
 
 
     return NextResponse.json({ success: true, orderId: newOrder.id, message: "Pesanan berhasil dibuat!" }, { status: 201 });
