@@ -11,11 +11,11 @@ function BookingFormInner() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  // Data dari Kalkulator
-  const appliance = searchParams.get("appliance") || "";
-  const brand = searchParams.get("brand") || "";
-  const problem = searchParams.get("problem") || "";
-  const maxCost = searchParams.get("maxCost") || "";
+  // Data dari Kalkulator atau Input Form langsung
+  const [appliance, setAppliance] = useState(searchParams.get("appliance") || "");
+  const [brand, setBrand] = useState(searchParams.get("brand") || "");
+  const [problem, setProblem] = useState(searchParams.get("problem") || "");
+  const [estimatedCost, setEstimatedCost] = useState(searchParams.get("maxCost") || "150000");
 
   // State Form Pelanggan
   const [name, setName] = useState("");
@@ -41,10 +41,10 @@ function BookingFormInner() {
       phone,
       address: serviceType === "HOME_SERVICE" ? address : null,
       appliance,
-      brand,
+      brand: brand || "General",
       problem,
       serviceType,
-      estimatedCost: maxCost,
+      estimatedCost: estimatedCost || "150000",
     };
 
     // Validasi Zod Client-Side
@@ -70,9 +70,10 @@ function BookingFormInner() {
         throw new Error(data.error || "Gagal membuat pesanan.");
       }
 
-      alert("Pesanan berhasil dibuat! Teknisi kami akan segera menghubungi Anda.");
-      router.push("/dashboard");
+      alert("Pesanan berhasil dibuat! Sekarang mencari teknisi terdekat...");
+      router.push(`/booking/status/${data.orderId}`);
       router.refresh();
+
     } catch (error: any) {
       setErrorMsg(error.message);
     } finally {
@@ -126,6 +127,47 @@ function BookingFormInner() {
                         <h4 className={`font-semibold ${serviceType === "WORKSHOP_VISIT" ? "text-blue-400" : "text-slate-300"}`}>Bawa ke Bengkel</h4>
                         <p className="text-xs text-slate-500 mt-1">Jaga privasi, antar barang ke kami.</p>
                       </button>
+                    </div>
+                  </div>
+
+                  <hr className="border-slate-800" />
+
+                  {/* Detail Barang & Keluhan */}
+                  <div className="space-y-4 animate-in fade-in">
+                    <label className="text-sm font-semibold text-slate-300">Detail Barang Elektronik & Keluhan</label>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <label className="text-xs text-slate-400">Jenis Barang Elektronik *</label>
+                        <input
+                          required
+                          type="text"
+                          value={appliance}
+                          onChange={(e) => setAppliance(e.target.value)}
+                          placeholder="Contoh: AC, Kulkas, Mesin Cuci..."
+                          className="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-3 py-2 text-slate-200 focus:border-orange-500 outline-none placeholder-slate-500"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-xs text-slate-400">Merek / Brand (Opsional)</label>
+                        <input
+                          type="text"
+                          value={brand}
+                          onChange={(e) => setBrand(e.target.value)}
+                          placeholder="Contoh: Daikin, Panasonic, LG..."
+                          className="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-3 py-2 text-slate-200 focus:border-orange-500 outline-none placeholder-slate-500"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs text-slate-400">Keluhan / Masalah *</label>
+                      <textarea
+                        required
+                        rows={2}
+                        value={problem}
+                        onChange={(e) => setProblem(e.target.value)}
+                        placeholder="Deskripsikan masalah barang Anda..."
+                        className="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-3 py-2 text-slate-200 focus:border-orange-500 outline-none placeholder-slate-500"
+                      />
                     </div>
                   </div>
 
@@ -197,7 +239,7 @@ function BookingFormInner() {
                 <div className="pt-4 border-t border-orange-500/20">
                   <p className="text-xs text-slate-500 uppercase tracking-wider font-semibold mb-1">Maksimal Estimasi Biaya</p>
                   <p className="text-2xl font-bold text-orange-500">
-                    {maxCost ? formatRupiah(parseInt(maxCost, 10)) : "Rp -"}
+                    {estimatedCost ? formatRupiah(parseInt(estimatedCost, 10)) : "Rp -"}
                   </p>
                   <p className="text-xs text-slate-400 mt-1 leading-relaxed">
                     Harga final akan ditentukan oleh teknisi setelah pengecekan langsung.

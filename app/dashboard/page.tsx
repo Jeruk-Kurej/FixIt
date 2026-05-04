@@ -46,9 +46,10 @@ export default async function DashboardPage() {
             <h1 className="text-3xl font-bold text-slate-50">Dashboard Anda</h1>
             <p className="text-slate-400 mt-1">Selamat datang kembali, <span className="text-orange-400 font-semibold">{user.name}</span></p>
           </div>
-          <Button href="/book" variant="primary" className="shadow-[0_0_15px_rgba(249,115,22,0.3)]">
+           <Button href="/booking" variant="primary" className="shadow-[0_0_15px_rgba(249,115,22,0.3)]">
             Pesan Servis Baru
           </Button>
+
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -84,8 +85,9 @@ export default async function DashboardPage() {
               <CardHeader className="border-b border-slate-800 pb-4 flex flex-row items-center justify-between">
                 <CardTitle className="text-lg">Riwayat Pesanan</CardTitle>
                 {user.orders.length > 0 && (
-                  <Button href="/book" variant="ghost" size="sm" className="text-orange-500 hover:text-orange-400">Pesan Lagi</Button>
+                  <Button href="/booking" variant="ghost" size="sm" className="text-orange-500 hover:text-orange-400">Pesan Lagi</Button>
                 )}
+
               </CardHeader>
 
               <CardContent className="p-0">

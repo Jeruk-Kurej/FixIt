@@ -27,13 +27,23 @@ export default function LoginPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Gagal masuk.");
 
-      router.push("/dashboard");
+      // Check if logged in user is a technician
+      if (email.includes("tech")) {
+        router.push("/technician/dashboard");
+      } else {
+        router.push("/dashboard");
+      }
       router.refresh();
     } catch (err: any) {
       setErrorMsg(err.message);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const autofillUser = (e: string, p: string) => {
+    setEmail(e);
+    setPassword(p);
   };
 
   return (
@@ -45,6 +55,26 @@ export default function LoginPage() {
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-slate-50 mb-2">Selamat Datang</h1>
           <p className="text-slate-400 text-sm">Masuk untuk mengelola jadwal servis Anda</p>
+        </div>
+
+        <div className="mb-6 p-4 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex flex-col gap-2">
+          <p className="text-xs font-semibold text-orange-400 uppercase tracking-wider">Quick Login Dummy (Demo)</p>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => autofillUser("budi@example.com", "password_budi")}
+              className="px-3 py-2 bg-slate-900/60 hover:bg-slate-900 border border-slate-700/80 rounded-xl text-xs font-medium text-slate-300 hover:text-orange-400 transition-all text-center"
+            >
+              Customer (Budi)
+            </button>
+            <button
+              type="button"
+              onClick={() => autofillUser("joko.tech@fixit.com", "password_joko")}
+              className="px-3 py-2 bg-slate-900/60 hover:bg-slate-900 border border-slate-700/80 rounded-xl text-xs font-medium text-slate-300 hover:text-orange-400 transition-all text-center"
+            >
+              Teknisi (Joko)
+            </button>
+          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">

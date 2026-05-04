@@ -13,10 +13,12 @@ export default function NavLinks({ isLoggedIn }: NavLinksProps) {
   const links = isLoggedIn 
     ? [
         { href: "/dashboard", label: "Dashboard" },
+        { href: "/technician/dashboard", label: "Mode Teknisi" },
         { href: "/membership", label: "Membership" },
         { href: "/how-it-works", label: "How It Works" },
         { href: "/contact", label: "Contact" },
       ]
+
     : [
         { href: "/about-us", label: "About Us" },
         { href: "/how-it-works", label: "How It Works" },
