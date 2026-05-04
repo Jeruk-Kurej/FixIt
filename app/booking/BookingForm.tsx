@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, Suspense, useEffect } from "react";
+
 import { useSearchParams, useRouter } from "next/navigation";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
@@ -29,6 +30,26 @@ function BookingFormInner() {
   // State Proses
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+
+  // Fetch User Profile for Pre-fill
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await fetch("/api/auth/profile");
+        const data = await res.json();
+        if (res.ok && data.user) {
+          setName(data.user.name || "");
+          setEmail(data.user.email || "");
+          setPhone(data.user.phone || "");
+          setAddress(data.user.address || "");
+        }
+      } catch (err) {
+        console.error("Failed to fetch profile for pre-fill:", err);
+      }
+    };
+    fetchProfile();
+  }, []);
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

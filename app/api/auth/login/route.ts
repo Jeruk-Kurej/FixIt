@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import prisma from "@/lib/prisma";
 
-const prisma = new PrismaClient();
 
 export async function POST(req: NextRequest) {
   try {
@@ -25,8 +24,16 @@ export async function POST(req: NextRequest) {
 
     // Untuk simplicity di MVP ini, password langsung dicocokkan (plain text) 
     // atau jika Anda ingin menambahkan bcrypt nanti.
-    const response = NextResponse.json({ success: true, message: "Login berhasil" });
+    const response = NextResponse.json({ 
+      success: true, 
+      message: "Login berhasil",
+      user: {
+        role: user.role,
+        email: user.email
+      }
+    });
     response.cookies.set("user_email", user.email, { path: "/", maxAge: 60 * 60 * 24 * 7 }); // 7 hari
+
     return response;
   } catch (err: any) {
     return NextResponse.json({ error: "Terjadi kesalahan server." }, { status: 500 });

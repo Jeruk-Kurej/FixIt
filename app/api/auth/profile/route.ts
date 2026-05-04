@@ -1,9 +1,41 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import prisma from "@/lib/prisma";
 
-const prisma = new PrismaClient();
+
+export async function GET(req: NextRequest) {
+  try {
+    const userEmail = req.cookies.get("user_email")?.value;
+
+    if (!userEmail) {
+      return NextResponse.json({ error: "Silakan masuk terlebih dahulu." }, { status: 401 });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { email: userEmail },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        address: true,
+        age: true,
+        gender: true,
+        role: true,
+      }
+    });
+
+    if (!user) {
+      return NextResponse.json({ error: "Pengguna tidak ditemukan." }, { status: 404 });
+    }
+
+    return NextResponse.json({ success: true, user });
+  } catch (err: any) {
+    return NextResponse.json({ error: "Terjadi kesalahan server saat mengambil profil." }, { status: 500 });
+  }
+}
 
 export async function PATCH(req: NextRequest) {
+
   try {
     const userEmail = req.cookies.get("user_email")?.value;
 

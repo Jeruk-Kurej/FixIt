@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import prisma from "@/lib/prisma";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
@@ -6,7 +6,7 @@ import Button from "@/components/ui/Button";
 import { formatRupiah, formatDate } from "@/lib/utils";
 import AcceptButton from "./AcceptButton";
 
-const prisma = new PrismaClient();
+
 
 export default async function TechnicianDashboardPage() {
   const cookieStore = await cookies();

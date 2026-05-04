@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import prisma from "@/lib/prisma";
+import { Role } from "@prisma/client";
 
-const prisma = new PrismaClient();
 
 export async function POST(req: NextRequest) {
   try {
@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
         password, // Simpan password (idealnya harus di-hash menggunakan bcrypt, tapi untuk MVP mock ini disimpan plain/hash sesuai kebutuhan)
         phone: phone || "08123456789", // fallback
         address: address || "N/A", // fallback
-        role: "CUSTOMER",
+        role: Role.CUSTOMER,
       },
     });
 

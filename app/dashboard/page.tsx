@@ -1,11 +1,11 @@
-import { PrismaClient } from "@prisma/client";
+import prisma from "@/lib/prisma";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import { formatDate } from "@/lib/utils";
 import { cookies } from "next/headers";
 import ProfileEditor from "@/components/features/ProfileEditor";
 
-const prisma = new PrismaClient();
+
 
 export default async function DashboardPage() {
   const cookieStore = await cookies();

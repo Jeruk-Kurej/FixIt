@@ -27,13 +27,14 @@ export default function LoginPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Gagal masuk.");
 
-      // Check if logged in user is a technician
-      if (email.includes("tech")) {
+      // Redirect based on role
+      if (data.user.role === "TECHNICIAN") {
         router.push("/technician/dashboard");
       } else {
         router.push("/dashboard");
       }
       router.refresh();
+
     } catch (err: any) {
       setErrorMsg(err.message);
     } finally {
