@@ -35,8 +35,8 @@ export default function ChatHub({ initialOrders, currentUserId, compact = false 
         
         {/* Left Sidebar: Conversation List */}
         <div className={cn(
-          "border-r border-slate-700/50 flex flex-col bg-slate-900/50",
-          compact ? "w-[60px] sm:w-[180px]" : "w-full sm:w-[350px]"
+          "border-r border-slate-700/50 flex flex-col bg-slate-900/50 transition-all duration-300",
+          compact ? "w-[60px] sm:w-[70px]" : "w-full sm:w-[350px]"
         )}>
           <div className={cn("p-4 border-b border-slate-700/50", compact && "p-3 flex justify-center")}>
             {!compact ? (
@@ -88,7 +88,7 @@ export default function ChatHub({ initialOrders, currentUserId, compact = false 
                           <UserIcon size={compact ? 14 : 18} />
                         </div>
                       </div>
-                      <div className={cn("flex-grow min-w-0", compact ? "hidden sm:block" : "block")}>
+                      <div className={cn("flex-grow min-w-0", compact ? "hidden" : "block")}>
                         <div className="flex justify-between items-start mb-0.5">
                           <h4 className={cn("text-[11px] font-bold truncate", isActive ? "text-orange-400" : "text-slate-100")}>
                             {otherUser.name.split(' ')[0]}
@@ -98,6 +98,7 @@ export default function ChatHub({ initialOrders, currentUserId, compact = false 
                           {order.appliance?.appliance_type?.name}
                         </p>
                       </div>
+
 
                     </button>
 

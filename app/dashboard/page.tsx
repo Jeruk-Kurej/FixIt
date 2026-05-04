@@ -6,6 +6,8 @@ import { cookies } from "next/headers";
 import ProfileEditor from "@/components/features/ProfileEditor";
 import ServiceCalendar from "@/components/features/ServiceCalendar";
 import ChatHub from "@/components/features/ChatHub";
+import OrderHistoryList from "./OrderHistoryList";
+
 
 export default async function DashboardPage() {
   const cookieStore = await cookies();
@@ -61,7 +63,7 @@ export default async function DashboardPage() {
     <div className="min-h-screen bg-slate-900 text-slate-50 py-10 relative overflow-hidden">
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-orange-500/5 blur-[150px] rounded-full pointer-events-none" />
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-[1600px] relative z-10">
+      <div className="mx-auto px-4 sm:px-8 max-w-full relative z-10">
         <div className="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h1 className="text-4xl font-black tracking-tight text-slate-50">Dashboard</h1>
@@ -72,43 +74,46 @@ export default async function DashboardPage() {
           </Button>
         </div>
 
-        {/* 3-Column Main Layout */}
-        <div className="flex flex-col md:flex-row gap-6 items-stretch h-auto md:h-[750px]">
+        {/* 3-Column Workspace Layout - Locked Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
           
-          {/* Col 1: Profile (Narrow) */}
-          <div className="md:w-[22%] flex flex-col">
-            <Card className="border-slate-800/80 bg-slate-800/40 backdrop-blur-md h-full shadow-xl">
-              <CardHeader className="border-b border-slate-800/60 pb-4">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <span className="p-1.5 bg-orange-500/10 rounded-lg text-orange-400">👤</span>
+          {/* Col 1: Profile (2/12) */}
+          <div className="md:col-span-2 flex flex-col self-stretch">
+            <Card className="border-slate-800 bg-slate-800/40 backdrop-blur-md shadow-2xl overflow-hidden min-h-[750px]">
+              <CardHeader className="border-b border-slate-800 p-6 bg-slate-800/20">
+                <CardTitle className="text-xs font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
+                  <span className="p-1 bg-blue-500/10 rounded-lg text-blue-400">👤</span>
                   Profil
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-5 space-y-6 overflow-y-auto custom-scrollbar">
-                <div>
-                  <p className="text-[9px] text-slate-500 font-black uppercase tracking-[0.2em] mb-1">Email</p>
-                  <p className="text-sm font-bold text-slate-100 truncate">{user.email}</p>
-                </div>
-                <hr className="border-slate-800/60" />
-                <div>
-                  <p className="text-[9px] text-slate-500 font-black uppercase tracking-[0.2em] mb-4">Informasi Kontak</p>
-                  <ProfileEditor 
-                    initialPhone={user.phone || ""} 
-                    initialAddress={user.address || ""}
-                  />
-                </div>
+              <CardContent className="p-6 overflow-y-auto custom-scrollbar flex-grow">
+                 <div>
+                   <p className="text-[8px] text-slate-500 font-black uppercase tracking-[0.2em] mb-1">Email</p>
+                   <p className="text-[11px] font-bold text-slate-100 truncate mb-6">{user.email}</p>
+                   <hr className="border-slate-800 mb-6" />
+                   <ProfileEditor 
+                     initialPhone={user.phone || ""} 
+                     initialAddress={user.address || ""}
+                   />
+                 </div>
               </CardContent>
             </Card>
           </div>
 
-          {/* Col 2: Calendar (Medium) */}
-          <div className="md:w-[39%] flex flex-col min-h-[500px] md:min-h-0">
-            <ServiceCalendar events={calendarEvents} />
+          {/* Col 2: Calendar & History (5/12) */}
+          <div className="md:col-span-5 flex flex-col gap-8 self-stretch">
+            <div className="flex-grow min-h-[450px]">
+               <ServiceCalendar events={calendarEvents} />
+            </div>
+            
+            <div className="h-[350px] shrink-0">
+              <OrderHistoryList orders={user.orders} />
+            </div>
           </div>
 
-          {/* Col 3: Chat Integrated (Medium) */}
-          <div className="md:w-[39%] flex flex-col min-h-[500px] md:min-h-0">
-            <Card className="border-slate-800/80 bg-slate-800/40 backdrop-blur-md h-full shadow-xl overflow-hidden flex flex-col">
+          {/* Col 3: Integrated Chat Hub (5/12) */}
+          <div className="md:col-span-5 flex flex-col self-stretch">
+            <Card className="border-slate-800/80 bg-slate-800/40 backdrop-blur-md min-h-[750px] shadow-xl overflow-hidden flex flex-col">
               <CardHeader className="border-b border-slate-800 p-5 bg-slate-800/20">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <span className="p-1.5 bg-orange-500/10 rounded-lg text-orange-400">💬</span>
@@ -126,46 +131,6 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        {/* Bottom Section: Order History */}
-        <div className="mt-12">
-          <Card className="border-slate-800/80 bg-slate-800/40 backdrop-blur-md shadow-xl overflow-hidden">
-            <CardHeader className="border-b border-slate-800 p-6 flex flex-row items-center justify-between bg-slate-800/20">
-              <div>
-                <CardTitle className="text-xl flex items-center gap-2">
-                  <span className="p-1.5 bg-orange-500/10 rounded-lg text-orange-400">📜</span>
-                  Riwayat Pesanan
-                </CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent className="p-0 max-h-[400px] overflow-y-auto custom-scrollbar">
-              {user.orders.length > 0 ? (
-                <div className="divide-y divide-slate-800/60">
-                  {user.orders.map((order) => (
-                    <div key={order.id} className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-6 hover:bg-slate-800/20 transition-all">
-                      <div className="flex items-start gap-4">
-                        <div className="p-3 bg-slate-900 rounded-2xl text-xl">🛠️</div>
-                        <div>
-                          <div className="flex items-center gap-3 mb-1">
-                            <h4 className="font-bold text-slate-100">{order.appliance?.appliance_type?.name || "Elektronik"}</h4>
-                            <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border border-slate-700 bg-slate-900">
-                              {order.status}
-                            </span>
-                          </div>
-                          <p className="text-xs text-slate-500">{formatDate(order.createdAt)} • {order.appliance?.brand}</p>
-                        </div>
-                      </div>
-                      <p className="text-lg font-black text-orange-500">
-                        {order.estimated_cost ? new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(order.estimated_cost) : "-"}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="p-10 text-center text-slate-500">Belum ada riwayat pesanan.</div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
       </div>
     </div>
   );

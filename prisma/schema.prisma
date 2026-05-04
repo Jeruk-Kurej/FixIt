@@ -91,6 +91,9 @@ model Order {
   estimated_cost      Int
   final_cost          Int?
 
+  technical_findings Json?
+  technical_notes    String?     @db.Text
+
   createdAt           DateTime    @default(now())
 
   // Relationships

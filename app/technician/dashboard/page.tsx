@@ -5,7 +5,9 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import { formatRupiah, formatDate } from "@/lib/utils";
 import AcceptButton from "./AcceptButton";
+import ActiveTasksList from "./ActiveTasksList";
 import ServiceCalendar from "@/components/features/ServiceCalendar";
+
 import ChatButton from "@/components/features/ChatButton";
 import ChatHub from "@/components/features/ChatHub";
 
@@ -92,16 +94,15 @@ export default async function TechnicianDashboardPage() {
     <div className="min-h-screen bg-slate-900 text-slate-50 py-10 relative overflow-hidden">
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-orange-500/5 blur-[150px] rounded-full pointer-events-none" />
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-[1600px] relative z-10">
-        {/* Header Section */}
-        <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="mx-auto px-4 sm:px-8 max-w-full relative z-10">
+        <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
-            <div className="inline-flex items-center gap-2 rounded-full bg-orange-500/10 border border-orange-500/20 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-orange-400 mb-2">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-orange-500/10 border border-orange-500/20 rounded-full mb-4">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
               </span>
-              Sistem Teknisi Aktif
+              <span className="text-[10px] font-black text-orange-500 uppercase tracking-widest">Sistem Teknisi Aktif</span>
             </div>
             <h1 className="text-4xl font-black tracking-tight text-slate-50">Dashboard Kerja</h1>
             <p className="text-slate-400 mt-1">Selamat bertugas, <span className="text-orange-400 font-bold">{user.name}</span></p>
@@ -119,74 +120,51 @@ export default async function TechnicianDashboardPage() {
           </div>
         </div>
 
-        {/* 3-Column Workspace Layout */}
-        <div className="flex flex-col md:flex-row gap-6 items-stretch h-auto md:h-[750px]">
+        {/* 3-Column Workspace Layout - Locked Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
           
-          {/* Col 1: Incoming Orders (Narrow) */}
-          <div className="md:w-[25%] flex flex-col">
-            <Card className="border-orange-500/30 bg-slate-800/40 backdrop-blur-md shadow-2xl overflow-hidden flex flex-col h-full ring-1 ring-orange-500/20">
-              <CardHeader className="border-b border-slate-800 p-5 bg-gradient-to-r from-orange-500/10 to-transparent">
-                <CardTitle className="text-lg flex items-center gap-2">
+          {/* Col 1: Incoming Orders (2/12) */}
+          <div className="md:col-span-2 flex flex-col self-stretch">
+            <Card className="border-orange-500/30 bg-slate-800/40 backdrop-blur-md shadow-2xl overflow-hidden flex flex-col min-h-[750px] ring-1 ring-orange-500/20">
+              <CardHeader className="border-b border-slate-800 p-4 bg-gradient-to-r from-orange-500/10 to-transparent">
+                <CardTitle className="text-sm flex items-center gap-2">
                    🔥 Pesanan Baru
                 </CardTitle>
-                <p className="text-[9px] text-slate-500 mt-1 font-bold uppercase tracking-widest">Ambil segera!</p>
               </CardHeader>
               <CardContent className="p-0 overflow-y-auto custom-scrollbar flex-grow">
                 {incomingOrders.length > 0 ? (
                   <div className="divide-y divide-slate-800/60">
                     {incomingOrders.map((order) => (
                       <div key={order.id} className="p-4 hover:bg-orange-500/[0.03] transition-all group border-l-2 border-transparent hover:border-orange-500">
-                        <div className="flex justify-between items-start mb-2">
-                          <h4 className="font-bold text-sm text-slate-100">{order.appliance?.appliance_type?.name}</h4>
-                          <p className="text-xs font-black text-orange-500">{formatRupiah(order.estimated_cost)}</p>
-                        </div>
-                        <p className="text-[10px] text-slate-400 line-clamp-2 bg-slate-900/40 p-2 rounded mb-3 italic">"{order.problem}"</p>
-                        <div className="flex items-center justify-between">
-                          <span className="text-[9px] font-bold text-slate-600">👤 {order.user?.name.split(' ')[0]}</span>
-                          <AcceptButton orderId={order.id} />
-                        </div>
+                        <h4 className="font-bold text-[11px] text-slate-100 truncate mb-1">{order.appliance?.appliance_type?.name}</h4>
+                        <p className="text-[10px] font-black text-orange-500 mb-3">{formatRupiah(order.estimated_cost)}</p>
+                        <AcceptButton orderId={order.id} />
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <div className="p-10 text-center text-slate-600 uppercase text-[9px] font-black tracking-widest">
-                    Menunggu pesanan baru...
+                  <div className="p-8 text-center text-slate-600 uppercase text-[8px] font-black tracking-widest h-full flex items-center justify-center">
+                    Menunggu...
                   </div>
                 )}
               </CardContent>
             </Card>
           </div>
 
-          {/* Col 2: Calendar & Active Tasks (Medium) */}
-          <div className="md:w-[40%] flex flex-col gap-6 overflow-hidden">
-            <div className="flex-grow">
+          {/* Col 2: Calendar & Active Tasks (5/12) */}
+          <div className="md:col-span-5 flex flex-col gap-8 self-stretch">
+            <div className="flex-grow min-h-[450px]">
                <ServiceCalendar events={calendarEvents} />
             </div>
             
-            {/* Active Tasks Mini List */}
-            <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-md h-[250px] overflow-hidden flex flex-col">
-              <CardHeader className="p-4 border-b border-slate-800/50 bg-slate-800/20">
-                 <CardTitle className="text-sm font-black uppercase tracking-widest text-slate-400">Tugas Aktif ({myAcceptedOrders.filter(o => o.status !== 'DONE').length})</CardTitle>
-              </CardHeader>
-              <CardContent className="p-0 overflow-y-auto custom-scrollbar flex-grow">
-                 {myAcceptedOrders.filter(o => o.status !== 'DONE').map(order => (
-                    <div key={order.id} className="p-4 border-b border-slate-800/50 flex items-center justify-between group hover:bg-slate-800/20">
-                        <div>
-                          <p className="text-xs font-bold text-slate-200">{order.appliance?.appliance_type?.name}</p>
-                          <p className="text-[9px] text-slate-500">{order.user?.name}</p>
-                        </div>
-                        <span className="text-[9px] px-2 py-0.5 rounded bg-green-500/10 text-green-400 border border-green-500/20 font-black uppercase">
-                          {order.status}
-                        </span>
-                    </div>
-                 ))}
-              </CardContent>
-            </Card>
+            <div className="h-[350px] shrink-0">
+              <ActiveTasksList orders={myAcceptedOrders} />
+            </div>
           </div>
 
-          {/* Col 3: Integrated Chat Hub (Medium) */}
-          <div className="md:w-[35%] flex flex-col">
-            <Card className="border-slate-800/80 bg-slate-800/40 backdrop-blur-md h-full shadow-xl overflow-hidden flex flex-col">
+          {/* Col 3: Integrated Chat Hub (5/12) */}
+          <div className="md:col-span-5 flex flex-col self-stretch">
+            <Card className="border-slate-800/80 bg-slate-800/40 backdrop-blur-md min-h-[750px] shadow-xl overflow-hidden flex flex-col">
               <CardHeader className="border-b border-slate-800 p-5 bg-slate-800/20">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <span className="p-1.5 bg-orange-500/10 rounded-lg text-orange-400">💬</span>
@@ -202,10 +180,9 @@ export default async function TechnicianDashboardPage() {
               </div>
             </Card>
           </div>
-
         </div>
+
       </div>
     </div>
   );
 }
-
