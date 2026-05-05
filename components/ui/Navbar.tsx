@@ -6,10 +6,19 @@ import NavLinks from "./NavLinks";
 import NotificationHub from "../features/NotificationHub";
 
 
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
+import LogoutButton from "./LogoutButton";
+
 export default async function Navbar() {
+  const session = await getServerSession(authOptions);
   const cookieStore = await cookies();
-  const isLoggedIn = !!cookieStore.get("user_email")?.value;
-  const userRole = cookieStore.get("user_role")?.value;
+  
+  const manualEmail = cookieStore.get("user_email")?.value;
+  const manualRole = cookieStore.get("user_role")?.value;
+
+  const isLoggedIn = !!session || !!manualEmail;
+  const userRole = (session?.user as any)?.role || manualRole;
 
 
   return (
@@ -46,9 +55,7 @@ export default async function Navbar() {
           ) : (
             <>
               <NotificationHub />
-              <a href="/api/auth/logout?redirect=/?logout=true" className="inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 disabled:opacity-50 disabled:pointer-events-none h-10 px-4 py-2 text-sm border border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-slate-100">
-                Keluar
-              </a>
+              <LogoutButton />
             </>
           )}
 

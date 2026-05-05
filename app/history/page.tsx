@@ -5,9 +5,13 @@ import OrderHistoryList from "@/app/dashboard/OrderHistoryList";
 import { History, ChevronLeft } from "lucide-react";
 import Link from "next/link";
 
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
+
 export default async function HistoryPage() {
+  const session = await getServerSession(authOptions);
   const cookieStore = await cookies();
-  const userEmail = cookieStore.get("user_email")?.value;
+  const userEmail = session?.user?.email || cookieStore.get("user_email")?.value;
 
   if (!userEmail) redirect("/login");
 

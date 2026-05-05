@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
+
 export async function POST(req: NextRequest) {
   try {
-    const userEmail = req.cookies.get("user_email")?.value;
+    const session = await getServerSession(authOptions);
+    const userEmail = session?.user?.email || req.cookies.get("user_email")?.value;
 
     if (!userEmail) {
       return NextResponse.json({ error: "Silakan masuk terlebih dahulu." }, { status: 401 });

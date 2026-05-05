@@ -4,9 +4,15 @@ import TechnicianDashboardView from "./TechnicianDashboardView";
 import CustomerDashboardView from "./CustomerDashboardView";
 import AdminDashboardView from "./AdminDashboardView";
 
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
+
 export default async function DashboardPage() {
+  const session = await getServerSession(authOptions);
   const cookieStore = await cookies();
-  const userEmail = cookieStore.get("user_email")?.value;
+  
+  const userEmail = session?.user?.email || cookieStore.get("user_email")?.value;
+  const userRole = (session?.user as any)?.role || cookieStore.get("user_role")?.value;
 
   if (!userEmail) {
     return (

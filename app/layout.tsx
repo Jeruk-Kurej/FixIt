@@ -22,6 +22,7 @@ export const metadata: Metadata = {
 import NextTopLoader from "nextjs-toploader";
 import PageTransition from "@/components/layout/PageTransition";
 import NotificationToast from "@/components/features/NotificationToast";
+import { Providers } from "@/components/Providers";
 
 export default function RootLayout({
   children,
@@ -34,8 +35,9 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}
     >
       <body className="min-h-full flex flex-col bg-slate-900 text-slate-50 selection:bg-orange-500 selection:text-white">
-        <NextTopLoader 
-          color="#f97316"
+        <Providers>
+          <NextTopLoader 
+            color="#f97316"
           initialPosition={0.08}
           crawlSpeed={200}
           height={3}
@@ -51,6 +53,7 @@ export default function RootLayout({
         </main>
         <Footer />
         <NotificationToast />
+        </Providers>
       </body>
     </html>
   );

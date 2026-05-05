@@ -3,10 +3,14 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import ChatHub from "@/components/features/ChatHub";
 
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
+
 export default async function ChatPage({ searchParams }: { searchParams: Promise<{ orderId?: string }> }) {
   const { orderId: initialOrderId } = await searchParams;
+  const session = await getServerSession(authOptions);
   const cookieStore = await cookies();
-  const userEmail = cookieStore.get("user_email")?.value;
+  const userEmail = session?.user?.email || cookieStore.get("user_email")?.value;
 
   if (!userEmail) {
     redirect("/login");
