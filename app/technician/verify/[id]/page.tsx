@@ -25,7 +25,7 @@ export default async function VerificationPage({ params }: { params: Promise<{ i
     },
   });
 
-  if (!order) redirect("/technician/dashboard");
+  if (!order) redirect("/dashboard");
 
   return (
     <div className="min-h-screen bg-slate-900 text-slate-50 py-12 relative">
@@ -34,7 +34,8 @@ export default async function VerificationPage({ params }: { params: Promise<{ i
         {/* Header with Back Button */}
         <div className="mb-10 flex items-center justify-between">
           <div className="flex items-center gap-6">
-            <Button href="/technician/dashboard" variant="secondary" className="p-3 rounded-2xl">
+            <Button href="/dashboard" variant="secondary" className="p-3 rounded-2xl">
+
               <ChevronLeft size={24} />
             </Button>
             <div>

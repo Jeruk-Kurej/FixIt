@@ -44,15 +44,18 @@ export async function PATCH(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { phone, address } = body;
+    const { phone, address, age, gender } = body;
 
     const user = await prisma.user.update({
       where: { email: userEmail },
       data: {
         phone: phone || null,
         address: address || null,
+        age: age ? parseInt(age) : null,
+        gender: gender || null,
       },
     });
+
 
     return NextResponse.json({ success: true, user });
   } catch (err: any) {
