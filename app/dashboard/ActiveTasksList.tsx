@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
-import { ChevronLeft, ChevronRight, CheckCircle2, Clock, ArrowUpRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, CheckCircle2, Clock, ArrowUpRight, CalendarPlus } from "lucide-react";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
+import { cn, getGoogleCalendarUrl } from "@/lib/utils";
+
 
 interface ActiveTasksListProps {
   orders: any[];
@@ -86,13 +87,26 @@ export default function ActiveTasksList({ orders }: ActiveTasksListProps) {
                       {order.status}
                    </div>
                    
-                   <Link 
-                     href={`/technician/verify/${order.id}`}
-                     className="flex items-center gap-1 px-2.5 py-1.5 bg-slate-800 hover:bg-orange-500 rounded-lg text-[9px] font-black uppercase text-slate-400 hover:text-white transition-all group/btn"
-                   >
-                     Update
-                     <ArrowUpRight size={10} className="group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform" />
-                   </Link>
+                   <div className="flex items-center gap-2">
+                     <a 
+                       href={getGoogleCalendarUrl(order)}
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       title="Sync to Google Calendar"
+                       className="p-1.5 bg-slate-800 hover:bg-blue-600 rounded-lg text-slate-400 hover:text-white transition-all"
+                     >
+                       <CalendarPlus size={14} />
+                     </a>
+                     
+                     <Link 
+                       href={`/technician/verify/${order.id}`}
+                       className="flex items-center gap-1 px-2.5 py-1.5 bg-slate-800 hover:bg-orange-500 rounded-lg text-[9px] font-black uppercase text-slate-400 hover:text-white transition-all group/btn"
+                     >
+                       Update
+                       <ArrowUpRight size={10} className="group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform" />
+                     </Link>
+                   </div>
+
                 </div>
               </div>
             ))}

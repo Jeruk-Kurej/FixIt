@@ -1,5 +1,7 @@
 import prisma from "@/lib/prisma";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
+import SmartReminderAlert from "@/components/features/SmartReminderAlert";
+
 import { formatRupiah } from "@/lib/utils";
 import ServiceCalendar from "@/components/features/ServiceCalendar";
 import AcceptButton from "./AcceptButton";
@@ -78,8 +80,13 @@ export default async function TechnicianDashboardView({ user, tech }: Technician
           </div>
         </div>
 
+        {/* Smart Reminder Alert */}
+        <SmartReminderAlert orders={tech.orders || []} />
+
+
         {/* Unified Layout: Sidebar + Main Content */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 flex-grow overflow-hidden min-h-0">
+
           
           {/* Sidebar (3/12) */}
           <div className="md:col-span-3 flex flex-col gap-4 h-full min-h-0">

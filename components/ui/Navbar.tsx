@@ -3,6 +3,8 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import Button from "./Button";
 import NavLinks from "./NavLinks";
+import NotificationHub from "../features/NotificationHub";
+
 
 export default async function Navbar() {
   const cookieStore = await cookies();
@@ -39,10 +41,14 @@ export default async function Navbar() {
               </Button>
             </>
           ) : (
-            <a href="/api/auth/logout" className="inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 disabled:opacity-50 disabled:pointer-events-none h-10 px-4 py-2 text-sm border border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-slate-100">
-              Keluar
-            </a>
+            <>
+              <NotificationHub />
+              <a href="/api/auth/logout" className="inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 disabled:opacity-50 disabled:pointer-events-none h-10 px-4 py-2 text-sm border border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-slate-100">
+                Keluar
+              </a>
+            </>
           )}
+
         </div>
       </div>
     </nav>

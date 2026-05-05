@@ -1,4 +1,6 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
+import SmartReminderAlert from "@/components/features/SmartReminderAlert";
+
 import Button from "@/components/ui/Button";
 import ProfileEditor from "@/components/features/ProfileEditor";
 import ServiceCalendar from "@/components/features/ServiceCalendar";
@@ -36,7 +38,11 @@ export default function CustomerDashboardView({ user, calendarEvents }: Customer
           </Button>
         </div>
 
+        {/* Smart Reminder Alert */}
+        <SmartReminderAlert orders={user.orders} />
+
         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 flex-grow overflow-hidden min-h-0">
+
           
           {/* Sidebar (3/12) */}
           <div className="md:col-span-3 flex flex-col gap-4 h-full min-h-0">

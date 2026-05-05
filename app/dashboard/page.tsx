@@ -21,7 +21,18 @@ export default async function DashboardPage() {
   const user = await prisma.user.findFirst({
     where: { email: String(userEmail) },
     include: {
-      technician: true,
+      technician: {
+        include: {
+          orders: {
+            orderBy: { createdAt: "desc" },
+            include: {
+              user: true,
+              appliance: { include: { appliance_type: true } }
+            }
+          }
+        }
+      },
+
       orders: {
         orderBy: { createdAt: "desc" },
         include: {
@@ -34,6 +45,12 @@ export default async function DashboardPage() {
   });
 
   if (!user) return null;
+
+  // Trigger smart reminders (Lazy Sync on load)
+  // Note: Since we are in a server component, this happens before rendering
+  const { processSmartReminders } = await import("@/lib/reminder-engine");
+  await processSmartReminders(user.id);
+
 
   return (
     <div className="min-h-screen bg-slate-900 text-slate-50 py-10 relative overflow-hidden">

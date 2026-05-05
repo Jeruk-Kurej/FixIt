@@ -37,7 +37,7 @@ export default function FloatingChatWidget({ orders, currentUserId }: FloatingCh
             {activeOrders.length > 0 ? (
               <div className="divide-y divide-slate-800/50">
                 {activeOrders.map((order) => {
-                  const otherUser = order.technician?.user || order.user;
+                  const otherUser = order?.technician?.user || order?.user || { name: "User" };
                   return (
                     <Link 
                       key={order.id} 
@@ -48,13 +48,14 @@ export default function FloatingChatWidget({ orders, currentUserId }: FloatingCh
                          {otherUser?.name?.[0] || "?"}
                       </div>
                       <div className="flex-grow min-w-0">
-                        <p className="text-xs font-bold text-slate-100 truncate">{otherUser?.name}</p>
-                        <p className="text-[10px] text-slate-500 truncate">{order.appliance?.appliance_type?.name}</p>
+                        <p className="text-xs font-bold text-slate-100 truncate">{otherUser?.name || "Pelanggan"}</p>
+                        <p className="text-[10px] text-slate-500 truncate">{order?.appliance?.appliance_type?.name || "Servis"}</p>
                       </div>
                       <ArrowUpRight size={14} className="text-slate-700 group-hover:text-orange-500 transition-colors" />
                     </Link>
                   );
                 })}
+
               </div>
             ) : (
               <div className="p-10 text-center text-[10px] text-slate-600 font-bold uppercase tracking-widest">

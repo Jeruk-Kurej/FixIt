@@ -4,8 +4,9 @@ import { useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { formatDate } from "@/lib/utils";
 import VerificationModal from "@/components/features/VerificationModal";
-import { History, Eye, CheckCircle2, Wrench } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { History, Eye, CheckCircle2, Wrench, CalendarPlus } from "lucide-react";
+import { cn, getGoogleCalendarUrl } from "@/lib/utils";
+
 
 interface OrderHistoryListProps {
   orders: any[];
@@ -61,16 +62,29 @@ export default function OrderHistoryList({ orders }: OrderHistoryListProps) {
                         {order.estimated_cost ? `Rp ${order.estimated_cost.toLocaleString('id-ID')}` : "-"}
                      </p>
                      
-                     {order.technical_findings && (
-                       <button 
-                         onClick={() => setSelectedOrder(order)}
-                         className="flex items-center gap-1 px-2.5 py-1.5 bg-slate-800 hover:bg-emerald-500 rounded-lg text-[9px] font-black uppercase text-slate-400 hover:text-white transition-all group/btn"
-                       >
-                          Analisis
-                          <Eye size={10} />
-                       </button>
-                     )}
+                     <div className="flex items-center gap-2">
+                        <a 
+                          href={getGoogleCalendarUrl(order)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title="Sync to Google Calendar"
+                          className="p-1.5 bg-slate-800 hover:bg-blue-600 rounded-lg text-slate-400 hover:text-white transition-all"
+                        >
+                          <CalendarPlus size={14} />
+                        </a>
+
+                        {order.technical_findings && (
+                          <button 
+                            onClick={() => setSelectedOrder(order)}
+                            className="flex items-center gap-1 px-2.5 py-1.5 bg-slate-800 hover:bg-emerald-500 rounded-lg text-[9px] font-black uppercase text-slate-400 hover:text-white transition-all group/btn"
+                          >
+                             Analisis
+                             <Eye size={10} />
+                          </button>
+                        )}
+                     </div>
                   </div>
+
                 </div>
               ))}
             </div>
