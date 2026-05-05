@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect } from "react";
+
 import { X, CheckCircle2, ClipboardList, User, ShieldCheck, ArrowRight } from "lucide-react";
 import Button from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
@@ -11,7 +13,19 @@ interface VerificationModalProps {
 }
 
 export default function VerificationModal({ order, onClose, isOpen }: VerificationModalProps) {
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isOpen]);
+
   const findings = order.technical_findings as string[] || [];
+
 
   return (
     <>
