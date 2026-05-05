@@ -17,11 +17,33 @@ interface CustomerDashboardViewProps {
   user: any;
   calendarEvents: any[];
   pendingMemberships?: any[];
+  pendingPayments?: any[];
 }
 
-export default function CustomerDashboardView({ user, calendarEvents, pendingMemberships = [] }: CustomerDashboardViewProps) {
+export default function CustomerDashboardView({ user, calendarEvents, pendingMemberships = [], pendingPayments = [] }: CustomerDashboardViewProps) {
   const router = useRouter();
   const [approvingId, setApprovingId] = useState<string | null>(null);
+  const [approvingPaymentId, setApprovingPaymentId] = useState<string | null>(null);
+
+  const handleApprovePayment = async (paymentId: string) => {
+    setApprovingPaymentId(paymentId);
+    try {
+      const res = await fetch("/api/payments/approve", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ paymentId }),
+      });
+      if (res.ok) {
+        alert("Pembayaran Sah! Status pesanan telah diperbarui.");
+        router.refresh();
+      }
+    } catch (err) {
+      alert("Gagal mengaktifkan.");
+    } finally {
+      setApprovingPaymentId(null);
+    }
+  };
+
 
   const handleApprove = async (id: string) => {
     setApprovingId(id);
@@ -68,49 +90,6 @@ export default function CustomerDashboardView({ user, calendarEvents, pendingMem
 
         {/* Smart Reminder Alert */}
         <SmartReminderAlert orders={user.orders} />
-
-        {/* Admin Panel for Pending Memberships (Demo Mode) */}
-        {pendingMemberships.length > 0 && (
-          <div className="mb-4 animate-in slide-in-from-top duration-500">
-             <div className="bg-orange-500/10 border border-orange-500/20 rounded-[24px] p-4 flex flex-col gap-3">
-                <div className="flex items-center justify-between">
-                   <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-orange-500 flex items-center justify-center text-white">
-                         <Star size={20} fill="currentColor" />
-                      </div>
-                      <div>
-                         <h3 className="text-sm font-black text-white uppercase tracking-tight">Admin: Pendaftaran Member Baru</h3>
-                         <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Menunggu Verifikasi Pembayaran Manual</p>
-                      </div>
-                   </div>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mt-1">
-                   {pendingMemberships.map((m: any) => (
-                     <div key={m.id} className="p-4 bg-slate-900/60 rounded-2xl border border-slate-800 flex items-center justify-between group">
-                        <div className="flex items-center gap-3">
-                           <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-slate-400">
-                              <User size={16} />
-                           </div>
-                           <div>
-                              <p className="text-[10px] font-black text-slate-100 uppercase tracking-tighter">{m.user?.name}</p>
-                              <p className="text-[9px] text-orange-500 font-bold uppercase">Smart Care {m.appliance_name}</p>
-                           </div>
-                        </div>
-                        <button 
-                          disabled={approvingId === m.id}
-                          onClick={() => handleApprove(m.id)}
-                          className="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 rounded-lg text-[9px] font-black text-white uppercase tracking-widest transition-all disabled:opacity-50"
-                        >
-                           {approvingId === m.id ? "..." : "Sahkan"}
-                        </button>
-                     </div>
-                   ))}
-                </div>
-             </div>
-          </div>
-        )}
-
 
         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 flex-grow overflow-hidden min-h-0">
 
@@ -203,11 +182,11 @@ export default function CustomerDashboardView({ user, calendarEvents, pendingMem
                      />
                   </div>
                 </div>
-
             </div>
 
           </div>
         </div>
+
       </div>
 
       <FloatingChatWidget orders={user.orders} currentUserId={user.id} />

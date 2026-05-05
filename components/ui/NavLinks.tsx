@@ -5,12 +5,13 @@ import { usePathname } from "next/navigation";
 
 interface NavLinksProps {
   isLoggedIn: boolean;
+  role?: string;
 }
 
-export default function NavLinks({ isLoggedIn }: NavLinksProps) {
+export default function NavLinks({ isLoggedIn, role }: NavLinksProps) {
   const pathname = usePathname();
 
-  const links = isLoggedIn 
+  let links = isLoggedIn 
     ? [
         { href: "/dashboard", label: "Dashboard" },
 
@@ -20,8 +21,6 @@ export default function NavLinks({ isLoggedIn }: NavLinksProps) {
 
         { href: "/how-it-works", label: "How It Works" },
         { href: "/contact", label: "Contact" },
-
-
       ]
 
     : [
@@ -30,6 +29,13 @@ export default function NavLinks({ isLoggedIn }: NavLinksProps) {
         { href: "/membership", label: "Membership" },
         { href: "/contact", label: "Contact" },
       ];
+
+  if (role === 'ADMIN') {
+    links = [
+      { href: "/dashboard", label: "Dashboard" }
+    ];
+  }
+
 
   return (
     <div className="hidden md:flex items-center justify-center gap-x-8 gap-8 flex-1">

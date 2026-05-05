@@ -177,26 +177,44 @@ export default function OrderHistoryList({
                           {order.final_cost ? `Rp ${order.final_cost.toLocaleString('id-ID')}` : (order.estimated_cost ? `Rp ${order.estimated_cost.toLocaleString('id-ID')}` : "-")}
                        </p>
                        
-                       <div className="flex items-center gap-1.5 shrink-0 flex-wrap justify-end">
+                        <div className="flex items-center gap-1.5 shrink-0 flex-wrap justify-end">
                           {needsDP && (
-                            <button 
-                              onClick={() => setPaymentOrder(order)}
-                              className="flex items-center gap-1 px-2 py-1 bg-orange-500 hover:bg-orange-600 rounded text-[8px] font-black uppercase text-white transition-all shadow-lg shadow-orange-500/20 whitespace-nowrap"
-                            >
-                               <Wallet size={10} />
-                               Bayar DP
-                            </button>
+                            <>
+                              {order.payments && order.payments.some((p: any) => p.status === 'PENDING') ? (
+                                <span className="px-2 py-1 bg-blue-500/10 border border-blue-500/20 rounded text-[8px] font-black uppercase text-blue-400">
+                                   Verifikasi Admin
+                                </span>
+                              ) : (
+                                <button 
+                                  onClick={() => setPaymentOrder(order)}
+                                  className="flex items-center gap-1 px-2 py-1 bg-orange-500 hover:bg-orange-600 rounded text-[8px] font-black uppercase text-white transition-all shadow-lg shadow-orange-500/20 whitespace-nowrap"
+                                >
+                                   <Wallet size={10} />
+                                   Bayar DP
+                                </button>
+                              )}
+                            </>
                           )}
 
+
                           {needsBalance && (
-                            <button 
-                              onClick={() => setPaymentOrder(order)}
-                              className="flex items-center gap-1 px-2 py-1 bg-emerald-500 hover:bg-emerald-600 rounded text-[8px] font-black uppercase text-white transition-all shadow-lg shadow-emerald-500/20 whitespace-nowrap"
-                            >
-                               <Wallet size={10} />
-                               Lunas
-                            </button>
+                            <>
+                              {order.payments && order.payments.some((p: any) => p.status === 'PENDING') ? (
+                                <span className="px-2 py-1 bg-blue-500/10 border border-blue-500/20 rounded text-[8px] font-black uppercase text-blue-400">
+                                   Verifikasi Admin
+                                </span>
+                              ) : (
+                                <button 
+                                  onClick={() => setPaymentOrder(order)}
+                                  className="flex items-center gap-1 px-2 py-1 bg-emerald-500 hover:bg-emerald-600 rounded text-[8px] font-black uppercase text-white transition-all shadow-lg shadow-emerald-500/20 whitespace-nowrap"
+                                >
+                                   <Wallet size={10} />
+                                   Lunas
+                                </button>
+                              )}
+                            </>
                           )}
+
 
                           <a 
                             href={getGoogleCalendarUrl(order)}

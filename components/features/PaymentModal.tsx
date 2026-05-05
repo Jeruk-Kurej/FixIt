@@ -20,9 +20,19 @@ export default function PaymentModal({ isOpen, onClose, order, paymentType, amou
 
   if (!isOpen) return null;
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setProofUrl(URL.createObjectURL(file)); // Show preview
+    }
+  };
+
   const handleUpload = async () => {
-    // In a real app, this would upload to Cloudinary/S3
-    // For this MVP, we simulate a successful upload after 1.5s
+    if (!proofUrl) {
+      alert("Pilih bukti transfer dulu bro!");
+      return;
+    }
+
     setIsUploading(true);
     try {
       const res = await fetch("/api/payments", {
@@ -32,7 +42,7 @@ export default function PaymentModal({ isOpen, onClose, order, paymentType, amou
           orderId: order.id,
           amount,
           type: paymentType,
-          proofUrl: "https://placehold.co/400x600?text=Bukti+Transfer+FixIt" // Dummy proof
+          proofUrl: "https://res.cloudinary.com/demo/image/upload/v1312461204/sample.jpg" // Simulated URL for MVP
         })
       });
 
@@ -41,7 +51,7 @@ export default function PaymentModal({ isOpen, onClose, order, paymentType, amou
       setStatus("SUCCESS");
       setTimeout(() => {
         onClose();
-        window.location.reload(); // Refresh to see updated status
+        window.location.href = '/dashboard'; // Force refresh
       }, 2000);
     } catch (err) {
       setStatus("ERROR");
@@ -49,6 +59,7 @@ export default function PaymentModal({ isOpen, onClose, order, paymentType, amou
       setIsUploading(false);
     }
   };
+
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-300">
@@ -112,13 +123,32 @@ export default function PaymentModal({ isOpen, onClose, order, paymentType, amou
               {/* Upload Section */}
               <div className="space-y-3 pt-4">
                  <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest px-1">Upload Bukti Transfer</p>
-                 <div className="border-2 border-dashed border-slate-800 rounded-2xl p-8 flex flex-col items-center justify-center gap-3 hover:border-orange-500/50 hover:bg-orange-500/5 transition-all cursor-pointer group">
-                    <div className="w-12 h-12 bg-slate-800 rounded-xl flex items-center justify-center text-slate-500 group-hover:bg-orange-500 group-hover:text-white transition-all">
-                       <Upload size={24} />
-                    </div>
-                    <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest group-hover:text-slate-400">Klik untuk memilih file</p>
-                 </div>
+                 <label className="relative border-2 border-dashed border-slate-800 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 hover:border-orange-500/50 hover:bg-orange-500/5 transition-all cursor-pointer group overflow-hidden">
+                    <input 
+                      type="file" 
+                      className="hidden" 
+                      onChange={handleFileChange}
+                      accept="image/*"
+                    />
+                    
+                    {proofUrl ? (
+                      <div className="w-full h-32 relative rounded-xl overflow-hidden">
+                         <img src={proofUrl} alt="Proof" className="w-full h-full object-cover" />
+                         <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <p className="text-[10px] font-black text-white uppercase">Ganti File</p>
+                         </div>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="w-12 h-12 bg-slate-800 rounded-xl flex items-center justify-center text-slate-500 group-hover:bg-orange-500 group-hover:text-white transition-all">
+                           <Upload size={24} />
+                        </div>
+                        <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest group-hover:text-slate-400">Klik untuk memilih file</p>
+                      </>
+                    )}
+                 </label>
               </div>
+
 
               {status === 'ERROR' && (
                 <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-2 text-red-400 text-xs">

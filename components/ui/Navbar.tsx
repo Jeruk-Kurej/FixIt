@@ -9,6 +9,8 @@ import NotificationHub from "../features/NotificationHub";
 export default async function Navbar() {
   const cookieStore = await cookies();
   const isLoggedIn = !!cookieStore.get("user_email")?.value;
+  const userRole = cookieStore.get("user_role")?.value;
+
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-slate-800 bg-slate-900/80 backdrop-blur-md shadow-sm">
@@ -27,7 +29,8 @@ export default async function Navbar() {
         </div>
         
         {/* Navigation Links */}
-        <NavLinks isLoggedIn={isLoggedIn} />
+        <NavLinks isLoggedIn={isLoggedIn} role={userRole} />
+
         
         {/* Action Buttons */}
         <div className="flex items-center space-x-3 shrink-0 w-[180px] justify-end">

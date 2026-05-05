@@ -2,6 +2,7 @@ import prisma from "@/lib/prisma";
 import { cookies } from "next/headers";
 import TechnicianDashboardView from "./TechnicianDashboardView";
 import CustomerDashboardView from "./CustomerDashboardView";
+import AdminDashboardView from "./AdminDashboardView";
 
 export default async function DashboardPage() {
   const cookieStore = await cookies();
@@ -39,7 +40,7 @@ export default async function DashboardPage() {
           technician: { include: { user: true } },
           appliance: { include: { appliance_type: true } },
           messages: { take: 1, orderBy: { createdAt: 'desc' } },
-          payments: true
+          payments: { orderBy: { createdAt: 'desc' } }
         }
 
       }
@@ -54,38 +55,74 @@ export default async function DashboardPage() {
     include: { user: true }
   });
 
+  const pendingPayments = await prisma.payment.findMany({
+    where: { status: 'PENDING' },
+    include: {
+      order: {
+        include: { user: true }
+      }
+    }
+  });
+
+  const verifiedPayments = await prisma.payment.findMany({
+    where: { status: 'VALID' },
+    include: {
+      order: {
+        include: { user: true }
+      }
+    },
+    orderBy: { createdAt: 'desc' },
+    take: 10
+  });
+
+  const verifiedMemberships = await prisma.membership.findMany({
+    where: { status: 'ACTIVE' },
+    include: { user: true },
+    orderBy: { createdAt: 'desc' },
+    take: 10
+  });
+
+
 
   // Trigger smart reminders (Lazy Sync on load)
-  // Note: Since we are in a server component, this happens before rendering
   const { processSmartReminders } = await import("@/lib/reminder-engine");
   await processSmartReminders(user.id);
 
+  const calendarEvents = user.orders
+    .filter(o => o.scheduled_date_time)
+    .map(o => ({
+      id: o.id,
+      date: new Date(o.scheduled_date_time!),
+      applianceName: o.appliance?.appliance_type?.name || "Servis",
+      type: o.service_type as any,
+      status: o.status,
+      problem: o.problem || "Cek Berkala"
+    }));
 
   return (
     <div className="min-h-screen bg-slate-900 text-slate-50 py-10 relative overflow-hidden">
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-orange-500/5 blur-[150px] rounded-full pointer-events-none" />
       
-      {user.role === 'TECHNICIAN' && user.technician ? (
+      {user.role === 'ADMIN' ? (
+        <AdminDashboardView 
+          user={user} 
+          pendingMemberships={pendingMemberships} 
+          pendingPayments={pendingPayments} 
+          verifiedPayments={verifiedPayments}
+          verifiedMemberships={verifiedMemberships}
+        />
+
+      ) : user.role === 'TECHNICIAN' && user.technician ? (
         <TechnicianDashboardView user={user} tech={user.technician} />
       ) : (
         <CustomerDashboardView 
           user={user} 
-          pendingMemberships={pendingMemberships || []}
-          calendarEvents={user.orders
-
-
-            .filter(o => o.scheduled_date_time)
-            .map(o => ({
-              id: o.id,
-              date: new Date(o.scheduled_date_time!),
-              applianceName: o.appliance?.appliance_type?.name || "Servis",
-              type: o.service_type as any,
-              status: o.status,
-              problem: o.problem || "Cek Berkala"
-            }))
-          } 
+          pendingMemberships={pendingMemberships}
+          pendingPayments={pendingPayments}
+          calendarEvents={calendarEvents} 
         />
       )}
     </div>
   );
 }
+

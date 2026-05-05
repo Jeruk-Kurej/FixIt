@@ -57,22 +57,30 @@ export default function LoginPage() {
 
         <div className="mb-6 p-4 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex flex-col gap-2">
           <p className="text-xs font-semibold text-orange-400 uppercase tracking-wider">Quick Login Dummy (Demo)</p>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-3 gap-2">
             <button
               type="button"
               onClick={() => autofillUser("budi@example.com", "password_budi")}
-              className="px-3 py-2 bg-slate-900/60 hover:bg-slate-900 border border-slate-700/80 rounded-xl text-xs font-medium text-slate-300 hover:text-orange-400 transition-all text-center"
+              className="px-2 py-2 bg-slate-900/60 hover:bg-slate-900 border border-slate-700/80 rounded-xl text-[10px] font-medium text-slate-300 hover:text-orange-400 transition-all text-center"
             >
               Customer (Budi)
             </button>
             <button
               type="button"
               onClick={() => autofillUser("joko.tech@fixit.com", "password_joko")}
-              className="px-3 py-2 bg-slate-900/60 hover:bg-slate-900 border border-slate-700/80 rounded-xl text-xs font-medium text-slate-300 hover:text-orange-400 transition-all text-center"
+              className="px-2 py-2 bg-slate-900/60 hover:bg-slate-900 border border-slate-700/80 rounded-xl text-[10px] font-medium text-slate-300 hover:text-orange-400 transition-all text-center"
             >
               Teknisi (Joko)
             </button>
+            <button
+              type="button"
+              onClick={() => autofillUser("admin@fixit.com", "password_admin")}
+              className="px-2 py-2 bg-slate-900/60 hover:bg-slate-900 border border-slate-700/80 rounded-xl text-[10px] font-medium text-slate-300 hover:text-orange-400 transition-all text-center"
+            >
+              Admin (FixIt)
+            </button>
           </div>
+
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
