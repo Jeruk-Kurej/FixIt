@@ -38,8 +38,10 @@ export default async function DashboardPage() {
         include: {
           technician: { include: { user: true } },
           appliance: { include: { appliance_type: true } },
-          messages: { take: 1, orderBy: { createdAt: 'desc' } }
+          messages: { take: 1, orderBy: { createdAt: 'desc' } },
+          payments: true
         }
+
       }
     }
   });

@@ -15,20 +15,40 @@ import { cn, getGoogleCalendarUrl } from "@/lib/utils";
 interface OrderHistoryListProps {
   orders: any[];
   isCompact?: boolean;
+  showActiveOnly?: boolean;
+  title?: string;
+  hideFooter?: boolean;
+  hideFilter?: boolean;
 }
 
 
-export default function OrderHistoryList({ orders, isCompact = false }: OrderHistoryListProps) {
+export default function OrderHistoryList({ 
+  orders, 
+  isCompact = false, 
+  showActiveOnly = false, 
+  title,
+  hideFooter = false,
+  hideFilter = false
+}: OrderHistoryListProps) {
+
+
+
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
   const [paymentOrder, setPaymentOrder] = useState<any | null>(null);
   const [filterCategory, setFilterCategory] = useState<string>("ALL");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
-  // Filter first, then paginate
+  // Filter by status if showActiveOnly is true
+  const filteredByStatus = showActiveOnly 
+    ? orders.filter(o => o.status !== 'DONE' && o.status !== 'CANCELLED')
+    : orders;
+
+  // Filter by category
   const baseFilteredOrders = filterCategory === "ALL" 
-    ? orders 
-    : orders.filter(o => o.appliance?.appliance_type?.name === filterCategory);
+    ? filteredByStatus 
+    : filteredByStatus.filter(o => o.appliance?.appliance_type?.name === filterCategory);
+
 
   const totalPages = Math.ceil(baseFilteredOrders.length / itemsPerPage);
   
@@ -54,35 +74,40 @@ export default function OrderHistoryList({ orders, isCompact = false }: OrderHis
         <CardHeader className="p-3 border-b border-slate-800/50 bg-slate-800/20 shrink-0 flex flex-row items-center justify-between">
           <CardTitle className="text-[10px] font-black uppercase tracking-widest text-slate-500 flex items-center gap-2">
             <History size={12} className="text-orange-500" />
-            {isCompact ? 'Riwayat Terbaru' : 'Seluruh Riwayat Pesanan'}
+            {title || (showActiveOnly ? 'Pesanan Aktif' : (isCompact ? 'Riwayat Terbaru' : 'Seluruh Riwayat Pesanan'))}
           </CardTitle>
+
+
           {!isCompact && (
              <span className="text-[10px] font-bold text-slate-600 bg-slate-800 px-2 py-0.5 rounded-full">{baseFilteredOrders.length} ITEMS</span>
           )}
         </CardHeader>
 
         {/* Filter Bar */}
-        <div className="px-3 py-2 border-b border-slate-800/40 bg-slate-800/10 shrink-0">
-          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
-            {categories.map((cat: any) => (
-              <button
-                key={cat}
-                onClick={() => {
-                  setFilterCategory(cat);
-                  setCurrentPage(1);
-                }}
-                className={cn(
-                  "px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest transition-all whitespace-nowrap",
-                  filterCategory === cat 
-                    ? "bg-orange-500 text-white shadow-lg shadow-orange-500/20" 
-                    : "bg-slate-800 text-slate-500 hover:text-slate-300"
-                )}
-              >
-                {cat}
-              </button>
-            ))}
+        {!hideFilter && (
+          <div className="px-3 py-2 border-b border-slate-800/40 bg-slate-800/10 shrink-0">
+            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
+              {categories.map((cat: any) => (
+                <button
+                  key={cat}
+                  onClick={() => {
+                    setFilterCategory(cat);
+                    setCurrentPage(1);
+                  }}
+                  className={cn(
+                    "px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest transition-all whitespace-nowrap",
+                    filterCategory === cat 
+                      ? "bg-orange-500 text-white shadow-lg shadow-orange-500/20" 
+                      : "bg-slate-800 text-slate-500 hover:text-slate-300"
+                  )}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
+
 
         {/* Maintenance Insight Bar */}
         {lastService && (
@@ -152,13 +177,13 @@ export default function OrderHistoryList({ orders, isCompact = false }: OrderHis
                           {order.final_cost ? `Rp ${order.final_cost.toLocaleString('id-ID')}` : (order.estimated_cost ? `Rp ${order.estimated_cost.toLocaleString('id-ID')}` : "-")}
                        </p>
                        
-                       <div className="flex items-center gap-2">
+                       <div className="flex items-center gap-1.5 shrink-0 flex-wrap justify-end">
                           {needsDP && (
                             <button 
                               onClick={() => setPaymentOrder(order)}
-                              className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-500 hover:bg-orange-600 rounded-lg text-[9px] font-black uppercase text-white transition-all shadow-lg shadow-orange-500/20"
+                              className="flex items-center gap-1 px-2 py-1 bg-orange-500 hover:bg-orange-600 rounded text-[8px] font-black uppercase text-white transition-all shadow-lg shadow-orange-500/20 whitespace-nowrap"
                             >
-                               <Wallet size={12} />
+                               <Wallet size={10} />
                                Bayar DP
                             </button>
                           )}
@@ -166,10 +191,10 @@ export default function OrderHistoryList({ orders, isCompact = false }: OrderHis
                           {needsBalance && (
                             <button 
                               onClick={() => setPaymentOrder(order)}
-                              className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 rounded-lg text-[9px] font-black uppercase text-white transition-all shadow-lg shadow-emerald-500/20"
+                              className="flex items-center gap-1 px-2 py-1 bg-emerald-500 hover:bg-emerald-600 rounded text-[8px] font-black uppercase text-white transition-all shadow-lg shadow-emerald-500/20 whitespace-nowrap"
                             >
-                               <Wallet size={12} />
-                               Pelunasan
+                               <Wallet size={10} />
+                               Lunas
                             </button>
                           )}
 
@@ -177,18 +202,16 @@ export default function OrderHistoryList({ orders, isCompact = false }: OrderHis
                             href={getGoogleCalendarUrl(order)}
                             target="_blank"
                             rel="noopener noreferrer"
-                            title="Sync to Google Calendar"
-                            className="p-1.5 bg-slate-800 hover:bg-blue-600 rounded-lg text-slate-400 hover:text-white transition-all"
+                            className="p-1.5 bg-slate-800 hover:bg-blue-600 rounded text-slate-400 hover:text-white transition-all"
                           >
-                            <CalendarPlus size={14} />
+                            <CalendarPlus size={12} />
                           </a>
 
                           {order.technical_findings && (
                             <button 
                               onClick={() => setSelectedOrder(order)}
-                              className="flex items-center gap-1 px-2.5 py-1.5 bg-slate-800 hover:bg-emerald-500 rounded-lg text-[9px] font-black uppercase text-slate-400 hover:text-white transition-all group/btn"
+                              className="flex items-center gap-1 px-2 py-1 bg-slate-800 hover:bg-emerald-500 rounded text-[8px] font-black uppercase text-slate-400 hover:text-white transition-all"
                             >
-                               Analisis
                                <Eye size={10} />
                             </button>
                           )}
@@ -235,7 +258,7 @@ export default function OrderHistoryList({ orders, isCompact = false }: OrderHis
         )}
 
         {/* Footer for Compact Mode */}
-        {isCompact && (
+        {isCompact && !hideFooter && (
           <div className="p-3 border-t border-slate-800 bg-slate-800/20">
             <Button 
               href="/history" 
@@ -246,6 +269,7 @@ export default function OrderHistoryList({ orders, isCompact = false }: OrderHis
             </Button>
           </div>
         )}
+
       </Card>
 
       {/* Modal Components */}

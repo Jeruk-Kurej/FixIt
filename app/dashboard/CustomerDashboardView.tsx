@@ -10,9 +10,8 @@ import ServiceCalendar from "@/components/features/ServiceCalendar";
 import OrderHistoryList from "./OrderHistoryList";
 import FloatingChatWidget from "@/components/features/FloatingChatWidget";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { User, Zap, ShieldCheck, Star, AlertCircle, CheckCircle } from "lucide-react";
-
+import { useRouter } from "next/navigation";
 
 interface CustomerDashboardViewProps {
   user: any;
@@ -176,13 +175,34 @@ export default function CustomerDashboardView({ user, calendarEvents, pendingMem
           {/* Col 2: Main Workspace (9/12) */}
           <div className="md:col-span-9 flex flex-col gap-4 h-full min-h-0">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 flex-grow min-h-0">
-               <div className="lg:col-span-9 h-full">
+                <div className="lg:col-span-9 h-full">
                   <ServiceCalendar events={calendarEvents} />
-               </div>
-               <div className="lg:col-span-3 h-full">
-                  <OrderHistoryList orders={user.orders} isCompact={true} />
-               </div>
+                </div>
+                <div className="lg:col-span-3 h-full flex flex-col gap-4 min-h-0 pb-4">
+                  {/* Section 1: Waiting for Action (DP / Verification) */}
+                  {user.orders.some((o: any) => o.payment_status === 'UNPAID' || (o.payments && o.payments.some((p: any) => p.status === 'PENDING'))) && (
+                    <div className="flex-grow min-h-0">
+                       <OrderHistoryList 
+                         orders={user.orders.filter((o: any) => o.payment_status === 'UNPAID' || (o.payments && o.payments.some((p: any) => p.status === 'PENDING')))} 
+                         isCompact={true} 
+                         title="Menunggu Aksi"
+                         showActiveOnly={true} 
+                         hideFooter={true}
+                         hideFilter={true}
+                       />
+                    </div>
+                  )}
 
+                  {/* Section 2: Active Orders (Paid & Ongoing) */}
+                  <div className="flex-grow min-h-0">
+                     <OrderHistoryList 
+                       orders={user.orders.filter((o: any) => o.payment_status !== 'UNPAID' && !(o.payments && o.payments.some((p: any) => p.status === 'PENDING')))} 
+                       isCompact={true} 
+                       title="Pesanan Aktif"
+                       showActiveOnly={true} 
+                     />
+                  </div>
+                </div>
 
             </div>
 
