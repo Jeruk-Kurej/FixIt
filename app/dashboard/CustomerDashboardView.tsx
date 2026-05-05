@@ -108,7 +108,7 @@ export default function CustomerDashboardView({ user, calendarEvents }: Customer
                   <ServiceCalendar events={calendarEvents} />
                </div>
                <div className="lg:col-span-3 h-full">
-                  <OrderHistoryList orders={user.orders} />
+                  <OrderHistoryList orders={user.orders} isCompact={true} />
                </div>
 
 
