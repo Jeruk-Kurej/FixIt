@@ -15,9 +15,12 @@ interface TechnicianDashboardViewProps {
 }
 
 export default async function TechnicianDashboardView({ user, tech }: TechnicianDashboardViewProps) {
-  // 1. Get Incoming Orders
+  // 1. Get Incoming Orders (Only those that have been paid/verified)
   const incomingOrders = await prisma.order.findMany({
-    where: { status: 'PENDING' },
+    where: { 
+      status: 'PENDING',
+      payment_status: { in: ['DP_PAID', 'FULLY_PAID'] }
+    },
     include: {
       user: true,
       appliance: { include: { appliance_type: true } }

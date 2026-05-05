@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import { formatDate } from "@/lib/utils";
 
 import VerificationModal from "@/components/features/VerificationModal";
 import PaymentModal from "@/components/features/PaymentModal";
-import { History, Eye, CheckCircle2, Wrench, CalendarPlus, Wallet, ChevronLeft, ChevronRight } from "lucide-react";
+import { History, Eye, CheckCircle2, Wrench, CalendarPlus, Wallet, ChevronLeft, ChevronRight, ClipboardCheck, X, AlertCircle } from "lucide-react";
 
 import { cn, getGoogleCalendarUrl } from "@/lib/utils";
 
@@ -19,6 +20,7 @@ interface OrderHistoryListProps {
   title?: string;
   hideFooter?: boolean;
   hideFilter?: boolean;
+  noCard?: boolean;
 }
 
 
@@ -28,8 +30,10 @@ export default function OrderHistoryList({
   showActiveOnly = false, 
   title,
   hideFooter = false,
-  hideFilter = false
+  hideFilter = false,
+  noCard = false
 }: OrderHistoryListProps) {
+
 
 
 
@@ -65,23 +69,112 @@ export default function OrderHistoryList({
     ? orders.find(o => o.appliance?.appliance_type?.name === filterCategory && o.status === 'DONE')
     : null;
 
-  return (
+  const content = (
+
     <>
-      <Card className={cn(
-        "border-slate-800 bg-slate-900/50 backdrop-blur-md overflow-hidden flex flex-col shadow-2xl transition-all duration-500",
-        isCompact ? "h-full" : "min-h-[600px] w-full"
-      )}>
-        <CardHeader className="p-3 border-b border-slate-800/50 bg-slate-800/20 shrink-0 flex flex-row items-center justify-between">
-          <CardTitle className="text-[10px] font-black uppercase tracking-widest text-slate-500 flex items-center gap-2">
-            <History size={12} className="text-orange-500" />
-            {title || (showActiveOnly ? 'Pesanan Aktif' : (isCompact ? 'Riwayat Terbaru' : 'Seluruh Riwayat Pesanan'))}
-          </CardTitle>
+        {!noCard && (
+          <CardHeader className="p-3 border-b border-slate-800/50 bg-slate-800/20 shrink-0 flex flex-row items-center justify-between">
+            <CardTitle className="text-[10px] font-black uppercase tracking-widest text-slate-500 flex items-center gap-2">
+              <History size={12} className="text-orange-500" />
+              {title || (showActiveOnly ? 'Pesanan Aktif' : (isCompact ? 'Riwayat Terbaru' : 'Seluruh Riwayat Pesanan'))}
+            </CardTitle>
 
 
-          {!isCompact && (
-             <span className="text-[10px] font-bold text-slate-600 bg-slate-800 px-2 py-0.5 rounded-full">{baseFilteredOrders.length} ITEMS</span>
-          )}
-        </CardHeader>
+            {!isCompact && (
+               <span className="text-[10px] font-bold text-slate-600 bg-slate-800 px-2 py-0.5 rounded-full">{baseFilteredOrders.length} ITEMS</span>
+            )}
+          </CardHeader>
+        )}
+
+        {/* Findings Modal - Teleported to Body via Portal for True Full Screen Focus */}
+        {typeof document !== "undefined" && selectedOrder && createPortal(
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+             {/* Deep Focus Backdrop */}
+             <div 
+               className="absolute inset-0 bg-slate-950/90 backdrop-blur-md transition-all duration-500"
+               onClick={() => setSelectedOrder(null)}
+             />
+             
+             {/* Content Modal - Centered and Larger */}
+             <div className="relative w-full max-w-xl bg-slate-900 border border-slate-800 rounded-[32px] shadow-[0_30px_100px_rgba(0,0,0,0.8)] overflow-hidden animate-in fade-in zoom-in duration-300">
+                {/* Header with Background Gradient */}
+                <div className="p-8 bg-gradient-to-b from-slate-800/50 to-transparent border-b border-slate-800/50">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-5">
+                      <div className="w-16 h-16 bg-orange-500 rounded-3xl flex items-center justify-center text-white shadow-2xl shadow-orange-500/40 rotate-3">
+                        <ClipboardCheck size={32} />
+                      </div>
+                      <div>
+                        <h3 className="text-2xl font-black text-white tracking-tight">Detail Analisis</h3>
+                        <p className="text-xs font-bold text-slate-500 uppercase tracking-[0.3em]">Order ID: {selectedOrder.id.slice(0, 12)}</p>
+                      </div>
+                    </div>
+                    <button 
+                      onClick={() => setSelectedOrder(null)}
+                      className="w-10 h-10 flex items-center justify-center bg-slate-800 hover:bg-red-500/20 rounded-full text-slate-400 hover:text-red-400 transition-all border border-slate-700/50"
+                    >
+                      <X size={20} />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="p-8 space-y-8 max-h-[70vh] overflow-y-auto custom-scrollbar">
+                   {/* Summary Section */}
+                   <div className="space-y-3">
+                      <p className="text-[10px] font-black text-orange-500 uppercase tracking-[0.3em]">Ringkasan Temuan</p>
+                      <div className="p-6 bg-slate-800/30 border border-slate-800/80 rounded-[24px] text-lg leading-relaxed text-slate-200 font-medium italic">
+                         "{selectedOrder.technical_findings?.summary || "Tidak ada ringkasan temuan..."}"
+                      </div>
+                   </div>
+                   
+                   {/* Checklist Grid */}
+                   {selectedOrder.technical_findings?.checklist && (
+                     <div className="space-y-4">
+                        <p className="text-[10px] font-black text-blue-500 uppercase tracking-[0.3em]">Checklist Kondisi Unit</p>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                           {Object.entries(selectedOrder.technical_findings.checklist).map(([key, val]: any) => (
+                             <div key={key} className="flex items-center justify-between p-4 bg-slate-800/20 rounded-2xl border border-slate-800/40 hover:border-slate-700 transition-colors">
+                                <span className="text-[11px] font-black text-slate-400 uppercase tracking-wider">{key.replace(/_/g, ' ')}</span>
+                                {val ? (
+                                  <div className="flex items-center gap-2 text-emerald-400">
+                                     <span className="text-[8px] font-black uppercase tracking-tighter">Normal</span>
+                                     <CheckCircle2 size={16} />
+                                  </div>
+                                ) : (
+                                  <div className="flex items-center gap-2 text-orange-400">
+                                     <span className="text-[8px] font-black uppercase tracking-tighter">Bermasalah</span>
+                                     <AlertCircle size={16} />
+                                  </div>
+                                )}
+                             </div>
+                           ))}
+                        </div>
+                     </div>
+                   )}
+                </div>
+
+                {/* Footer Section */}
+                <div className="p-8 bg-slate-950/50 border-t border-slate-800 flex items-center justify-between">
+                   <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 bg-slate-800 rounded-full border border-slate-700 flex items-center justify-center text-slate-400">
+                         <Wrench size={16} />
+                      </div>
+                      <div className="flex flex-col">
+                         <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Dianalisis Oleh</span>
+                         <p className="text-sm font-black text-white">{selectedOrder.technician?.user?.name || "Joko Teknisi"}</p>
+                      </div>
+                   </div>
+                   <button 
+                     onClick={() => setSelectedOrder(null)}
+                     className="px-10 py-3 bg-white hover:bg-slate-200 rounded-2xl text-xs font-black text-slate-950 uppercase tracking-widest transition-all shadow-xl active:scale-95"
+                   >
+                     Tutup Laporan
+                   </button>
+                </div>
+             </div>
+          </div>,
+          document.body
+        )}
 
         {/* Filter Bar */}
         {!hideFilter && (
@@ -132,9 +225,6 @@ export default function OrderHistoryList({
                     isCompact ? "px-3" : "px-6"
                   )}>
                     
-                    {/* Premium Pill Indicator */}
-                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-0 group-hover:h-8 bg-emerald-500 rounded-r-full transition-all duration-300 opacity-0 group-hover:opacity-100" />
-                    
                     {/* Item Header */}
                     <div className="flex items-center gap-2">
                       <div className={cn(
@@ -168,77 +258,102 @@ export default function OrderHistoryList({
                       </div>
                     </div>
 
-                    {/* Item Footer: Cost & Action */}
-                    <div className="flex items-center justify-between pt-2 border-t border-slate-800/50">
-                       <p className={cn(
-                         "font-black text-slate-100",
-                         isCompact ? "text-[11px]" : "text-lg"
-                       )}>
-                          {order.final_cost ? `Rp ${order.final_cost.toLocaleString('id-ID')}` : (order.estimated_cost ? `Rp ${order.estimated_cost.toLocaleString('id-ID')}` : "-")}
-                       </p>
+                    {/* Item Footer: Compact Side-by-Side for All Stages */}
+                    <div className="pt-2.5 border-t border-slate-800/40 flex items-center justify-between gap-3">
+                       {/* Price Block - Compact */}
+                       <div className="flex items-center gap-2 shrink-0">
+                          <p className={cn(
+                            "font-black text-slate-100 tracking-tight",
+                            isCompact ? "text-sm" : "text-base"
+                          )}>
+                             {order.final_cost ? `Rp ${order.final_cost.toLocaleString('id-ID')}` : (order.estimated_cost ? `Rp ${order.estimated_cost.toLocaleString('id-ID')}` : "-")}
+                          </p>
+                       </div>
                        
-                        <div className="flex items-center gap-1.5 shrink-0 flex-wrap justify-end">
-                          {needsDP && (
-                            <>
-                              {order.payments && order.payments.some((p: any) => p.status === 'PENDING') ? (
-                                <span className="px-2 py-1 bg-blue-500/10 border border-blue-500/20 rounded text-[8px] font-black uppercase text-blue-400">
-                                   Verifikasi Admin
-                                </span>
-                              ) : (
-                                <button 
-                                  onClick={() => setPaymentOrder(order)}
-                                  className="flex items-center gap-1 px-2 py-1 bg-orange-500 hover:bg-orange-600 rounded text-[8px] font-black uppercase text-white transition-all shadow-lg shadow-orange-500/20 whitespace-nowrap"
-                                >
-                                   <Wallet size={10} />
-                                   Bayar DP
-                                </button>
-                              )}
-                            </>
-                          )}
+                       {/* Actions Block - Unified Horizontal */}
+                       <div className="flex items-center gap-1.5 min-w-0 justify-end flex-grow">
+                          {/* 1. Payment Action (DP or Balance) */}
+                          <div className="flex items-center gap-1.5 min-w-0">
+                             {needsDP && (
+                               <>
+                                 {order.payments && order.payments.some((p: any) => p.status === 'PENDING') ? (
+                                   <div className="px-2 py-1 bg-blue-500/10 border border-blue-500/20 rounded-full flex items-center gap-1.5 shrink-0">
+                                      <div className="w-1 h-1 rounded-full bg-blue-500 animate-pulse" />
+                                      <span className="text-[8px] font-black uppercase text-blue-400 tracking-tighter">Verifikasi</span>
+                                   </div>
+                                 ) : (
+                                   <button 
+                                     onClick={() => setPaymentOrder(order)}
+                                     className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-500 hover:bg-orange-600 rounded-full text-[9px] font-black uppercase text-white transition-all shadow-md shadow-orange-500/20 whitespace-nowrap active:scale-95"
+                                   >
+                                      <Wallet size={12} />
+                                      Bayar DP
+                                   </button>
+                                 )}
+                               </>
+                             )}
 
+                             {needsBalance && (
+                               <>
+                                 {order.payments && order.payments.some((p: any) => p.status === 'PENDING') ? (
+                                   <div className="px-2 py-1 bg-blue-500/10 border border-blue-500/20 rounded-full flex items-center gap-1.5 shrink-0">
+                                      <div className="w-1 h-1 rounded-full bg-blue-500 animate-pulse" />
+                                      <span className="text-[8px] font-black uppercase text-blue-400 tracking-tighter">Verifikasi</span>
+                                   </div>
+                                 ) : (
+                                   <button 
+                                     onClick={() => setPaymentOrder(order)}
+                                     className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 rounded-full text-[9px] font-black uppercase text-white transition-all shadow-md shadow-emerald-500/20 whitespace-nowrap active:scale-95"
+                                   >
+                                      <Wallet size={12} />
+                                      Lunas
+                                   </button>
+                                 )}
+                               </>
+                             )}
+                          </div>
 
-                          {needsBalance && (
-                            <>
-                              {order.payments && order.payments.some((p: any) => p.status === 'PENDING') ? (
-                                <span className="px-2 py-1 bg-blue-500/10 border border-blue-500/20 rounded text-[8px] font-black uppercase text-blue-400">
-                                   Verifikasi Admin
-                                </span>
-                              ) : (
-                                <button 
-                                  onClick={() => setPaymentOrder(order)}
-                                  className="flex items-center gap-1 px-2 py-1 bg-emerald-500 hover:bg-emerald-600 rounded text-[8px] font-black uppercase text-white transition-all shadow-lg shadow-emerald-500/20 whitespace-nowrap"
-                                >
-                                   <Wallet size={10} />
-                                   Lunas
-                                </button>
-                              )}
-                            </>
-                          )}
+                          {/* 2. Utility Icons (Only for Paid/Active Orders) */}
+                          {!needsDP && (
+                            <div className="flex items-center gap-1 shrink-0 ml-1">
+                               {/* Analysis Eye: Only if findings exist - Put FIRST so Calendar stays at the far right */}
+                               {order.technical_findings && (
+                                 <button 
+                                   onClick={() => setSelectedOrder(order)}
+                                   className="w-7 h-7 flex items-center justify-center bg-slate-800/50 hover:bg-emerald-500/20 rounded-full text-slate-500 hover:text-emerald-400 transition-all border border-slate-700/30"
+                                   title="Analysis"
+                                 >
+                                    <Eye size={12} />
+                                 </button>
+                               )}
 
-
-                          <a 
-                            href={getGoogleCalendarUrl(order)}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="p-1.5 bg-slate-800 hover:bg-blue-600 rounded text-slate-400 hover:text-white transition-all"
-                          >
-                            <CalendarPlus size={12} />
-                          </a>
-
-                          {order.technical_findings && (
-                            <button 
-                              onClick={() => setSelectedOrder(order)}
-                              className="flex items-center gap-1 px-2 py-1 bg-slate-800 hover:bg-emerald-500 rounded text-[8px] font-black uppercase text-slate-400 hover:text-white transition-all"
-                            >
-                               <Eye size={10} />
-                            </button>
+                               {/* Calendar: Always for active orders - Put LAST to fix position */}
+                               <a 
+                                 href={getGoogleCalendarUrl(order)}
+                                 target="_blank"
+                                 rel="noopener noreferrer"
+                                 className="w-7 h-7 flex items-center justify-center bg-slate-800/50 hover:bg-blue-500/20 rounded-full text-slate-500 hover:text-blue-400 transition-all border border-slate-700/30"
+                                 title="Calendar"
+                               >
+                                 <CalendarPlus size={12} />
+                               </a>
+                            </div>
                           )}
                        </div>
                     </div>
 
+
+
+
+
+
+
+
+
                   </div>
                 );
               })}
+
             </div>
           ) : (
             <div className="p-10 text-center text-[9px] text-slate-700 font-black uppercase tracking-[0.2em] h-full flex flex-col items-center justify-center gap-3">
@@ -287,10 +402,26 @@ export default function OrderHistoryList({
             </Button>
           </div>
         )}
+    </>
+  );
 
-      </Card>
+  return (
+    <>
+      {noCard ? (
+        <div className="flex flex-col h-full overflow-hidden">
+          {content}
+        </div>
+      ) : (
+        <Card className={cn(
+          "border-slate-800 bg-slate-900/50 backdrop-blur-md overflow-hidden flex flex-col shadow-2xl transition-all duration-500",
+          isCompact ? "h-full" : "min-h-[600px] w-full"
+        )}>
+          {content}
+        </Card>
+      )}
 
       {/* Modal Components */}
+
 
       {selectedOrder && (
         <VerificationModal 

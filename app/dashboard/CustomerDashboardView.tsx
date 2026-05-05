@@ -12,6 +12,8 @@ import FloatingChatWidget from "@/components/features/FloatingChatWidget";
 import { useState } from "react";
 import { User, Zap, ShieldCheck, Star, AlertCircle, CheckCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
+
 
 interface CustomerDashboardViewProps {
   user: any;
@@ -157,34 +159,35 @@ export default function CustomerDashboardView({ user, calendarEvents, pendingMem
                 <div className="lg:col-span-9 h-full">
                   <ServiceCalendar events={calendarEvents} />
                 </div>
-                <div className="lg:col-span-3 h-full flex flex-col gap-4 min-h-0 pb-4">
-                  {/* Section 1: Waiting for Action (DP / Verification) */}
-                  {user.orders.some((o: any) => o.payment_status === 'UNPAID' || (o.payments && o.payments.some((p: any) => p.status === 'PENDING'))) && (
-                    <div className="flex-grow min-h-0">
-                       <OrderHistoryList 
-                         orders={user.orders.filter((o: any) => o.payment_status === 'UNPAID' || (o.payments && o.payments.some((p: any) => p.status === 'PENDING')))} 
-                         isCompact={true} 
-                         title="Menunggu Aksi"
-                         showActiveOnly={true} 
-                         hideFooter={true}
-                         hideFilter={true}
-                       />
-                    </div>
-                  )}
+                <div className="lg:col-span-3 h-full flex flex-col min-h-0 pb-4">
+                  {(() => {
+                    const pendingOrders = user.orders.filter((o: any) => o.payment_status === 'UNPAID' || (o.payments && o.payments.some((p: any) => p.status === 'PENDING')));
+                    const activeOrders = user.orders.filter((o: any) => o.payment_status !== 'UNPAID' && !(o.payments && o.payments.some((p: any) => p.status === 'PENDING')));
+                    const hasPending = pendingOrders.length > 0;
 
-                  {/* Section 2: Active Orders (Paid & Ongoing) */}
-                  <div className="flex-grow min-h-0">
-                     <OrderHistoryList 
-                       orders={user.orders.filter((o: any) => o.payment_status !== 'UNPAID' && !(o.payments && o.payments.some((p: any) => p.status === 'PENDING')))} 
-                       isCompact={true} 
-                       title="Pesanan Aktif"
-                       showActiveOnly={true} 
-                     />
-                  </div>
+                    return (
+                      <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-md overflow-hidden flex flex-col h-full shadow-2xl">
+                        {hasPending ? (
+                          <SidebarTabbedOrders 
+                            pendingOrders={pendingOrders} 
+                            activeOrders={activeOrders} 
+                          />
+                        ) : (
+                          <OrderHistoryList 
+                            orders={activeOrders} 
+                            isCompact={true} 
+                            title="Pesanan Aktif"
+                            showActiveOnly={true} 
+                          />
+                        )}
+                      </Card>
+                    );
+                  })()}
                 </div>
             </div>
 
           </div>
+
         </div>
 
       </div>
@@ -193,3 +196,67 @@ export default function CustomerDashboardView({ user, calendarEvents, pendingMem
     </div>
   );
 }
+
+function SidebarTabbedOrders({ pendingOrders, activeOrders }: { pendingOrders: any[], activeOrders: any[] }) {
+
+  const [activeTab, setActiveTab] = useState<'PENDING' | 'ACTIVE'>('PENDING');
+
+  return (
+    <div className="flex flex-col h-full min-h-0">
+      {/* Tab Switcher */}
+      <div className="flex p-1 bg-slate-950/50 border-b border-slate-800 shrink-0">
+        <button 
+          onClick={() => setActiveTab('PENDING')}
+          className={cn(
+            "flex-1 flex items-center justify-center gap-2 py-2 text-[9px] font-black uppercase tracking-widest transition-all rounded-lg relative overflow-hidden group",
+            activeTab === 'PENDING' ? "text-orange-500" : "text-slate-500 hover:text-slate-300"
+          )}
+        >
+          {activeTab === 'PENDING' && <div className="absolute inset-0 bg-orange-500/5 animate-pulse" />}
+          Menunggu Aksi
+          {pendingOrders.length > 0 && (
+            <span className={cn(
+              "px-1.5 py-0.5 rounded-full text-[8px] font-black",
+              activeTab === 'PENDING' ? "bg-orange-500 text-white" : "bg-slate-800 text-slate-500"
+            )}>
+              {pendingOrders.length}
+            </span>
+          )}
+        </button>
+        <button 
+          onClick={() => setActiveTab('ACTIVE')}
+          className={cn(
+            "flex-1 flex items-center justify-center gap-2 py-2 text-[9px] font-black uppercase tracking-widest transition-all rounded-lg",
+            activeTab === 'ACTIVE' ? "text-emerald-500" : "text-slate-500 hover:text-slate-300"
+          )}
+        >
+          Pesanan Aktif
+        </button>
+      </div>
+
+      {/* Tab Content */}
+      <div className="flex-grow min-h-0 overflow-hidden">
+        {activeTab === 'PENDING' ? (
+          <OrderHistoryList 
+            orders={pendingOrders} 
+            isCompact={true} 
+            title="" 
+            showActiveOnly={true} 
+            hideFooter={true} 
+            hideFilter={true}
+            noCard={true}
+          />
+        ) : (
+          <OrderHistoryList 
+            orders={activeOrders} 
+            isCompact={true} 
+            title="" 
+            showActiveOnly={true}
+            noCard={true}
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
