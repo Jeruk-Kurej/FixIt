@@ -46,6 +46,13 @@ export default async function DashboardPage() {
 
   if (!user) return null;
 
+  // Fetch pending memberships separately to bypass Prisma Client include issues
+  const pendingMemberships = await prisma.membership.findMany({
+    where: { status: 'PENDING' },
+    include: { user: true }
+  });
+
+
   // Trigger smart reminders (Lazy Sync on load)
   // Note: Since we are in a server component, this happens before rendering
   const { processSmartReminders } = await import("@/lib/reminder-engine");
@@ -61,7 +68,10 @@ export default async function DashboardPage() {
       ) : (
         <CustomerDashboardView 
           user={user} 
+          pendingMemberships={pendingMemberships || []}
           calendarEvents={user.orders
+
+
             .filter(o => o.scheduled_date_time)
             .map(o => ({
               id: o.id,

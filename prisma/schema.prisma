@@ -28,7 +28,26 @@ model User {
   orders        Order[]
   technician    Technician?
   notifications Notification[]
+  memberships   Membership[]
 }
+
+model Membership {
+  id              String   @id @default(uuid())
+  user_id         String
+  user            User     @relation(fields: [user_id], references: [id])
+  appliance_name  String
+  frequency_months Int
+  status          MembershipStatus @default(PENDING)
+  createdAt       DateTime @default(now())
+}
+
+enum MembershipStatus {
+  PENDING
+  ACTIVE
+  EXPIRED
+  CANCELLED
+}
+
 
 
 
