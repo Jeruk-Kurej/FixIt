@@ -17,7 +17,7 @@ export default function NavLinks({ isLoggedIn, role }: NavLinksProps) {
 
         { href: "/chat", label: "Chat" },
         { href: "/history", label: "History" },
-        { href: "/membership", label: "Membership" },
+        ...(role !== 'TECHNICIAN' ? [{ href: "/membership", label: "Membership" }] : []),
 
         { href: "/how-it-works", label: "How It Works" },
         { href: "/contact", label: "Contact" },
