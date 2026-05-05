@@ -19,7 +19,56 @@ export async function processSmartReminders(userId: string) {
     }
   });
 
+  // 2. Proactive Membership Maintenance Reminders
+  const activeMemberships = await prisma.membership.findMany({
+    where: { user_id: userId, status: 'ACTIVE' }
+  });
+
   const today = new Date();
+
+  for (const membership of activeMemberships) {
+    // Check for the latest DONE order of this appliance type
+    const latestOrder = await prisma.order.findFirst({
+      where: {
+        user_id: userId,
+        status: 'DONE',
+        appliance: {
+          appliance_type: {
+            name: { contains: membership.appliance_name }
+          }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    const lastServiceDate = latestOrder ? new Date(latestOrder.createdAt) : new Date(membership.createdAt);
+    const monthsSinceLastService = (today.getTime() - lastServiceDate.getTime()) / (1000 * 60 * 60 * 24 * 30);
+
+    if (monthsSinceLastService >= membership.frequency_months) {
+      const title = "Jadwal Servis Rutin";
+      const msg = `Saatnya servis rutin ${membership.appliance_name} Anda! Berdasarkan paket membership, unit ini butuh perawatan setiap ${membership.frequency_months} bulan.`;
+
+      const notificationModel = (prisma as any).notification || (prisma as any).Notification;
+      const exists = await notificationModel.findFirst({
+        where: {
+          user_id: userId,
+          title: title,
+          message: { contains: membership.appliance_name }
+        }
+      });
+
+      if (!exists) {
+        await notificationModel.create({
+          data: {
+            user_id: userId,
+            title: title,
+            message: msg,
+            type: "INFO"
+          }
+        });
+      }
+    }
+  }
   
   for (const order of orders) {
     if (!order.scheduled_date_time) continue;

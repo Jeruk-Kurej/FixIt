@@ -49,6 +49,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Pesanan ini sudah diproses atau dibatalkan." }, { status: 400 });
     }
 
+    // SECURITY CHECK: Only allow acceptance if payment is verified (DP or Full)
+    if (order.payment_status !== "DP_PAID" && order.payment_status !== "FULLY_PAID") {
+      return NextResponse.json({ error: "Pesanan belum divalidasi pembayarannya oleh Admin." }, { status: 403 });
+    }
+
     // Update the order to ACCEPTED
     const updatedOrder = await prisma.order.update({
       where: { id: orderId },

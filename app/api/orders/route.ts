@@ -33,7 +33,13 @@ export async function POST(req: NextRequest) {
         phone: phone || "",
         address: address || "",
       },
+      include: {
+        memberships: { where: { status: 'ACTIVE' } }
+      }
     });
+
+    // Check if user is a premium member
+    const isMember = user.memberships && user.memberships.length > 0;
 
     // Cari atau buat master data ApplianceType
     let appType = await prisma.applianceType.findFirst({
@@ -64,6 +70,7 @@ export async function POST(req: NextRequest) {
         user_id: user.id,
         appliance_id: newAppliance.id,
         status: "PENDING",
+        payment_status: isMember ? "FULLY_PAID" : "UNPAID",
         problem: problem,
         estimated_cost: estimatedCost ? parseInt(estimatedCost.toString(), 10) : 250000,
         scheduled_date_time: new Date(scheduled_date_time),

@@ -15,11 +15,28 @@ export async function POST(req: NextRequest) {
     }
 
     const user = await prisma.user.findUnique({
-      where: { email: userEmail }
+      where: { email: userEmail },
+      include: { technician: true }
     });
 
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    // SECURITY CHECK: Verify if the sender is the owner or the assigned technician
+    const order = await prisma.order.findUnique({
+      where: { id: order_id }
+    });
+
+    if (!order) {
+      return NextResponse.json({ error: "Order not found" }, { status: 404 });
+    }
+
+    const isOwner = order.user_id === user.id;
+    const isAssignedTech = order.technician_id === user.technician?.id;
+
+    if (!isOwner && !isAssignedTech) {
+      return NextResponse.json({ error: "Unauthorized: You don't have access to this chat." }, { status: 403 });
     }
 
     const newMessage = await prisma.message.create({
