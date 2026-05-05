@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { MessageSquare, X, ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -13,12 +13,30 @@ interface FloatingChatWidgetProps {
 export default function FloatingChatWidget({ orders, currentUserId }: FloatingChatWidgetProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const widgetRef = useRef<HTMLDivElement>(null);
+
+  // Close when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (widgetRef.current && !widgetRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen]);
 
   // Filter orders that have active chats
   const activeOrders = orders.filter(o => ['ACCEPTED', 'WORKING', 'DONE'].includes(o.status));
 
   return (
-    <div className="fixed bottom-8 right-8 z-[100] flex flex-col items-end gap-4">
+    <div ref={widgetRef} className="fixed bottom-8 right-8 z-[100] flex flex-col items-end gap-4">
+
       
       {/* Mini Preview Panel */}
       {isOpen && (
