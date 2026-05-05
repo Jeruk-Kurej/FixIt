@@ -7,6 +7,7 @@ import Button from "@/components/ui/Button";
 import { formatRupiah } from "@/lib/utils";
 import { bookingSchema } from "@/lib/validations";
 import { Calendar, Clock, Contact, Laptop, ChevronRight, ChevronLeft, CheckCircle2 } from "lucide-react";
+import PremiumCalendar from "@/components/features/PremiumCalendar";
 
 function BookingFormInner() {
   const searchParams = useSearchParams();
@@ -293,41 +294,38 @@ function BookingFormInner() {
                       <div className="p-2 bg-orange-500/10 rounded-lg text-orange-400"><Calendar size={20} /></div>
                       <h3 className="text-lg font-bold">Tentukan Waktu Servis</h3>
                     </div>
-                    
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 gap-6">
+
                       <div className="space-y-2">
-                        <label className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Pilih Tanggal *</label>
-                        <input
-                          required
-                          type="date"
-                          min={new Date().toISOString().split('T')[0]}
-                          value={scheduledDate}
-                          onChange={(e) => setScheduledDate(e.target.value)}
-                          className="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:border-orange-500 outline-none [color-scheme:dark]"
+                        <label className="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-2 block px-1">Pilih Tanggal Servis *</label>
+                        <PremiumCalendar
+                          selectedDate={scheduledDate}
+                          onChange={(date) => setScheduledDate(date)}
                         />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Pilih Jam *</label>
-                        <div className="flex items-center gap-3 p-3 bg-slate-900/50 border border-slate-700 rounded-xl">
-                          <Clock className="text-slate-500" size={18} />
+                        <label className="text-xs text-slate-400 font-semibold uppercase tracking-wider px-1">Pilih Jam *</label>
+                        <div className="flex items-center gap-3 p-4 bg-slate-900/50 border border-slate-700 rounded-2xl shadow-inner shadow-black/20">
+                          <Clock className="text-orange-500" size={18} />
                           <select
                             value={scheduledTime}
                             onChange={(e) => setScheduledTime(e.target.value)}
-                            className="flex-grow bg-transparent text-slate-200 outline-none"
+                            className="flex-grow bg-transparent text-slate-200 font-black text-sm outline-none cursor-pointer"
                           >
-                            <option value="08:00">08:00 WIB</option>
-                            <option value="09:00">09:00 WIB</option>
-                            <option value="10:00">10:00 WIB</option>
-                            <option value="11:00">11:00 WIB</option>
-                            <option value="13:00">13:00 WIB</option>
-                            <option value="14:00">14:00 WIB</option>
-                            <option value="15:00">15:00 WIB</option>
-                            <option value="16:00">16:00 WIB</option>
-                            <option value="17:00">17:00 WIB</option>
+                            <option value="08:00" className="bg-slate-900">08:00 WIB</option>
+                            <option value="09:00" className="bg-slate-900">09:00 WIB</option>
+                            <option value="10:00" className="bg-slate-900">10:00 WIB</option>
+                            <option value="11:00" className="bg-slate-900">11:00 WIB</option>
+                            <option value="13:00" className="bg-slate-900">13:00 WIB</option>
+                            <option value="14:00" className="bg-slate-900">14:00 WIB</option>
+                            <option value="15:00" className="bg-slate-900">15:00 WIB</option>
+                            <option value="16:00" className="bg-slate-900">16:00 WIB</option>
+                            <option value="17:00" className="bg-slate-900">17:00 WIB</option>
                           </select>
                         </div>
                       </div>
                     </div>
+
 
                     <div className="p-4 bg-blue-500/5 border border-blue-500/20 rounded-xl">
                       <p className="text-[10px] text-blue-400 font-bold uppercase tracking-widest mb-1">Catatan Penting</p>
