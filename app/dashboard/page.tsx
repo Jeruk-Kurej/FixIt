@@ -1,4 +1,5 @@
 import prisma from "@/lib/prisma";
+// Force recompile to detect new Prisma schema
 import { cookies } from "next/headers";
 import TechnicianDashboardView from "./TechnicianDashboardView";
 import CustomerDashboardView from "./CustomerDashboardView";
@@ -46,7 +47,8 @@ export default async function DashboardPage() {
           technician: { include: { user: true } },
           appliance: { include: { appliance_type: true } },
           messages: { take: 1, orderBy: { createdAt: 'desc' } },
-          payments: { orderBy: { createdAt: 'desc' } }
+          payments: { orderBy: { createdAt: 'desc' } },
+          review: true
         }
 
       }

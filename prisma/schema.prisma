@@ -26,6 +26,7 @@ model User {
   memberships   Membership[]
   notifications Notification[]
   orders        Order[]
+  reviews       Review[]
   technician    Technician?
 }
 
@@ -84,6 +85,7 @@ model Technician {
   rating       Float   @default(5)
   is_available Boolean @default(true)
   orders       Order[]
+  reviews      Review[]
   user         User    @relation(fields: [user_id], references: [id])
 }
 
@@ -140,10 +142,27 @@ model Order {
   user                User          @relation(fields: [user_id], references: [id])
   order_details       OrderDetail[]
   payments            Payment[]
+  review              Review?
 
   @@index([appliance_id], map: "Order_appliance_id_fkey")
   @@index([technician_id], map: "Order_technician_id_fkey")
   @@index([user_id], map: "Order_user_id_fkey")
+}
+
+model Review {
+  id            String   @id @default(uuid())
+  order_id      String   @unique
+  technician_id String
+  user_id       String
+  rating        Int      @default(5)
+  comment       String?  @db.Text
+  createdAt     DateTime @default(now())
+  order         Order    @relation(fields: [order_id], references: [id])
+  technician    Technician @relation(fields: [technician_id], references: [id])
+  user          User       @relation(fields: [user_id], references: [id])
+
+  @@index([technician_id])
+  @@index([user_id])
 }
 
 model OrderDetail {

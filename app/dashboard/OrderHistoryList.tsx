@@ -8,10 +8,11 @@ import { formatDate } from "@/lib/utils";
 
 import VerificationModal from "@/components/features/VerificationModal";
 import PaymentModal from "@/components/features/PaymentModal";
-import { History, Eye, CheckCircle2, Wrench, CalendarPlus, Wallet, ChevronLeft, ChevronRight, ClipboardCheck, X, AlertCircle } from "lucide-react";
+import { History, Eye, CheckCircle2, Wrench, CalendarPlus, Wallet, ChevronLeft, ChevronRight, ClipboardCheck, X, AlertCircle, Star } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 import { cn, getGoogleCalendarUrl } from "@/lib/utils";
+import ReviewModal from "@/components/features/ReviewModal";
 
 
 interface OrderHistoryListProps {
@@ -40,6 +41,7 @@ export default function OrderHistoryList({
 
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
   const [paymentOrder, setPaymentOrder] = useState<any | null>(null);
+  const [reviewOrder, setReviewOrder] = useState<any | null>(null);
   const [filterCategory, setFilterCategory] = useState<string>("ALL");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
@@ -314,9 +316,7 @@ export default function OrderHistoryList({
                                    </button>
                                  )}
                                </>
-                             )}
-
-                             {needsBalance && (
+                             )}                              {needsBalance && (
                                <>
                                  {order.payments && order.payments.some((p: any) => p.status === 'PENDING') ? (
                                    <div className="px-2 py-1 bg-blue-500/10 border border-blue-500/20 rounded-full flex items-center gap-1.5 shrink-0">
@@ -334,15 +334,55 @@ export default function OrderHistoryList({
                                  )}
                                </>
                              )}
+
+                             {/* 3. Review Action (If DONE and Fully Paid) */}
+                             {order.status === 'DONE' && order.payment_status === 'FULLY_PAID' && (
+                               <>
+                                 {!order.review ? (
+                                   <button 
+                                     onClick={(e) => {
+                                       e.stopPropagation();
+                                       setReviewOrder(order);
+                                     }}
+                                     className="relative z-20 flex items-center gap-1.5 px-4 py-2 bg-orange-500 hover:bg-orange-600 rounded-full text-[9px] font-black uppercase text-white transition-all shadow-lg shadow-orange-500/20 active:scale-90 group/btn"
+                                   >
+                                      <Star size={12} className="fill-white animate-pulse" />
+                                      Beri Nilai
+                                   </button>
+                                 ) : (
+                                   <div className="flex flex-col items-end gap-1">
+                                      <div className="flex items-center gap-0.5">
+                                         {[...Array(5)].map((_, i) => (
+                                           <Star 
+                                             key={i} 
+                                             size={10} 
+                                             className={cn(
+                                               i < order.review.rating ? "fill-orange-500 text-orange-500" : "fill-slate-800 text-slate-800"
+                                             )} 
+                                           />
+                                         ))}
+                                      </div>
+                                      {order.review.comment && (
+                                        <p className="text-[8px] font-bold text-slate-500 italic max-w-[150px] truncate">
+                                          "{order.review.comment}"
+                                        </p>
+                                      )}
+                                   </div>
+                                 )}
+                               </>
+                             )}
                           </div>
 
-                          {/* 2. Utility Icons (Only for Paid/Active Orders) */}
-                          {!needsDP && (
+                          {/* 2. Utility Icons (Only for Active Orders) */}
+                          {!needsDP && order.status !== 'DONE' && (
                             <div className="flex items-center gap-1 shrink-0 ml-1">
                                {/* Analysis Eye: Only if findings exist - Put FIRST so Calendar stays at the far right */}
                                {order.technical_findings && (
                                  <button 
-                                   onClick={() => setSelectedOrder(order)}
+                                   onClick={(e) => {
+                                     e.stopPropagation();
+                                     setSelectedOrder(order);
+                                   }}
                                    className="w-7 h-7 flex items-center justify-center bg-slate-800/50 hover:bg-emerald-500/20 rounded-full text-slate-500 hover:text-emerald-400 transition-all border border-slate-700/30"
                                    title="Analysis"
                                  >
@@ -355,6 +395,7 @@ export default function OrderHistoryList({
                                  href={getGoogleCalendarUrl(order)}
                                  target="_blank"
                                  rel="noopener noreferrer"
+                                 onClick={(e) => e.stopPropagation()}
                                  className="w-7 h-7 flex items-center justify-center bg-slate-800/50 hover:bg-blue-500/20 rounded-full text-slate-500 hover:text-blue-400 transition-all border border-slate-700/30"
                                  title="Calendar"
                                >
@@ -457,6 +498,15 @@ export default function OrderHistoryList({
           amount={paymentOrder.payment_status === 'UNPAID' ? 50000 : (paymentOrder.final_cost ? paymentOrder.final_cost - 50000 : (paymentOrder.estimated_cost - 50000))}
         />
       )}
+
+      {reviewOrder && (
+        <ReviewModal
+          isOpen={!!reviewOrder}
+          onClose={() => setReviewOrder(null)}
+          order={reviewOrder}
+        />
+      )}
     </>
   );
+;
 }

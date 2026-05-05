@@ -1,4 +1,5 @@
 import prisma from "@/lib/prisma";
+// Force recompile to detect new Prisma schema
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import OrderHistoryList from "@/app/dashboard/OrderHistoryList";
@@ -20,7 +21,8 @@ export default async function HistoryPage() {
     include: {
       orders: {
         include: {
-          appliance: { include: { appliance_type: true } }
+          appliance: { include: { appliance_type: true } },
+          review: true
         },
         orderBy: { createdAt: "desc" }
       }
