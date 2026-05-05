@@ -9,6 +9,7 @@ import { formatDate } from "@/lib/utils";
 import VerificationModal from "@/components/features/VerificationModal";
 import PaymentModal from "@/components/features/PaymentModal";
 import { History, Eye, CheckCircle2, Wrench, CalendarPlus, Wallet, ChevronLeft, ChevronRight, ClipboardCheck, X, AlertCircle } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 import { cn, getGoogleCalendarUrl } from "@/lib/utils";
 
@@ -214,16 +215,31 @@ export default function OrderHistoryList({
 
         <CardContent className="p-0 overflow-y-auto custom-scrollbar flex-grow">
           {paginatedOrders.length > 0 ? (
-            <div className="divide-y divide-slate-800/40">
-              {paginatedOrders.map((order) => {
+            <motion.div 
+              initial="hidden"
+              animate="visible"
+              variants={{
+                visible: { transition: { staggerChildren: 0.05 } }
+              }}
+              className="divide-y divide-slate-800/40"
+            >
+              {paginatedOrders.map((order, index) => {
                 const needsDP = order.payment_status === 'UNPAID' && order.status !== 'CANCELLED';
                 const needsBalance = order.payment_status === 'DP_PAID' && order.status === 'DONE';
                 
                 return (
-                  <div key={order.id} className={cn(
-                    "py-4 flex flex-col gap-3 hover:bg-slate-800/30 transition-all group relative border-l-0",
-                    isCompact ? "px-3" : "px-6"
-                  )}>
+                  <motion.div 
+                    key={order.id} 
+                    variants={{
+                      hidden: { opacity: 0, x: -20 },
+                      visible: { opacity: 1, x: 0 }
+                    }}
+                    whileHover={{ x: 4 }}
+                    className={cn(
+                      "py-4 flex flex-col gap-3 hover:bg-slate-800/50 transition-all group relative border-l-0 cursor-default",
+                      isCompact ? "px-3" : "px-6"
+                    )}
+                  >
                     
                     {/* Item Header */}
                     <div className="flex items-center gap-2">
@@ -345,16 +361,10 @@ export default function OrderHistoryList({
 
 
 
-
-
-
-
-
-                  </div>
+                  </motion.div>
                 );
               })}
-
-            </div>
+            </motion.div>
           ) : (
             <div className="p-10 text-center text-[9px] text-slate-700 font-black uppercase tracking-[0.2em] h-full flex flex-col items-center justify-center gap-3">
               <div className="w-12 h-12 bg-slate-800/50 rounded-full flex items-center justify-center text-slate-700">

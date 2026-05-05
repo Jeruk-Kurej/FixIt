@@ -67,7 +67,14 @@ export default function CustomerDashboardView({ user, calendarEvents, pendingMem
   };
 
   return (
-    <div className="h-[calc(100vh-64px)] flex flex-col overflow-hidden bg-slate-950/20">
+    <div className="h-[calc(100vh-64px)] flex flex-col overflow-hidden bg-slate-950/20 relative">
+      
+      {/* Premium Ambient Glow - The "Sultan" Touch */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-orange-500/10 blur-[120px] rounded-full animate-pulse" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-500/10 blur-[120px] rounded-full animate-pulse" style={{ animationDelay: '2s' }} />
+      </div>
+
       <div className="w-full px-4 flex flex-col h-full relative z-10 pt-4 pb-4">
         
         {/* Header Section */}
