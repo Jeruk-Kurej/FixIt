@@ -207,6 +207,7 @@ model Notification {
   user      User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
   title     String
   message   String
+  link      String?  // New field for navigation
   type      String   @default("INFO") // INFO, REMINDER, SYSTEM
   isRead    Boolean  @default(false)
   createdAt DateTime @default(now())

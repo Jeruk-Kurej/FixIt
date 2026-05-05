@@ -47,6 +47,36 @@ export async function POST(req: NextRequest) {
       }
     });
 
+    // NOTIFICATION LOGIC: Notify the other party
+    let recipientId = "";
+    if (isOwner) {
+      // Sender is owner, recipient is technician
+      const tech = await prisma.technician.findUnique({
+        where: { id: order.technician_id as string }
+      });
+      recipientId = tech?.user_id as string;
+    } else {
+      // Sender is technician, recipient is owner
+      recipientId = order.user_id;
+    }
+
+    if (recipientId) {
+      try {
+        await prisma.notification.create({
+          data: {
+            user_id: recipientId,
+            title: `Pesan baru dari ${user.name}`,
+            message: content.length > 50 ? content.slice(0, 50) + "..." : content,
+            link: `/chat?orderId=${order_id}`,
+            type: "CHAT"
+          }
+        });
+      } catch (notifError) {
+        console.error("Failed to create notification for chat:", notifError);
+        // We don't throw here so the chat message itself still succeeds
+      }
+    }
+
 
     return NextResponse.json(newMessage, { status: 201 });
   } catch (error) {

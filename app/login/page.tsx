@@ -27,6 +27,9 @@ export default function LoginPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Gagal masuk.");
 
+      // Set flag for NotificationToast
+      sessionStorage.setItem("fixit_logged_in", "true");
+
       // Redirect to consolidated dashboard
       router.push("/dashboard");
       router.refresh();

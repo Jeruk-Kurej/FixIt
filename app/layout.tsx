@@ -21,6 +21,7 @@ export const metadata: Metadata = {
 
 import NextTopLoader from "nextjs-toploader";
 import PageTransition from "@/components/layout/PageTransition";
+import NotificationToast from "@/components/features/NotificationToast";
 
 export default function RootLayout({
   children,
@@ -49,6 +50,7 @@ export default function RootLayout({
           <PageTransition>{children}</PageTransition>
         </main>
         <Footer />
+        <NotificationToast />
       </body>
     </html>
   );

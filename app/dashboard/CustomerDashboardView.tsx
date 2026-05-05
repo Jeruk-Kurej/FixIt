@@ -97,8 +97,7 @@ export default function CustomerDashboardView({ user, calendarEvents, pendingMem
           </Button>
         </div>
 
-        {/* Smart Reminder Alert */}
-        <SmartReminderAlert orders={user.orders} />
+
 
         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 flex-grow overflow-hidden min-h-0">
 

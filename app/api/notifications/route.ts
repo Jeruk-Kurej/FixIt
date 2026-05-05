@@ -2,7 +2,10 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { cookies } from "next/headers";
 
-export async function GET() {
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const unreadOnly = searchParams.get("unreadOnly") === "true";
+
   const cookieStore = await cookies();
   const userEmail = cookieStore.get("user_email")?.value;
 
@@ -23,8 +26,13 @@ export async function GET() {
     return NextResponse.json([]);
   }
 
+  const where: any = { user_id: user.id };
+  if (unreadOnly) {
+    where.isRead = false;
+  }
+
   const notifications = await notificationModel.findMany({
-    where: { user_id: user.id },
+    where,
     orderBy: { createdAt: "desc" },
     take: 20,
   });

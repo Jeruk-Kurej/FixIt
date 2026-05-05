@@ -83,8 +83,7 @@ export default async function TechnicianDashboardView({ user, tech }: Technician
           </div>
         </div>
 
-        {/* Smart Reminder Alert */}
-        <SmartReminderAlert orders={tech.orders || []} />
+
 
 
         {/* Unified Layout: Sidebar + Main Content */}

@@ -1,24 +1,26 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Bell, BellRing, Clock, CheckCircle2, ShieldAlert, X } from "lucide-react";
+import { Bell, BellRing, Clock, CheckCircle2, ShieldAlert, X, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import { id } from "date-fns/locale";
+import { useRouter } from "next/navigation";
 
 interface Notification {
   id: string;
   title: string;
   message: string;
-  type: "INFO" | "REMINDER" | "SYSTEM";
+  link?: string;
+  type: "INFO" | "REMINDER" | "SYSTEM" | "CHAT";
   isRead: boolean;
   createdAt: string;
 }
 
 export default function NotificationHub() {
+  const router = useRouter();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isOpen, setIsOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const fetchNotifications = async () => {
@@ -35,8 +37,8 @@ export default function NotificationHub() {
 
   useEffect(() => {
     fetchNotifications();
-    // Refresh every 1 minute
-    const interval = setInterval(fetchNotifications, 60000);
+    // Refresh every 30 seconds for faster updates
+    const interval = setInterval(fetchNotifications, 30000);
     return () => clearInterval(interval);
   }, []);
 
@@ -50,18 +52,27 @@ export default function NotificationHub() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const markAsRead = async (id: string) => {
-    try {
-      await fetch("/api/notifications", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id }),
-      });
-      setNotifications(prev => 
-        prev.map(n => n.id === id ? { ...n, isRead: true } : n)
-      );
-    } catch (err) {
-      console.error("Failed to mark as read", err);
+  const handleNotificationClick = async (n: Notification) => {
+    // 1. Mark as read
+    if (!n.isRead) {
+      try {
+        await fetch("/api/notifications", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: n.id }),
+        });
+        setNotifications(prev => 
+          prev.map(item => item.id === n.id ? { ...item, isRead: true } : item)
+        );
+      } catch (err) {
+        console.error("Failed to mark as read", err);
+      }
+    }
+
+    // 2. Navigate if link exists
+    if (n.link) {
+      router.push(n.link);
+      setIsOpen(false);
     }
   };
 
@@ -96,10 +107,10 @@ export default function NotificationHub() {
         isOpen ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-95 -translate-y-2 pointer-events-none"
       )}>
         <div className="p-5 border-b border-slate-800 bg-slate-800/20 flex items-center justify-between">
-           <h3 className="text-sm font-black uppercase tracking-widest text-slate-100">Pusat Notifikasi</h3>
-           <span className="text-[10px] font-black text-slate-500 px-2 py-0.5 bg-slate-800 rounded-lg">
-             {unreadCount} NEW
-           </span>
+            <h3 className="text-sm font-black uppercase tracking-widest text-slate-100">Pusat Notifikasi</h3>
+            <span className="text-[10px] font-black text-slate-500 px-2 py-0.5 bg-slate-800 rounded-lg">
+              {unreadCount} NEW
+            </span>
         </div>
 
         <div className="max-h-[400px] overflow-y-auto custom-scrollbar divide-y divide-slate-800/50">
@@ -107,7 +118,7 @@ export default function NotificationHub() {
             notifications.map((n) => (
               <div 
                 key={n.id} 
-                onClick={() => !n.isRead && markAsRead(n.id)}
+                onClick={() => handleNotificationClick(n)}
                 className={cn(
                   "p-5 transition-all cursor-pointer group relative",
                   !n.isRead ? "bg-orange-500/5 hover:bg-orange-500/10" : "hover:bg-slate-800/50 opacity-60"
@@ -120,9 +131,11 @@ export default function NotificationHub() {
                 <div className="flex gap-4">
                    <div className={cn(
                       "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-lg",
+                      n.type === 'CHAT' ? "bg-blue-500/10 text-blue-400" : 
                       n.type === 'REMINDER' ? "bg-orange-500/10 text-orange-500" : "bg-slate-800 text-slate-400"
                    )}>
-                      {n.type === 'REMINDER' ? <Clock size={18} /> : <ShieldAlert size={18} />}
+                      {n.type === 'CHAT' ? <MessageSquare size={18} /> : 
+                       n.type === 'REMINDER' ? <Clock size={18} /> : <ShieldAlert size={18} />}
                    </div>
                    
                    <div className="min-w-0 flex-grow">
