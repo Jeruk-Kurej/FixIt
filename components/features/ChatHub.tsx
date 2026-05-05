@@ -14,14 +14,47 @@ interface ChatHubProps {
   initialOrders: any[];
   currentUserId: string;
   compact?: boolean;
+  initialSelectedOrderId?: string;
 }
 
-export default function ChatHub({ initialOrders, currentUserId, compact = false }: ChatHubProps) {
+export default function ChatHub({ initialOrders, currentUserId, compact = false, initialSelectedOrderId }: ChatHubProps) {
+  const [orders, setOrders] = useState<any[]>(initialOrders);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(
-    initialOrders.length > 0 ? initialOrders[0].id : null
+    initialSelectedOrderId || (initialOrders.length > 0 ? initialOrders[0].id : null)
   );
 
-  const selectedOrder = initialOrders.find(o => o.id === selectedOrderId);
+  const selectedOrder = orders.find(o => o.id === selectedOrderId);
+
+  // INSTANT CLEAR: Clear unread badge locally as soon as a chat is selected
+  useEffect(() => {
+    if (selectedOrderId) {
+      setOrders(prev => prev.map(order => {
+        if (order.id === selectedOrderId) {
+          return {
+            ...order,
+            _count: { ...order._count, messages: 0 }
+          };
+        }
+        return order;
+      }));
+    }
+  }, [selectedOrderId]);
+
+  // PERIODIC REFRESH: Keep order list and unread counts fresh
+  useEffect(() => {
+    const refreshOrders = async () => {
+      try {
+        const res = await fetch("/api/orders/chat-list"); // We'll create this helper endpoint
+        if (res.ok) {
+          const data = await res.json();
+          setOrders(data);
+        }
+      } catch (err) {}
+    };
+
+    const interval = setInterval(refreshOrders, 10000); // Check for new chats every 10s
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className={cn(
@@ -61,47 +94,63 @@ export default function ChatHub({ initialOrders, currentUserId, compact = false 
 
 
           <div className="flex-grow overflow-y-auto custom-scrollbar">
-            {initialOrders.length > 0 ? (
+            {orders.length > 0 ? (
               <div className="divide-y divide-slate-800/50">
-                {initialOrders.map((order) => {
+                {orders.map((order) => {
                   const isTechnician = order.technician?.user_id === currentUserId;
                   const otherUser = isTechnician ? order.user : (order.technician?.user || { name: "Teknisi FixIt" });
-                  const lastMsg = order.messages?.[0];
                   const isActive = selectedOrderId === order.id;
+                  const unreadCount = order._count?.messages || 0;
 
                   return (
                     <button
                       key={order.id}
                       onClick={() => setSelectedOrderId(order.id)}
                       className={cn(
-                        "w-full p-3 flex items-center gap-3 transition-all hover:bg-slate-800/50 group text-left",
+                        "w-full p-4 flex items-center gap-3 transition-all hover:bg-slate-800/50 group text-left relative",
                         isActive ? "bg-orange-500/10 border-l-4 border-orange-500" : "border-l-4 border-transparent",
                         compact && "px-2"
                       )}
                     >
                       <div className="relative shrink-0">
                         <div className={cn(
-                          "w-10 h-10 rounded-xl flex items-center justify-center text-slate-400 border border-slate-700 group-hover:border-orange-500/30 transition-all",
+                          "w-12 h-12 rounded-2xl flex items-center justify-center text-slate-400 border border-slate-700 group-hover:border-orange-500/30 transition-all shadow-lg",
                           isActive ? "bg-orange-500/20 text-orange-400 border-orange-500/30" : "bg-slate-800",
                           compact && "w-8 h-8 rounded-lg"
                         )}>
-                          <UserIcon size={compact ? 14 : 18} />
+                          <UserIcon size={compact ? 14 : 22} />
                         </div>
+                        
+                        {/* Unread Badge - Floating on Avatar */}
+                        {!isActive && unreadCount > 0 && (
+                          <div className="absolute -top-1 -right-1 min-w-[20px] h-5 bg-orange-500 text-white text-[10px] font-black rounded-full flex items-center justify-center px-1.5 ring-4 ring-slate-900 animate-bounce">
+                            {unreadCount}
+                          </div>
+                        )}
                       </div>
+
                       <div className={cn("flex-grow min-w-0", compact ? "hidden" : "block")}>
-                        <div className="flex justify-between items-start mb-0.5">
-                          <h4 className={cn("text-[11px] font-bold truncate", isActive ? "text-orange-400" : "text-slate-100")}>
-                            {otherUser.name.split(' ')[0]}
+                        <div className="flex justify-between items-start mb-1">
+                          <h4 className={cn("text-xs font-black truncate", isActive ? "text-orange-400" : "text-slate-100")}>
+                            {otherUser.name}
                           </h4>
+                          {isActive && unreadCount > 0 && (
+                            <div className="w-2 h-2 rounded-full bg-orange-500 shadow-[0_0_10px_rgba(249,115,22,0.6)]" />
+                          )}
                         </div>
-                        <p className="text-[8px] text-slate-500 font-bold uppercase tracking-widest truncate">
+                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest truncate">
                           {order.appliance?.appliance_type?.name}
                         </p>
                       </div>
 
+                      {!compact && !isActive && unreadCount > 0 && (
+                        <div className="shrink-0 flex flex-col items-end gap-1">
+                          <div className="text-[8px] font-black text-orange-500 uppercase tracking-tighter">Baru</div>
+                        </div>
+                      )}
 
+                      <ChevronRight size={14} className={cn("text-slate-700 transition-all group-hover:translate-x-1 group-hover:text-slate-400", compact && "hidden")} />
                     </button>
-
                   );
                 })}
               </div>
@@ -188,6 +237,13 @@ function ChatContent({ orderId, currentUserId, title, compact = false }: { order
 
   useEffect(() => {
     fetchMessages();
+    
+    // Explicitly trigger a fetch to mark as read immediately on mount/change
+    const markRead = async () => {
+      try { await fetch(`/api/chat/${orderId}`); } catch(e) {}
+    };
+    markRead();
+
     const interval = setInterval(fetchMessages, 3000);
     return () => clearInterval(interval);
   }, [orderId]);

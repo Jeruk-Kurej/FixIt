@@ -76,7 +76,7 @@ export default function NotificationHub() {
     }
   };
 
-  const unreadCount = notifications.filter(n => !n.isRead).length;
+  const unreadCount = notifications.filter(n => n.isRead === false || n.isRead === 0 || !n.isRead).length;
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -121,10 +121,10 @@ export default function NotificationHub() {
                 onClick={() => handleNotificationClick(n)}
                 className={cn(
                   "p-5 transition-all cursor-pointer group relative",
-                  !n.isRead ? "bg-orange-500/5 hover:bg-orange-500/10" : "hover:bg-slate-800/50 opacity-60"
+                  (n.isRead === false || n.isRead === 0 || !n.isRead) ? "bg-orange-500/5 hover:bg-orange-500/10" : "hover:bg-slate-800/50 opacity-60"
                 )}
               >
-                {!n.isRead && (
+                {(n.isRead === false || n.isRead === 0 || !n.isRead) && (
                   <div className="absolute left-0 top-0 bottom-0 w-1 bg-orange-500" />
                 )}
                 
@@ -142,7 +142,7 @@ export default function NotificationHub() {
                       <div className="flex items-center justify-between gap-2 mb-1">
                          <p className={cn(
                             "text-xs font-black truncate",
-                            !n.isRead ? "text-slate-100" : "text-slate-400"
+                            (n.isRead === false || n.isRead === 0 || !n.isRead) ? "text-slate-100" : "text-slate-400"
                          )}>{n.title}</p>
                          <span className="text-[9px] text-slate-500 font-bold shrink-0">
                             {formatDistanceToNow(new Date(n.createdAt), { addSuffix: true, locale: id })}

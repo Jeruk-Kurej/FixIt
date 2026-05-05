@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
+  const untoastedOnly = searchParams.get("untoastedOnly") === "true";
   const unreadOnly = searchParams.get("unreadOnly") === "true";
 
   const cookieStore = await cookies();
@@ -21,24 +22,20 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "User not found" }, { status: 404 });
   }
 
-  const notificationModel = (prisma as any).notification || (prisma as any).Notification;
-  if (!notificationModel) {
-    return NextResponse.json([]);
-  }
+  // Use RAW SQL to ensure we get the isToastShown column correctly
+  let query = 'SELECT * FROM Notification WHERE user_id = ?';
+  const params: any[] = [user.id];
 
-  const where: any = { user_id: user.id };
   if (unreadOnly) {
-    where.isRead = false;
+    query += ' AND isRead = 0';
+  }
+  if (untoastedOnly) {
+    query += ' AND isToastShown = 0';
   }
 
-  const notifications = await notificationModel.findMany({
-    where,
-    orderBy: { createdAt: "desc" },
-    take: 20,
-  });
+  query += ' ORDER BY createdAt DESC LIMIT 20';
 
-
-
+  const notifications = await prisma.$queryRawUnsafe(query, ...params);
 
   return NextResponse.json(notifications);
 }
@@ -51,20 +48,14 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { id } = await request.json();
+  const { id, isRead, isToastShown } = await request.json();
 
-  const notificationModel = (prisma as any).notification || (prisma as any).Notification;
-  if (!notificationModel) {
-    return NextResponse.json({ success: false });
+  if (isRead !== undefined) {
+    await prisma.$executeRaw`UPDATE Notification SET isRead = ${isRead ? 1 : 0} WHERE id = ${id}`;
   }
-
-  await notificationModel.update({
-    where: { id },
-    data: { isRead: true },
-  });
-
-
-
+  if (isToastShown !== undefined) {
+    await prisma.$executeRaw`UPDATE Notification SET isToastShown = ${isToastShown ? 1 : 0} WHERE id = ${id}`;
+  }
 
   return NextResponse.json({ success: true });
 }

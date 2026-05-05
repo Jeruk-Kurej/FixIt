@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageSquare, Bell, X } from "lucide-react";
 import Link from "next/link";
@@ -11,17 +11,27 @@ export default function NotificationToast() {
   const [seenIds, setSeenIds] = useState<Set<string>>(new Set());
   const pathname = usePathname();
 
-  const markAsRead = async (id: string) => {
+  const markAsToasted = async (id: string) => {
     try {
       await fetch("/api/notifications", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id }),
+        body: JSON.stringify({ id, isToastShown: true }),
       });
     } catch (err) {
-      console.error("Failed to mark as read:", err);
+      console.error("Failed to mark as toasted:", err);
     }
   };
+
+  // Track previous pathname to only clear toast on actual navigation
+  const prevPathname = useRef(pathname);
+
+  useEffect(() => {
+    if (prevPathname.current !== pathname) {
+      setActiveToast(null);
+      prevPathname.current = pathname;
+    }
+  }, [pathname]);
 
   useEffect(() => {
     // 1. Check for Auth Notifications (Login/Logout)
@@ -58,18 +68,26 @@ export default function NotificationToast() {
     // 2. Poll for real notifications
     const fetchNotifs = async () => {
       try {
-        const res = await fetch("/api/notifications?unreadOnly=true");
+        const res = await fetch("/api/notifications?untoastedOnly=true");
         if (res.ok) {
           const data = await res.json();
           if (data.length > 0) {
             const latest = data[0];
             
             if (!seenIds.has(latest.id)) {
+               // SMART CHECK: Don't show toast if we are already on that specific chat page
+               if (latest.link && pathname + window.location.search === latest.link) {
+                  // Mark as toasted (but not read) silently
+                  markAsToasted(latest.id);
+                  setSeenIds(prev => new Set(prev).add(latest.id));
+                  return;
+               }
+
                setActiveToast(latest);
                setSeenIds(prev => new Set(prev).add(latest.id));
                
-               // Delay marking as read slightly to ensure it shows up correctly
-               setTimeout(() => markAsRead(latest.id), 2000);
+               // Delay marking as toasted slightly to ensure it shows up correctly
+               setTimeout(() => markAsToasted(latest.id), 2000);
                setTimeout(() => setActiveToast(null), 8000);
             }
           }
@@ -79,8 +97,8 @@ export default function NotificationToast() {
       }
     };
 
-    // Faster poll (5s) for better real-time feel during demo
-    const interval = setInterval(fetchNotifs, 5000);
+    // Turbo poll (2s) for better real-time feel
+    const interval = setInterval(fetchNotifs, 2000);
     fetchNotifs();
 
     return () => clearInterval(interval);
@@ -98,7 +116,7 @@ export default function NotificationToast() {
           <div className="relative group">
             <Link 
               href={activeToast.link || "#"} 
-              onClick={() => setActiveToast(null)}
+              prefetch={true}
               className="block bg-slate-900/80 border border-white/10 rounded-[22px] shadow-[0_20px_40px_rgba(0,0,0,0.4)] p-3 backdrop-blur-2xl overflow-hidden ring-1 ring-white/5 cursor-pointer hover:bg-slate-800/90 transition-all active:scale-[0.98]"
             >
               {/* Background Glow */}

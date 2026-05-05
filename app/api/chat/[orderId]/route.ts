@@ -41,10 +41,29 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized access" }, { status: 403 });
     }
 
-    const messages = await prisma.message.findMany({
-      where: { order_id: orderId },
-      orderBy: { createdAt: "asc" },
-    });
+    // AUTO-READ: Mark all messages FROM the other party as read
+    // Using RAW SQL Template Literals for maximum reliability
+    try {
+      const affected = await prisma.$executeRaw`
+        UPDATE Message 
+        SET isRead = 1 
+        WHERE order_id = ${orderId} 
+        AND sender_id != ${user.id} 
+        AND isRead = 0
+      `;
+      if (affected > 0) {
+        console.log(`[CHAT-API] Successfully marked ${affected} messages as read`);
+      }
+    } catch (e) {
+      console.error("Raw SQL Auto-read failed:", e);
+    }
+
+    const messages: any[] = await prisma.$queryRaw`
+      SELECT id, order_id, sender_id, content, isRead, createdAt 
+      FROM Message 
+      WHERE order_id = ${orderId} 
+      ORDER BY createdAt ASC
+    `;
 
     return NextResponse.json(messages);
   } catch (error) {
