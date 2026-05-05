@@ -41,6 +41,11 @@ export default async function TechnicianDashboardView({ user, tech }: Technician
     orderBy: { createdAt: 'desc' }
   });
 
+  // 3. Calculate Stats
+  const finishedOrders = myAcceptedOrders.filter(o => o.status === 'DONE');
+  const totalEarnings = finishedOrders.reduce((sum, o) => sum + (o.final_cost || o.estimated_cost || 0), 0);
+  const totalUnits = finishedOrders.length;
+
   const calendarEvents = myAcceptedOrders
     .filter(o => o.scheduled_date_time)
     .map(o => ({
@@ -67,17 +72,14 @@ export default async function TechnicianDashboardView({ user, tech }: Technician
           <div className="flex gap-4">
              <div className="flex items-center gap-2">
                 <Star size={10} className="text-orange-500 fill-orange-500" />
-                <span className="text-[10px] font-black text-slate-300">RATING {tech.rating}</span>
+                <span className="text-[10px] font-black text-slate-300">RATING {tech.rating.toFixed(1)}</span>
              </div>
              <div className="flex items-center gap-2">
                 <CheckCircle2 size={10} className="text-emerald-500" />
-                <span className="text-[10px] font-black text-slate-300">TOTAL {myAcceptedOrders.filter(o => o.status === 'DONE').length} SELESAI</span>
+                <span className="text-[10px] font-black text-slate-300">TOTAL {totalUnits} SELESAI</span>
              </div>
           </div>
         </div>
-
-
-
 
         {/* Unified Layout: Sidebar + Main Content */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 flex-grow overflow-hidden min-h-0">
@@ -115,42 +117,46 @@ export default async function TechnicianDashboardView({ user, tech }: Technician
             </Card>
 
             {/* Vertical Stats Card */}
-            <Card className="border-slate-800 bg-slate-900/60 backdrop-blur-md flex-grow overflow-hidden flex flex-col p-4 gap-4">
-               <div className="p-4 bg-slate-800/30 border border-slate-800/50 rounded-2xl flex items-center gap-4">
-                  <div className="p-3 bg-emerald-500/10 rounded-xl text-emerald-500">
+            <Card className="border-slate-800 bg-slate-900/60 backdrop-blur-md flex-grow overflow-hidden flex flex-col p-4 gap-3">
+               <div className="p-4 bg-slate-800/30 border border-slate-700/30 rounded-2xl flex items-center gap-4 group hover:border-emerald-500/50 transition-all duration-500">
+                  <div className="p-3 bg-emerald-500/10 rounded-xl text-emerald-500 group-hover:scale-110 transition-transform">
                      <TrendingUp size={18} />
                   </div>
                   <div>
-                     <p className="text-[8px] font-black text-slate-600 uppercase tracking-widest">Pendapatan</p>
-                     <p className="text-sm font-black text-slate-100">Rp 4.500.000</p>
+                     <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Omzet Bulan Ini</p>
+                     <p className="text-sm font-black text-slate-100">{formatRupiah(totalEarnings)}</p>
                   </div>
                </div>
 
-               <div className="p-4 bg-slate-800/30 border border-slate-800/50 rounded-2xl flex items-center gap-4">
-                  <div className="p-3 bg-blue-500/10 rounded-xl text-blue-500">
-                     <Clock size={18} />
+               <div className="p-4 bg-slate-800/30 border border-slate-800/50 rounded-2xl flex items-center gap-4 group hover:border-blue-500/50 transition-all duration-500">
+                  <div className="p-3 bg-blue-500/10 rounded-xl text-blue-500 group-hover:scale-110 transition-transform">
+                     <CheckCircle2 size={18} />
                   </div>
                   <div>
-                     <p className="text-[8px] font-black text-slate-600 uppercase tracking-widest">Jam Kerja</p>
-                     <p className="text-sm font-black text-slate-100">124 Jam</p>
+                     <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Unit Ditangani</p>
+                     <p className="text-sm font-black text-slate-100">{totalUnits} Pesanan Beres</p>
                   </div>
                </div>
 
-               <div className="p-4 bg-slate-800/30 border border-slate-800/50 rounded-2xl flex items-center gap-4">
-                  <div className="p-3 bg-orange-500/10 rounded-xl text-orange-500">
+               <div className="p-4 bg-slate-800/30 border border-slate-800/50 rounded-2xl flex items-center gap-4 group hover:border-orange-500/50 transition-all duration-500">
+                  <div className="p-3 bg-orange-500/10 rounded-xl text-orange-500 group-hover:scale-110 transition-transform">
                      <Star size={18} />
                   </div>
                   <div>
-                     <p className="text-[8px] font-black text-slate-600 uppercase tracking-widest">Efisiensi</p>
-                     <p className="text-sm font-black text-slate-100">98%</p>
+                     <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Score Kepuasan</p>
+                     <p className="text-sm font-black text-slate-100">{tech.rating.toFixed(1)} / 5.0</p>
                   </div>
                </div>
 
-               <div className="flex-grow flex items-end">
-                  <div className="w-full p-4 bg-orange-500/5 border border-dashed border-orange-500/20 rounded-xl">
-                     <p className="text-[8px] font-black text-orange-500/40 uppercase tracking-[0.2em] text-center">
-                        Level: Master Technician
+               <div className="mt-auto">
+                  <div className="w-full p-4 bg-gradient-to-br from-orange-500/10 to-transparent border border-orange-500/20 rounded-2xl relative overflow-hidden group">
+                     <div className="absolute top-0 right-0 w-24 h-24 bg-orange-500/5 blur-2xl rounded-full -mr-12 -mt-12" />
+                     <p className="text-[9px] font-black text-orange-500 uppercase tracking-[0.25em] text-center mb-1">
+                        Professional Tier
                      </p>
+                     <h3 className="text-xs font-black text-white text-center uppercase tracking-widest group-hover:text-orange-400 transition-colors">
+                        Master Technician
+                     </h3>
                   </div>
                </div>
             </Card>
