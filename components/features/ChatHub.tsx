@@ -5,6 +5,7 @@ import { MessageSquare, User as UserIcon, Search, ChevronRight, Clock, Send } fr
 import ChatUI from "./ChatUI";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { useSearchParams } from "next/navigation";
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -18,10 +19,20 @@ interface ChatHubProps {
 }
 
 export default function ChatHub({ initialOrders, currentUserId, compact = false, initialSelectedOrderId }: ChatHubProps) {
+  const searchParams = useSearchParams();
+  const urlOrderId = searchParams.get("orderId");
+  
   const [orders, setOrders] = useState<any[]>(initialOrders);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(
     initialSelectedOrderId || (initialOrders.length > 0 ? initialOrders[0].id : null)
   );
+
+  // URL LISTENER: Switch chat if URL orderId changes (e.g. from notification)
+  useEffect(() => {
+    if (urlOrderId && urlOrderId !== selectedOrderId) {
+      setSelectedOrderId(urlOrderId);
+    }
+  }, [urlOrderId]);
 
   const selectedOrder = orders.find(o => o.id === selectedOrderId);
 

@@ -13,7 +13,7 @@ interface Notification {
   message: string;
   link?: string;
   type: "INFO" | "REMINDER" | "SYSTEM" | "CHAT";
-  isRead: boolean;
+  isRead: any;
   createdAt: string;
 }
 
@@ -59,7 +59,11 @@ export default function NotificationHub() {
         await fetch("/api/notifications", {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id: n.id }),
+          body: JSON.stringify({ 
+            id: n.id, 
+            isRead: true,
+            isToastShown: true 
+          }),
         });
         setNotifications(prev => 
           prev.map(item => item.id === n.id ? { ...item, isRead: true } : item)
