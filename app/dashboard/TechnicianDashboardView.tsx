@@ -60,15 +60,8 @@ export default async function TechnicianDashboardView({ user, tech }: Technician
         <div className="mb-4 flex items-center justify-between gap-4 shrink-0 px-2">
           <div className="flex items-center gap-4">
             <h1 className="text-xl font-black tracking-tight text-slate-50 flex items-center gap-3">
-              Dashboard Kerja
-              <span className="px-1.5 py-0.5 bg-orange-500/10 border border-orange-500/20 rounded text-[8px] font-black text-orange-500 uppercase tracking-widest">
-                Professional
-              </span>
+              Halo, {user.name}
             </h1>
-            <div className="h-4 w-px bg-slate-800" />
-            <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">
-              Teknisi: <span className="text-orange-400">{user.name}</span>
-            </p>
           </div>
           
           <div className="flex gap-4">

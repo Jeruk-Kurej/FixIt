@@ -234,12 +234,19 @@ export default function OrderHistoryList({
                       hidden: { opacity: 0, x: -20 },
                       visible: { opacity: 1, x: 0 }
                     }}
-                    whileHover={{ x: 4 }}
+                    whileHover={{ 
+                      scale: 1.02,
+                      backgroundColor: "rgba(30, 41, 59, 0.8)",
+                    }}
+                    transition={{ type: "spring", stiffness: 400, damping: 17 }}
                     className={cn(
-                      "py-4 flex flex-col gap-3 hover:bg-slate-800/50 transition-all group relative border-l-0 cursor-default",
-                      isCompact ? "px-3" : "px-6"
+                      "py-4 flex flex-col gap-3 transition-all group relative border-l-2 border-l-transparent hover:border-l-orange-500 cursor-default overflow-hidden",
+                      isCompact ? "px-3" : "px-6",
+                      order.status === 'DONE' && "hover:border-l-emerald-500"
                     )}
                   >
+                    {/* Hover Glow Background */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-orange-500/0 via-orange-500/0 to-orange-500/0 group-hover:from-orange-500/[0.03] group-hover:via-transparent group-hover:to-transparent transition-all duration-500" />
                     
                     {/* Item Header */}
                     <div className="flex items-center gap-2">

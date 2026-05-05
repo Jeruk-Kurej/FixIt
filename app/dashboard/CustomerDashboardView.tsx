@@ -81,15 +81,8 @@ export default function CustomerDashboardView({ user, calendarEvents, pendingMem
         <div className="mb-4 flex items-center justify-between gap-4 shrink-0 px-2">
           <div className="flex items-center gap-4">
             <h1 className="text-xl font-black tracking-tight text-slate-50 flex items-center gap-3">
-              Dashboard Saya
-              <span className="px-1.5 py-0.5 bg-blue-500/10 border border-blue-500/20 rounded text-[8px] font-black text-blue-400 uppercase tracking-widest">
-                Customer
-              </span>
+              Halo, {user.name}
             </h1>
-            <div className="h-4 w-px bg-slate-800" />
-            <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">
-              ID: <span className="text-slate-300">{user.id.slice(0,8)}</span>
-            </p>
           </div>
           
           <Button href="/booking" variant="primary" className="shadow-[0_10px_20px_rgba(249,115,22,0.15)] px-6 py-2 text-[10px] font-black uppercase tracking-wider">

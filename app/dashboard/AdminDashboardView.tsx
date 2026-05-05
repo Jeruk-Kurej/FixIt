@@ -72,19 +72,10 @@ export default function AdminDashboardView({
         {/* Admin Header */}
         <div className="mb-8 flex items-center justify-between gap-4 shrink-0">
           <div className="flex items-center gap-6">
-            <div className="w-16 h-16 bg-orange-500 rounded-3xl flex items-center justify-center text-white shadow-2xl shadow-orange-500/40">
-              <Settings size={32} />
-            </div>
             <div>
               <h1 className="text-3xl font-black tracking-tight text-white flex items-center gap-4">
-                Pusat Kendali Admin
-                <span className="px-3 py-1 bg-orange-500/10 border border-orange-500/20 rounded-lg text-[10px] font-black text-orange-500 uppercase tracking-[0.2em]">
-                  System Active
-                </span>
+                Halo, {user.name}
               </h1>
-              <p className="text-slate-500 text-sm font-bold uppercase tracking-widest mt-1">
-                Selamat Datang, <span className="text-slate-300">{user.name}</span>
-              </p>
             </div>
           </div>
 
