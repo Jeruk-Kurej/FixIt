@@ -80,12 +80,21 @@ export default function ActiveTasksList({ orders }: ActiveTasksListProps) {
                 
                 {/* Footer: Status & Action */}
                 <div className="flex items-center justify-between pt-2 border-t border-slate-800/50">
-                   <div className={cn(
-                      "text-[8px] font-black uppercase px-2 py-0.5 rounded border tracking-widest",
-                      order.status === 'WORKING' ? "border-orange-500/20 bg-orange-500/10 text-orange-500" : "border-slate-700 bg-slate-800 text-slate-400"
-                   )}>
-                      {order.status}
+                   <div className="flex flex-col gap-1">
+                      <div className={cn(
+                        "text-[8px] font-black uppercase px-2 py-0.5 rounded border tracking-widest w-fit",
+                        order.status === 'WORKING' ? "border-orange-500/20 bg-orange-500/10 text-orange-500" : "border-slate-700 bg-slate-800 text-slate-400"
+                      )}>
+                        {order.status}
+                      </div>
+                      <div className={cn(
+                        "text-[7px] font-black uppercase tracking-tighter",
+                        order.payment_status === 'UNPAID' ? "text-red-500" : "text-emerald-500"
+                      )}>
+                        {order.payment_status === 'UNPAID' ? '⚠️ Menunggu DP' : '✅ DP Berhasil'}
+                      </div>
                    </div>
+
                    
                    <div className="flex items-center gap-2">
                      <a 

@@ -88,6 +88,7 @@ model Order {
   appliance_id        String
   appliance           Appliance   @relation(fields: [appliance_id], references: [id])
   status              OrderStatus @default(PENDING)
+  payment_status      PaymentStatus @default(UNPAID)
   problem             String      @db.Text
   scheduled_date_time DateTime
   service_type        ServiceType @default(HOME_SERVICE)
@@ -102,6 +103,7 @@ model Order {
   // Relationships
   order_details OrderDetail[]
   messages Message[]
+  payments Payment[]
 }
 
 // 7. Tabel: OrderDetail (Rincian Pekerjaan)
@@ -114,7 +116,21 @@ model OrderDetail {
   is_confirmed Boolean @default(false)
 }
 
-// 8. Tabel: ChatMessage (Komunikasi Pelanggan & Teknisi)
+// 8. Tabel: Payment (Escrow System)
+model Payment {
+  id            String      @id @default(uuid())
+  order_id      String
+  order         Order       @relation(fields: [order_id], references: [id])
+  amount        Int
+  proof_url     String?     @db.Text
+  type          PaymentType
+  status        PaymentVerificationStatus @default(PENDING)
+  admin_notes   String?     @db.Text
+  verifiedAt    DateTime?
+  createdAt     DateTime    @default(now())
+}
+
+// 9. Tabel: ChatMessage (Komunikasi Pelanggan & Teknisi)
 model Message {
   id        String   @id @default(uuid())
   order_id  String
@@ -123,8 +139,6 @@ model Message {
   content   String   @db.Text
   createdAt DateTime @default(now())
 }
-
-
 
 enum Gender {
   MALE
@@ -145,10 +159,29 @@ enum OrderStatus {
   CANCELLED
 }
 
+enum PaymentStatus {
+  UNPAID
+  DP_PAID
+  FULLY_PAID
+}
+
+enum PaymentType {
+  DOWN_PAYMENT
+  FINAL_BALANCE
+  FULL_PAYMENT
+}
+
+enum PaymentVerificationStatus {
+  PENDING
+  VALID
+  INVALID
+}
+
 enum ServiceType {
   HOME_SERVICE
   WORKSHOP_VISIT
 }
+
 model Notification {
   id        String   @id @default(cuid())
   user_id   String
@@ -159,4 +192,5 @@ model Notification {
   isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
 }
+
 
