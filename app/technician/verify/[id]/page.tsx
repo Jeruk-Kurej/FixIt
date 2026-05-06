@@ -98,7 +98,24 @@ export default async function VerificationPage({ params }: { params: Promise<{ i
 
           {/* Right Panel: The Verification Form (Interactive) */}
           <div className="lg:col-span-8">
-            <VerificationForm order={JSON.parse(JSON.stringify(order))} />
+            {order.status === 'DONE' ? (
+              <Card className="border-emerald-500/20 bg-emerald-500/5 backdrop-blur-xl p-12 text-center rounded-[40px]">
+                <div className="w-20 h-20 bg-emerald-500 rounded-3xl flex items-center justify-center text-white mx-auto mb-6 shadow-[0_20px_40px_rgba(16,185,129,0.3)]">
+                  <CheckCircle2 size={40} />
+                </div>
+                <h2 className="text-3xl font-black text-white mb-4">Servis Telah Selesai!</h2>
+                <p className="text-slate-400 max-w-md mx-auto leading-relaxed">
+                  Laporan teknis dan pelunasan telah diverifikasi. Pekerjaan ini sudah resmi ditutup dan diarsipkan ke dalam riwayat.
+                </p>
+                <div className="mt-10">
+                   <Button href="/dashboard" variant="primary" className="px-10 py-4 rounded-2xl font-black uppercase tracking-widest">
+                      Kembali ke Dashboard
+                   </Button>
+                </div>
+              </Card>
+            ) : (
+              <VerificationForm order={JSON.parse(JSON.stringify(order))} />
+            )}
           </div>
 
         </div>

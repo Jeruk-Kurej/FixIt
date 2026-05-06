@@ -10,7 +10,7 @@ export async function POST(
 ) {
   try {
     const { id: orderId } = await params;
-    const { findings, notes } = await req.json();
+    const { findings, notes, additionalCost } = await req.json();
     
     const session = await getServerSession(authOptions);
     const cookieStore = await cookies();
@@ -38,11 +38,14 @@ export async function POST(
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
+    const finalTotal = (existingOrder.estimated_cost || 0) + (Number(additionalCost) || 0);
+
     const updatedOrder = await prisma.order.update({
       where: { id: orderId },
       data: {
         technical_findings: findings,
         technical_notes: notes,
+        final_cost: finalTotal,
         status: "WORKING"
       }
     });

@@ -66,6 +66,7 @@ export default function VerificationForm({ order }: { order: any }) {
   
   const [selectedFindings, setSelectedFindings] = useState<string[]>(order.technical_findings || []);
   const [notes, setNotes] = useState(order.technical_notes || "");
+  const [additionalCost, setAdditionalCost] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 
@@ -88,7 +89,8 @@ export default function VerificationForm({ order }: { order: any }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           findings: selectedFindings,
-          notes: notes
+          notes: notes,
+          additionalCost: additionalCost
         })
       });
 
@@ -195,6 +197,27 @@ export default function VerificationForm({ order }: { order: any }) {
                 </label>
               );
             })}
+          </div>
+
+          {/* Additional Costs Section */}
+          <div className="mt-12 group">
+            <div className="flex items-center gap-2 mb-4">
+               <Wallet size={14} className="text-emerald-500" />
+               <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Estimasi Biaya Tambahan (Sparepart/Jasa Tambahan)</label>
+            </div>
+            <div className="relative max-w-md">
+               <div className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-500 font-black text-lg">Rp</div>
+               <input 
+                 type="number"
+                 value={additionalCost}
+                 onChange={(e) => setAdditionalCost(Number(e.target.value))}
+                 placeholder="0"
+                 className="w-full bg-slate-950/50 border-2 border-slate-800 rounded-[24px] py-5 pl-16 pr-8 text-xl font-black text-white outline-none focus:border-emerald-500/50 transition-all shadow-inner"
+               />
+               <p className="text-[9px] text-slate-600 mt-2 ml-4 font-bold uppercase tracking-widest italic">
+                  *Kosongkan jika tidak ada biaya tambahan
+               </p>
+            </div>
           </div>
 
           <div className="mt-12 group">

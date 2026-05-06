@@ -27,7 +27,10 @@ export async function POST(req: NextRequest) {
 
     await prisma.order.update({
       where: { id: payment.order_id },
-      data: { payment_status: newPaymentStatus as any }
+      data: { 
+        payment_status: newPaymentStatus as any,
+        status: payment.type === "FINAL_BALANCE" ? "DONE" : payment.order.status
+      }
     });
 
     return NextResponse.json({ success: true });

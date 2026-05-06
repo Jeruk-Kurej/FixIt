@@ -8,11 +8,12 @@ import { formatDate } from "@/lib/utils";
 
 import VerificationModal from "@/components/features/VerificationModal";
 import PaymentModal from "@/components/features/PaymentModal";
-import { History, Eye, CheckCircle2, Wrench, CalendarPlus, Wallet, ChevronLeft, ChevronRight, ClipboardCheck, X, AlertCircle, Star } from "lucide-react";
+import { History, Eye, CheckCircle2, Wrench, CalendarPlus, Wallet, ChevronLeft, ChevronRight, ClipboardCheck, X, AlertCircle, Star, ArrowRight, ArrowLeft } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 import { cn, getGoogleCalendarUrl } from "@/lib/utils";
 import ReviewModal from "@/components/features/ReviewModal";
+import PaymentModalContent from "@/components/features/PaymentModalContent";
 
 
 interface OrderHistoryListProps {
@@ -40,6 +41,8 @@ export default function OrderHistoryList({
 
 
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
+  const [showPaymentInModal, setShowPaymentInModal] = useState(false);
+  const [isFinishing, setIsFinishing] = useState(false);
   const [paymentOrder, setPaymentOrder] = useState<any | null>(null);
   const [reviewOrder, setReviewOrder] = useState<any | null>(null);
   const [filterCategory, setFilterCategory] = useState<string>("ALL");
@@ -92,101 +95,231 @@ export default function OrderHistoryList({
         {/* Findings Modal - Teleported to Body via Portal for True Full Screen Focus */}
         {typeof document !== "undefined" && selectedOrder && createPortal(
           <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-             <div 
+             <motion.div 
+               initial={{ opacity: 0 }}
+               animate={{ opacity: 1 }}
+               exit={{ opacity: 0 }}
                className="absolute inset-0 bg-slate-950/80 backdrop-blur-md"
-               onClick={() => setSelectedOrder(null)}
+               onClick={() => {
+                  setSelectedOrder(null);
+                  setShowPaymentInModal(false);
+               }}
              />
              
-             <div className="relative w-full max-w-2xl bg-slate-900 border border-slate-800 rounded-[40px] shadow-[0_40px_120px_rgba(0,0,0,0.9)] overflow-hidden animate-in fade-in zoom-in duration-200">
-                {/* Header with Premium Gradient */}
-                <div className="p-10 bg-gradient-to-br from-slate-800/40 via-transparent to-transparent border-b border-slate-800/50 relative overflow-hidden">
-                   <div className="absolute top-0 right-0 p-16 opacity-[0.03] pointer-events-none rotate-12">
-                      <ClipboardCheck size={200} />
-                   </div>
-
-                   <div className="flex items-center justify-between relative z-10">
-                    <div className="flex items-center gap-6">
-                      <div className="w-20 h-20 bg-orange-500 rounded-[28px] flex items-center justify-center text-white shadow-[0_15px_40px_rgba(249,115,22,0.4)] rotate-3">
-                        <ClipboardCheck size={40} />
-                      </div>
-                      <div>
-                        <h3 className="text-3xl font-black text-white tracking-tight">Detail Analisis</h3>
-                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em] mt-1">
-                           Transparency Report • #{selectedOrder.id.slice(0, 8)}
-                        </p>
-                      </div>
-                    </div>
-                    <button 
-                      onClick={() => setSelectedOrder(null)}
-                      className="w-12 h-12 flex items-center justify-center bg-slate-800 hover:bg-slate-700 rounded-full text-slate-400 hover:text-white transition-all border border-slate-700/50"
-                    >
-                      <X size={24} />
-                    </button>
-                  </div>
-                </div>
-
-                <div className="p-10 space-y-10 max-h-[65vh] overflow-y-auto custom-scrollbar bg-slate-900/30">
+             <motion.div 
+               layout
+               initial={{ scale: 0.9, opacity: 0, y: 20 }}
+               animate={{ 
+                 scale: 1, 
+                 opacity: 1, 
+                 y: 0,
+               }}
+               transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+               className="relative flex items-center gap-0 pointer-events-none group"
+             >
+                {/* UNIFIED CONTAINER FOR SHADOW & ROUNDING */}
+                <div className="flex items-start gap-0 relative pointer-events-auto">
                    
-                   {/* Results Grid */}
-                   <div className="space-y-6">
-                      <div className="flex items-center justify-between">
-                         <p className="text-[10px] font-black text-orange-500 uppercase tracking-[0.3em]">Temuan Diagnosa</p>
-                         <span className="px-3 py-1 bg-emerald-500/10 text-emerald-500 text-[8px] font-black rounded-full border border-emerald-500/20 uppercase tracking-widest">
-                            Verified by Specialist
-                         </span>
-                      </div>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                         {Array.isArray(selectedOrder.technical_findings) ? (
-                           selectedOrder.technical_findings.map((item: string) => (
-                             <div key={item} className="flex items-center gap-4 p-5 bg-slate-950/50 border border-slate-800 rounded-3xl">
-                                <div className="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center text-slate-400">
-                                   <AlertCircle size={20} />
-                                </div>
-                                <span className="text-[13px] font-black text-slate-300 tracking-tight leading-snug">{item}</span>
+                   {/* LEFT PANEL: ANALYSIS DETAIL */}
+                   <motion.div 
+                     layout
+                     className="w-[520px] bg-slate-900 border border-slate-800 rounded-[32px] shadow-[0_40px_100px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col h-fit z-20"
+                   >
+                      {/* Header */}
+                      <div className="p-6 bg-gradient-to-br from-slate-800/40 via-transparent to-transparent border-b border-slate-800/50 relative overflow-hidden">
+                         <div className="flex items-center justify-between relative z-10">
+                           <div className="flex items-center gap-4">
+                             <div className="w-12 h-12 bg-orange-500 rounded-2xl flex items-center justify-center text-white shadow-xl rotate-3 group-hover:rotate-6 transition-transform">
+                               <ClipboardCheck size={24} />
                              </div>
-                           ))
-                         ) : (
-                           <div className="col-span-full p-10 bg-slate-950/30 border border-dashed border-slate-800 rounded-3xl text-center">
-                              <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest italic">Belum ada data temuan spesifik</p>
+                             <div>
+                               <h3 className="text-lg font-black text-white tracking-tight leading-none">Detail Analisis</h3>
+                               <p className="text-[8px] font-black text-slate-500 uppercase tracking-[0.3em] mt-1.5">Report • #{selectedOrder.id.slice(0, 6)}</p>
+                             </div>
+                           </div>
+                           {!showPaymentInModal && (
+                              <button 
+                                onClick={() => setSelectedOrder(null)}
+                                className="w-9 h-9 flex items-center justify-center bg-slate-800 hover:bg-slate-700 rounded-full text-slate-400 transition-all border border-slate-700/50"
+                              >
+                                <X size={18} />
+                              </button>
+                           )}
+                         </div>
+                      </div>
+
+                      {/* Content */}
+                      <div className="p-6 space-y-5 overflow-y-auto custom-scrollbar bg-slate-900/30 max-h-[55vh]">
+                         {/* Findings */}
+                         <div className="space-y-3">
+                            <p className="text-[8px] font-black text-orange-500 uppercase tracking-[0.2em]">Temuan Diagnosa</p>
+                            <div className="grid grid-cols-1 gap-2">
+                               {Array.isArray(selectedOrder.technical_findings) ? (
+                                 selectedOrder.technical_findings.slice(0, 3).map((item: string) => (
+                                   <div key={item} className="flex items-center gap-3 p-3 bg-slate-950/40 border border-slate-800/50 rounded-xl">
+                                      <div className="w-7 h-7 bg-slate-800/50 rounded-lg flex items-center justify-center text-slate-500 shrink-0">
+                                         <AlertCircle size={14} />
+                                      </div>
+                                      <span className="text-[11px] font-bold text-slate-300 leading-tight">{item}</span>
+                                   </div>
+                                 ))
+                               ) : null}
+                            </div>
+                         </div>
+
+                         {/* Notes */}
+                         <div className="space-y-2.5">
+                            <p className="text-[8px] font-black text-blue-500 uppercase tracking-[0.2em]">Catatan Teknisi</p>
+                            <div className="p-4 bg-slate-800/20 border border-slate-800/30 rounded-xl italic text-[11px] text-slate-400 leading-relaxed">
+                               "{selectedOrder.technical_notes || "Unit dalam pengecekan..."}"
+                            </div>
+                         </div>
+
+                         {/* Price Summary */}
+                         <div className="bg-slate-950/60 border border-slate-800/50 rounded-xl p-5 space-y-2.5">
+                            <div className="flex justify-between text-[9px] font-bold text-slate-500 uppercase tracking-widest">
+                               <span>Estimasi + Tambahan</span>
+                               <span className="text-white">Rp {(selectedOrder.final_cost || selectedOrder.estimated_cost)?.toLocaleString('id-ID')}</span>
+                            </div>
+                            <div className="flex justify-between text-[9px] font-bold text-slate-500 uppercase tracking-widest">
+                               <span>Sudah Dibayar (DP)</span>
+                               <span className="text-blue-400">- Rp 50.000</span>
+                            </div>
+                            <div className="pt-2.5 border-t border-slate-800/50 flex justify-between items-center">
+                               <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">Sisa Pelunasan</span>
+                               <span className="text-lg font-black text-emerald-400">Rp {Math.max(0, (selectedOrder.final_cost || selectedOrder.estimated_cost) - 50000).toLocaleString('id-ID')}</span>
+                            </div>
+                         </div>
+                      </div>
+
+                      {/* Footer Actions */}
+                      <div className="p-6 bg-slate-950/80 border-t border-slate-800/50 flex items-center justify-between">
+                         <div className="flex items-center gap-3 opacity-60">
+                            <div className="w-8 h-8 bg-slate-800 rounded-lg border border-slate-700 flex items-center justify-center text-slate-500">
+                               <Wrench size={14} />
+                            </div>
+                            <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">By {selectedOrder.technician?.user?.name || "Specialist"}</p>
+                         </div>
+
+                         {selectedOrder.status === 'WORKING' && !showPaymentInModal && (
+                           <div className="flex gap-2">
+                              {selectedOrder.payment_status === 'FULLY_PAID' || ((selectedOrder.final_cost || selectedOrder.estimated_cost) - 50000) <= 0 ? (
+                                 <button 
+                                   disabled={isFinishing}
+                                   onClick={async () => {
+                                      setIsFinishing(true);
+                                      try {
+                                         const res = await fetch(`/api/orders/${selectedOrder.id}/finish`, { method: 'POST' });
+                                         if (res.ok) {
+                                            setSelectedOrder(null);
+                                            window.location.reload();
+                                         }
+                                      } catch (err) {} finally { setIsFinishing(false); }
+                                   }}
+                                   className="px-6 py-3 bg-blue-500 hover:bg-blue-600 rounded-xl text-[9px] font-black text-white uppercase tracking-[0.2em] transition-all shadow-lg shadow-blue-500/20 active:scale-95 flex items-center justify-center gap-2"
+                                 >
+                                   {isFinishing ? "..." : "Konfirmasi Selesai"}
+                                 </button>
+                              ) : selectedOrder.payments?.some((p: any) => p.payment_type === 'FINAL_BALANCE' && p.status === 'PENDING') ? (
+                                 <button 
+                                   disabled
+                                   className="px-6 py-3 bg-slate-800 rounded-xl text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2 cursor-not-allowed border border-slate-700"
+                                 >
+                                   Verifikasi Admin <AlertCircle size={14} />
+                                 </button>
+                              ) : (
+                                 <button 
+                                   onClick={() => setShowPaymentInModal(true)}
+                                   className="px-6 py-3 bg-orange-500 hover:bg-orange-600 rounded-xl text-[9px] font-black text-white uppercase tracking-[0.2em] transition-all shadow-lg shadow-orange-500/20 active:scale-95 flex items-center justify-center gap-2 group/btn"
+                                 >
+                                   Bayar Pelunasan <ArrowRight size={14} className="group-hover/btn:translate-x-1 transition-transform" />
+                                 </button>
+                              )}
                            </div>
                          )}
+                         
+                         {selectedOrder.status === 'DONE' && (
+                            <button 
+                              onClick={() => setSelectedOrder(null)}
+                              className="px-8 py-3 bg-slate-800 hover:bg-slate-700 rounded-xl text-[9px] font-black text-white uppercase tracking-[0.2em] transition-all"
+                            >
+                              Tutup
+                            </button>
+                         )}
                       </div>
-                   </div>
+                   </motion.div>
 
-                   {/* Recommendations / Notes */}
-                   <div className="space-y-4">
-                      <p className="text-[10px] font-black text-blue-500 uppercase tracking-[0.3em]">Catatan & Rekomendasi</p>
-                      <div className="p-8 bg-slate-800/30 border border-slate-800/50 rounded-[32px] relative overflow-hidden group">
-                         <div className="absolute top-0 right-0 p-4 opacity-5">
-                            <Wrench size={40} />
-                         </div>
-                         <p className="text-base text-slate-300 font-medium leading-relaxed italic relative z-10">
-                            "{selectedOrder.technical_notes || "Unit dalam pengecekan mendalam..."}"
-                         </p>
-                      </div>
-                   </div>
-                </div>
+                   {/* VISUAL BRIDGE (Prominent Connector) */}
+                   <AnimatePresence>
+                      {showPaymentInModal && (
+                        <motion.div 
+                          initial={{ opacity: 0, x: -30, scale: 0.5 }}
+                          animate={{ opacity: 1, x: 0, scale: 1 }}
+                          exit={{ opacity: 0, x: -30, scale: 0.5 }}
+                          transition={{ duration: 0.4, ease: "easeOut" }}
+                          className="w-16 flex items-center justify-center relative"
+                        >
+                           {/* Vertical Dashed Line */}
+                           <div className="absolute inset-y-12 w-0 border-l-2 border-dashed border-slate-800/50" />
+                           
+                           {/* Glowing Neon Arrow */}
+                           <div className="w-12 h-12 bg-emerald-500 rounded-full flex items-center justify-center text-white shadow-[0_0_35px_rgba(16,185,129,0.7)] border-4 border-slate-950 z-10 relative">
+                              <ArrowRight size={22} className="stroke-[3]" />
+                           </div>
+                        </motion.div>
+                      )}
+                   </AnimatePresence>
 
-                {/* Footer with Professional Badge */}
-                <div className="p-10 bg-slate-950/80 border-t border-slate-800/50 flex items-center justify-between">
-                   <div className="flex items-center gap-5">
-                      <div className="w-12 h-12 bg-slate-800 rounded-2xl border border-slate-700 flex items-center justify-center text-slate-500 shadow-xl">
-                         <Wrench size={20} />
-                      </div>
-                      <div className="flex flex-col">
-                         <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Diagnosed By Specialist</span>
-                         <p className="text-base font-black text-white">{selectedOrder.technician?.user?.name || "Master Technician"}</p>
-                      </div>
-                   </div>
-                   <button 
-                     onClick={() => setSelectedOrder(null)}
-                     className="px-12 py-4 bg-white hover:bg-slate-100 rounded-2xl text-[10px] font-black text-slate-950 uppercase tracking-[0.2em] transition-all shadow-[0_15px_30px_rgba(255,255,255,0.1)] active:scale-95"
-                   >
-                     Selesai & Tutup
-                   </button>
+                   {/* RIGHT PANEL: PAYMENT INTERFACE */}
+                   <AnimatePresence>
+                      {showPaymentInModal && (
+                        <motion.div 
+                          initial={{ x: -80, opacity: 0, scale: 0.95 }}
+                          animate={{ x: 0, opacity: 1, scale: 1 }}
+                          exit={{ x: -80, opacity: 0, scale: 0.95 }}
+                          transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+                          className="w-[440px] bg-slate-900 border border-slate-800 rounded-[32px] shadow-[0_40px_100px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col h-fit z-0"
+                        >
+                           <div className="p-6 bg-slate-800/20 border-b border-slate-800/50 flex items-center justify-between">
+                              <div className="flex items-center gap-4">
+                                 <button 
+                                   onClick={() => setShowPaymentInModal(false)}
+                                   className="w-9 h-9 flex items-center justify-center bg-slate-800 hover:bg-slate-700 rounded-full text-slate-400 transition-all border border-slate-700/50"
+                                 >
+                                   <ArrowLeft size={16} />
+                                 </button>
+                                 <h3 className="text-lg font-black text-white tracking-tight flex items-center gap-2">
+                                    <Wallet size={20} className="text-emerald-500" />
+                                    Pembayaran
+                                 </h3>
+                              </div>
+                              <button 
+                                onClick={() => {
+                                   setShowPaymentInModal(false);
+                                   setSelectedOrder(null);
+                                }}
+                                className="w-9 h-9 flex items-center justify-center bg-slate-800/50 hover:bg-red-500/20 rounded-full text-slate-400 hover:text-red-400 transition-all border border-slate-700/50"
+                              >
+                                <X size={18} />
+                              </button>
+                           </div>
+                           
+                           <div className="p-6 flex-grow overflow-y-auto custom-scrollbar bg-slate-900/50">
+                              <PaymentModalContent 
+                                 order={selectedOrder} 
+                                 amount={Math.max(0, (selectedOrder.final_cost || selectedOrder.estimated_cost) - 50000)} 
+                                 paymentType="FINAL_BALANCE"
+                                 onClose={() => {
+                                    setShowPaymentInModal(false);
+                                    setSelectedOrder(null);
+                                 }}
+                              />
+                           </div>
+                        </motion.div>
+                      )}
+                   </AnimatePresence>
                 </div>
-             </div>
+             </motion.div>
           </div>,
           document.body
         )}
@@ -415,7 +548,26 @@ export default function OrderHistoryList({
                              )}
                           </div>
 
-                          {/* 2. Utility Icons (Only for Active Orders) */}
+                          {/* 2. Final Balance Status during WORKING phase */}
+                          {!needsDP && order.status === 'WORKING' && (
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              {order.payments?.some((p: any) => p.payment_type === 'FINAL_BALANCE' && p.status === 'PENDING') ? (
+                                <div className="px-2 py-1 bg-blue-500/10 border border-blue-500/20 rounded-full flex items-center gap-1.5 shrink-0">
+                                  <div className="w-1 h-1 rounded-full bg-blue-500 animate-pulse" />
+                                  <span className="text-[8px] font-black uppercase text-blue-400 tracking-tighter">Verifikasi Lunas</span>
+                                </div>
+                              ) : (
+                                 order.payment_status === 'FULLY_PAID' && (
+                                    <div className="px-2 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full flex items-center gap-1.5 shrink-0">
+                                      <CheckCircle2 size={10} className="text-emerald-500" />
+                                      <span className="text-[8px] font-black uppercase text-emerald-500 tracking-tighter">Lunas</span>
+                                    </div>
+                                 )
+                              )}
+                            </div>
+                          )}
+
+                          {/* 3. Utility Icons (Only for Active Orders) */}
                           {!needsDP && order.status !== 'DONE' && (
                             <div className="flex items-center gap-1 shrink-0 ml-1">
                                {/* Analysis Eye: Only if findings exist - Put FIRST so Calendar stays at the far right */}
