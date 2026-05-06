@@ -43,6 +43,9 @@ export async function POST(req: NextRequest) {
 
     const order = await prisma.order.findUnique({
       where: { id: orderId },
+      include: {
+        appliance: { include: { appliance_type: true } }
+      }
     });
 
     if (!order) {
@@ -64,6 +67,17 @@ export async function POST(req: NextRequest) {
       data: {
         status: "ACCEPTED",
         technician_id: tech.id,
+      },
+    });
+
+    // Create notification for the customer
+    await prisma.notification.create({
+      data: {
+        user_id: order.user_id,
+        title: "Teknisi Ditemukan!",
+        message: `Kabar gembira bro! Teknisi ${user.name} baru saja mengambil pesanan ${order.appliance?.appliance_type?.name} Anda. Klik untuk mulai chat.`,
+        type: "SUCCESS",
+        link: `/chat?orderId=${orderId}`,
       },
     });
 

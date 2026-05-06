@@ -46,7 +46,7 @@ export default function OrderHistoryList({
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
-  // Filter by status if showActiveOnly is true
+   // Filter by status if showActiveOnly is true
   const filteredByStatus = showActiveOnly 
     ? orders.filter(o => o.status !== 'DONE' && o.status !== 'CANCELLED')
     : orders;
@@ -64,8 +64,8 @@ export default function OrderHistoryList({
     ? baseFilteredOrders.slice(0, 5) 
     : baseFilteredOrders.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
-  // Get unique categories from all orders
-  const categories = ["ALL", ...Array.from(new Set(orders.map(o => o.appliance?.appliance_type?.name).filter(Boolean)))];
+  // Get unique categories from ONLY the currently filtered status (Active or All)
+  const categories = ["ALL", ...Array.from(new Set(filteredByStatus.map(o => o.appliance?.appliance_type?.name).filter(Boolean)))];
 
   // Get last service info for the selected category
   const lastService = filterCategory !== "ALL" 
@@ -242,10 +242,16 @@ export default function OrderHistoryList({
                     }}
                     transition={{ type: "spring", stiffness: 400, damping: 17 }}
                     className={cn(
-                      "py-4 flex flex-col gap-3 transition-all group relative border-l-2 border-l-transparent hover:border-l-orange-500 cursor-default overflow-hidden",
+                      "py-4 flex flex-col gap-3 transition-all group relative border-l-2 border-l-transparent hover:border-l-orange-500 overflow-hidden",
                       isCompact ? "px-3" : "px-6",
-                      order.status === 'DONE' && "hover:border-l-emerald-500"
+                      order.status === 'DONE' && "hover:border-l-emerald-500",
+                      order.technician_id ? "cursor-pointer active:scale-[0.98]" : "cursor-default"
                     )}
+                    onClick={() => {
+                      if (order.technician_id && order.status !== 'DONE') {
+                         window.location.href = `/chat?orderId=${order.id}`;
+                      }
+                    }}
                   >
                     {/* Hover Glow Background - pointer-events-none to let clicks pass through */}
                     <div className="absolute inset-0 bg-gradient-to-r from-orange-500/0 via-orange-500/0 to-orange-500/0 group-hover:from-orange-500/[0.03] group-hover:via-transparent group-hover:to-transparent transition-all duration-500 pointer-events-none" />
@@ -259,8 +265,8 @@ export default function OrderHistoryList({
                       )}>
                         {order.status === 'DONE' ? <CheckCircle2 size={isCompact ? 18 : 24} /> : <Wrench size={isCompact ? 18 : 24} />}
                       </div>
-                      <div className="min-w-0 flex-grow">
-                        <div className="flex items-center gap-2">
+                      <div className="min-w-0 flex-grow flex flex-col gap-1.5">
+                        <div className="flex flex-wrap items-center gap-2 min-w-0">
                            <h4 className={cn(
                              "font-black text-slate-100 truncate leading-tight",
                              isCompact ? "text-[11px]" : "text-base"
@@ -268,18 +274,35 @@ export default function OrderHistoryList({
                               {order.appliance?.appliance_type?.name}
                            </h4>
                            {order.payment_status === 'FULLY_PAID' && (
-                             <span className="px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-500 text-[8px] font-black uppercase tracking-tighter">Lunas</span>
-                           )}
-                           {order.payment_status === 'DP_PAID' && (
-                             <span className="px-1.5 py-0.5 rounded-full bg-orange-500/20 text-orange-500 text-[8px] font-black uppercase tracking-tighter">DP Berhasil</span>
+                             <span className="px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-500 text-[8px] font-black uppercase tracking-tighter shrink-0 border border-emerald-500/10">Lunas</span>
                            )}
                         </div>
-                        <p className={cn(
-                          "text-slate-500 font-bold uppercase tracking-widest truncate mt-0.5",
-                          isCompact ? "text-[9px]" : "text-[10px]"
-                        )}>
-                          {order.status} • {formatDate(order.createdAt)}
-                        </p>
+
+                        <div className="flex flex-col gap-2">
+                           {/* Technician Search Status Label (Only in Active View and if DP is Paid) */}
+                           {showActiveOnly && order.status !== 'DONE' && order.payment_status !== 'UNPAID' && (
+                             <div className="w-fit">
+                               {!order.technician_id ? (
+                                 <span className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-orange-500/10 text-orange-500 text-[7px] font-black uppercase tracking-tighter border border-orange-500/20 animate-pulse">
+                                   <div className="w-1 h-1 rounded-full bg-orange-500" />
+                                   Mencari Teknisi...
+                                 </span>
+                               ) : (
+                                 <span className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-emerald-500/10 text-emerald-500 text-[7px] font-black uppercase tracking-tighter border border-emerald-500/20">
+                                   <div className="w-1 h-1 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+                                   Teknisi Ditemukan
+                                 </span>
+                               )}
+                             </div>
+                           )}
+
+                           <p className={cn(
+                             "text-slate-500 font-bold uppercase tracking-widest truncate",
+                             isCompact ? "text-[9px]" : "text-[10px]"
+                           )}>
+                             {order.status} • {formatDate(order.createdAt)}
+                           </p>
+                        </div>
                       </div>
                     </div>
 
