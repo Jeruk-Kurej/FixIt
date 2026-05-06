@@ -49,7 +49,10 @@ export default function ChatUI({ orderId, currentUserId, onClose, title, subtitl
 
   useEffect(() => {
     fetchMessages();
-    const interval = setInterval(fetchMessages, 3000);
+    const interval = setInterval(() => {
+      fetchMessages();
+      window.dispatchEvent(new CustomEvent("fixit-notif-update"));
+    }, 3000);
     return () => clearInterval(interval);
   }, [orderId]);
 

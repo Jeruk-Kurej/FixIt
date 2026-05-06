@@ -28,7 +28,12 @@ export default function NotificationHub() {
       const res = await fetch("/api/notifications");
       if (res.ok) {
         const data = await res.json();
-        setNotifications(data);
+        // Defensive check: ensure data is an array
+        if (Array.isArray(data)) {
+          setNotifications(data);
+        } else {
+          console.error("[NOTIF-HUB] Received non-array data:", data);
+        }
       }
     } catch (err) {
       console.error("Failed to fetch notifications", err);
@@ -37,9 +42,21 @@ export default function NotificationHub() {
 
   useEffect(() => {
     fetchNotifications();
-    // Refresh every 30 seconds for faster updates
-    const interval = setInterval(fetchNotifications, 30000);
-    return () => clearInterval(interval);
+    // 1. Periodic refresh (safety net)
+    const interval = setInterval(fetchNotifications, 5000);
+    
+    // 2. Instant refresh via Custom Event (Seamless Sync)
+    const handleInstantUpdate = () => {
+      // Small delay to ensure DB has finished writing if triggered by an insert
+      setTimeout(fetchNotifications, 500);
+    };
+    
+    window.addEventListener("fixit-notif-update", handleInstantUpdate);
+    
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("fixit-notif-update", handleInstantUpdate);
+    };
   }, []);
 
   useEffect(() => {
@@ -54,19 +71,20 @@ export default function NotificationHub() {
 
   const handleNotificationClick = async (n: Notification) => {
     // 1. Mark as read
-    if (!n.isRead) {
+    const isUnread = !n.isRead || n.isRead === 0 || n.isRead === "0";
+    if (isUnread) {
       try {
         await fetch("/api/notifications", {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ 
             id: n.id, 
-            isRead: true,
-            isToastShown: true 
+            isRead: 1, // Use numeric 1 for consistency with DB
+            isToastShown: 1 
           }),
         });
         setNotifications(prev => 
-          prev.map(item => item.id === n.id ? { ...item, isRead: true } : item)
+          prev.map(item => item.id === n.id ? { ...item, isRead: 1 } : item)
         );
       } catch (err) {
         console.error("Failed to mark as read", err);
@@ -80,7 +98,8 @@ export default function NotificationHub() {
     }
   };
 
-  const unreadCount = notifications.filter(n => n.isRead === false || n.isRead === 0 || !n.isRead).length;
+  // Improved unread count logic
+  const unreadCount = (notifications || []).filter(n => !n.isRead || n.isRead === 0 || n.isRead === "0").length;
 
   return (
     <div className="relative" ref={dropdownRef}>

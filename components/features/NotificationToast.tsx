@@ -71,23 +71,39 @@ export default function NotificationToast() {
         const res = await fetch("/api/notifications?untoastedOnly=true");
         if (res.ok) {
           const data = await res.json();
-          if (data.length > 0) {
+          // Ensure we have an array and it's not empty
+          if (Array.isArray(data) && data.length > 0) {
             const latest = data[0];
             
             if (!seenIds.has(latest.id)) {
+               // Notify the hub immediately that there is something new
+               window.dispatchEvent(new CustomEvent("fixit-notif-update"));
+
                // SMART CHECK: Don't show toast if we are already on that specific chat page
                if (latest.link && pathname + window.location.search === latest.link) {
                   // Mark as toasted (but not read) silently
                   markAsToasted(latest.id);
-                  setSeenIds(prev => new Set(prev).add(latest.id));
+                  setSeenIds(prev => {
+                    const next = new Set(prev);
+                    next.add(latest.id);
+                    return next;
+                  });
                   return;
                }
 
                setActiveToast(latest);
-               setSeenIds(prev => new Set(prev).add(latest.id));
+               setSeenIds(prev => {
+                 const next = new Set(prev);
+                 next.add(latest.id);
+                 return next;
+               });
                
                // Delay marking as toasted slightly to ensure it shows up correctly
-               setTimeout(() => markAsToasted(latest.id), 2000);
+               setTimeout(() => {
+                 markAsToasted(latest.id);
+                 // Signal update again after marking as toasted to keep Hub in sync
+                 window.dispatchEvent(new CustomEvent("fixit-notif-update"));
+               }, 1500);
                setTimeout(() => setActiveToast(null), 8000);
             }
           }

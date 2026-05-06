@@ -251,11 +251,21 @@ function ChatContent({ orderId, currentUserId, title, compact = false }: { order
     
     // Explicitly trigger a fetch to mark as read immediately on mount/change
     const markRead = async () => {
-      try { await fetch(`/api/chat/${orderId}`); } catch(e) {}
+      try { 
+        const res = await fetch(`/api/chat/${orderId}`); 
+        if (res.ok) {
+           // Signal notification hub to update because auto-read might have happened
+           window.dispatchEvent(new CustomEvent("fixit-notif-update"));
+        }
+      } catch(e) {}
     };
     markRead();
 
-    const interval = setInterval(fetchMessages, 3000);
+    const interval = setInterval(() => {
+      fetchMessages();
+      // Periodically signal hub too in case of background updates
+      window.dispatchEvent(new CustomEvent("fixit-notif-update"));
+    }, 3000);
     return () => clearInterval(interval);
   }, [orderId]);
 
