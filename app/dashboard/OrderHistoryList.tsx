@@ -247,8 +247,8 @@ export default function OrderHistoryList({
                       order.status === 'DONE' && "hover:border-l-emerald-500"
                     )}
                   >
-                    {/* Hover Glow Background */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-orange-500/0 via-orange-500/0 to-orange-500/0 group-hover:from-orange-500/[0.03] group-hover:via-transparent group-hover:to-transparent transition-all duration-500" />
+                    {/* Hover Glow Background - pointer-events-none to let clicks pass through */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-orange-500/0 via-orange-500/0 to-orange-500/0 group-hover:from-orange-500/[0.03] group-hover:via-transparent group-hover:to-transparent transition-all duration-500 pointer-events-none" />
                     
                     {/* Item Header */}
                     <div className="flex items-center gap-2">
@@ -308,15 +308,19 @@ export default function OrderHistoryList({
                                    </div>
                                  ) : (
                                    <button 
-                                     onClick={() => setPaymentOrder(order)}
-                                     className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-500 hover:bg-orange-600 rounded-full text-[9px] font-black uppercase text-white transition-all shadow-md shadow-orange-500/20 whitespace-nowrap active:scale-95"
+                                     onClick={(e) => {
+                                       e.stopPropagation();
+                                       setPaymentOrder(order);
+                                     }}
+                                     className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-500 hover:bg-orange-600 rounded-full text-[9px] font-black uppercase text-white transition-all shadow-md shadow-orange-500/20 whitespace-nowrap active:scale-95 relative z-30"
                                    >
                                       <Wallet size={12} />
                                       Bayar DP
                                    </button>
                                  )}
                                </>
-                             )}                              {needsBalance && (
+                             )}
+                             {needsBalance && (
                                <>
                                  {order.payments && order.payments.some((p: any) => p.status === 'PENDING') ? (
                                    <div className="px-2 py-1 bg-blue-500/10 border border-blue-500/20 rounded-full flex items-center gap-1.5 shrink-0">
@@ -325,11 +329,14 @@ export default function OrderHistoryList({
                                    </div>
                                  ) : (
                                    <button 
-                                     onClick={() => setPaymentOrder(order)}
-                                     className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 rounded-full text-[9px] font-black uppercase text-white transition-all shadow-md shadow-emerald-500/20 whitespace-nowrap active:scale-95"
+                                     onClick={(e) => {
+                                       e.stopPropagation();
+                                       setPaymentOrder(order);
+                                     }}
+                                     className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 rounded-full text-[9px] font-black uppercase text-white transition-all shadow-md shadow-emerald-500/20 whitespace-nowrap active:scale-95 relative z-30"
                                    >
                                       <Wallet size={12} />
-                                      Lunas
+                                       Lunas
                                    </button>
                                  )}
                                </>
@@ -344,7 +351,7 @@ export default function OrderHistoryList({
                                        e.stopPropagation();
                                        setReviewOrder(order);
                                      }}
-                                     className="relative z-20 flex items-center gap-1.5 px-4 py-2 bg-orange-500 hover:bg-orange-600 rounded-full text-[9px] font-black uppercase text-white transition-all shadow-lg shadow-orange-500/20 active:scale-90 group/btn"
+                                     className="relative z-30 flex items-center gap-1.5 px-4 py-2 bg-orange-500 hover:bg-orange-600 rounded-full text-[9px] font-black uppercase text-white transition-all shadow-lg shadow-orange-500/20 active:scale-90 group/btn"
                                    >
                                       <Star size={12} className="fill-white animate-pulse" />
                                       Beri Nilai
@@ -489,22 +496,24 @@ export default function OrderHistoryList({
         />
       )}
 
-      {paymentOrder && (
+      {typeof document !== "undefined" && paymentOrder && createPortal(
         <PaymentModal
           isOpen={!!paymentOrder}
           onClose={() => setPaymentOrder(null)}
           order={paymentOrder}
           paymentType={paymentOrder.payment_status === 'UNPAID' ? 'DOWN_PAYMENT' : 'FINAL_BALANCE'}
           amount={paymentOrder.payment_status === 'UNPAID' ? 50000 : (paymentOrder.final_cost ? paymentOrder.final_cost - 50000 : (paymentOrder.estimated_cost - 50000))}
-        />
+        />,
+        document.body
       )}
 
-      {reviewOrder && (
+      {typeof document !== "undefined" && reviewOrder && createPortal(
         <ReviewModal
           isOpen={!!reviewOrder}
           onClose={() => setReviewOrder(null)}
           order={reviewOrder}
-        />
+        />,
+        document.body
       )}
     </>
   );
