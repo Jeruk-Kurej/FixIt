@@ -177,13 +177,6 @@ export default function OrderHistoryList({
 
                          {/* Price Summary */}
                          <div className="bg-slate-950/60 border border-slate-800/50 rounded-xl p-5 space-y-2.5 relative overflow-hidden">
-                            {selectedOrder.payment_status === 'FULLY_PAID' && (
-                               <div className="absolute top-2 right-2 px-2 py-0.5 bg-emerald-500/20 border border-emerald-500/30 rounded-md">
-                                  <span className="text-[7px] font-black text-emerald-400 uppercase tracking-widest flex items-center gap-1">
-                                     <CheckCircle2 size={8} /> PAID
-                                  </span>
-                               </div>
-                            )}
                             
                             <div className="flex justify-between text-[9px] font-bold text-slate-500 uppercase tracking-widest">
                                <span>Estimasi + Tambahan</span>
@@ -193,13 +186,13 @@ export default function OrderHistoryList({
                                <span>Sudah Dibayar (DP)</span>
                                <span className="text-blue-400">- Rp 50.000</span>
                             </div>
+                             {selectedOrder.payment_status === 'FULLY_PAID' && (
+                                <div className="flex justify-between text-[9px] font-bold text-slate-500 uppercase tracking-widest">
+                                   <span>Pelunasan (Verified)</span>
+                                   <span className="text-emerald-400">- Rp {Math.max(0, (selectedOrder.final_cost || selectedOrder.estimated_cost) - 50000).toLocaleString('id-ID')}</span>
+                                </div>
+                             )}
 
-                            {selectedOrder.payment_status === 'FULLY_PAID' && (
-                               <div className="flex justify-between text-[9px] font-bold text-slate-500 uppercase tracking-widest">
-                                  <span>Pelunasan (Verified)</span>
-                                  <span className="text-emerald-400">- Rp {Math.max(0, (selectedOrder.final_cost || selectedOrder.estimated_cost) - 50000).toLocaleString('id-ID')}</span>
-                               </div>
-                            )}
 
                             <div className="pt-2.5 border-t border-slate-800/50 flex justify-between items-center">
                                <span className={cn(
@@ -237,7 +230,7 @@ export default function OrderHistoryList({
                                  >
                                    Detail Pembayaran <ArrowRight size={14} className="group-hover/btn:translate-x-1 transition-transform" />
                                  </button>
-                              ) : selectedOrder.payments?.some((p: any) => p.payment_type === 'FINAL_BALANCE' && p.status === 'PENDING') ? (
+                              ) : selectedOrder.payments?.some((p: any) => p.type === 'FINAL_BALANCE' && p.status === 'PENDING') ? (
                                  <button 
                                    disabled
                                    className="px-6 py-3 bg-slate-800 rounded-xl text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2 cursor-not-allowed border border-slate-700"
@@ -334,7 +327,6 @@ export default function OrderHistoryList({
                               <button 
                                 onClick={() => {
                                    setShowPaymentInModal(false);
-                                   setSelectedOrder(null);
                                 }}
                                 className="w-9 h-9 flex items-center justify-center bg-slate-800/50 hover:bg-red-500/20 rounded-full text-slate-400 hover:text-red-400 transition-all border border-slate-700/50"
                               >
@@ -349,7 +341,6 @@ export default function OrderHistoryList({
                                  paymentType="FINAL_BALANCE"
                                  onClose={() => {
                                     setShowPaymentInModal(false);
-                                    setSelectedOrder(null);
                                  }}
                               />
                            </div>
@@ -589,17 +580,14 @@ export default function OrderHistoryList({
                           {/* 2. Final Balance Status during WORKING phase */}
                           {!needsDP && order.status === 'WORKING' && (
                             <div className="flex items-center gap-1.5 shrink-0">
-                              {order.payments?.some((p: any) => p.payment_type === 'FINAL_BALANCE' && p.status === 'PENDING') ? (
+                              {order.payments?.some((p: any) => p.type === 'FINAL_BALANCE' && p.status === 'PENDING') ? (
                                 <div className="px-2 py-1 bg-blue-500/10 border border-blue-500/20 rounded-full flex items-center gap-1.5 shrink-0">
                                   <div className="w-1 h-1 rounded-full bg-blue-500 animate-pulse" />
                                   <span className="text-[8px] font-black uppercase text-blue-400 tracking-tighter">Verifikasi Lunas</span>
                                 </div>
                               ) : (
                                  order.payment_status === 'FULLY_PAID' && (
-                                    <div className="px-2 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full flex items-center gap-1.5 shrink-0">
-                                      <CheckCircle2 size={10} className="text-emerald-500" />
-                                      <span className="text-[8px] font-black uppercase text-emerald-500 tracking-tighter">Lunas</span>
-                                    </div>
+                                    null
                                  )
                               )}
                             </div>

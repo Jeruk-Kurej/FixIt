@@ -18,7 +18,8 @@ export default async function TechnicianDashboardView({ user, tech }: Technician
   // 1. Get Incoming Orders (Only those that have been paid/verified)
   const incomingOrders = await prisma.order.findMany({
     where: { 
-      status: 'PENDING',
+      status: 'ACCEPTED',
+      technician_id: null,
       payment_status: { in: ['DP_PAID', 'FULLY_PAID'] }
     },
     include: {

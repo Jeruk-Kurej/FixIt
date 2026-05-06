@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
       where: { id: payment.order_id },
       data: { 
         payment_status: newPaymentStatus as any,
-        status: payment.type === "FINAL_BALANCE" ? "DONE" : payment.order.status
+        status: (payment.type === "DOWN_PAYMENT" && payment.order.status === "PENDING") ? "ACCEPTED" : payment.order.status
       }
     });
 

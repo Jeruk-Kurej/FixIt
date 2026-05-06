@@ -52,8 +52,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Pesanan tidak ditemukan." }, { status: 404 });
     }
 
-    if (order.status !== "PENDING") {
+    if (order.status !== "PENDING" && order.status !== "ACCEPTED") {
       return NextResponse.json({ error: "Pesanan ini sudah diproses atau dibatalkan." }, { status: 400 });
+    }
+
+    if (order.technician_id) {
+      return NextResponse.json({ error: "Pesanan ini sudah diambil oleh teknisi lain." }, { status: 400 });
     }
 
     // SECURITY CHECK: Only allow acceptance if payment is verified (DP or Full)
