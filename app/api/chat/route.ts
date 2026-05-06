@@ -66,11 +66,12 @@ export async function POST(req: NextRequest) {
     if (recipientId) {
       try {
         const notifId = `notif_${Math.random().toString(36).substring(2, 15)}`;
+        const now = new Date();
         await prisma.$executeRaw`
           INSERT INTO Notification (id, user_id, title, message, link, type, isRead, isToastShown, createdAt)
-          VALUES (${notifId}, ${recipientId}, ${`Pesan baru dari ${user.name}`}, ${content.length > 50 ? content.slice(0, 50) + "..." : content}, ${`/chat?orderId=${order_id}`}, 'CHAT', 0, 0, NOW())
+          VALUES (${notifId}, ${recipientId}, ${`Pesan baru dari ${user.name}`}, ${content.length > 50 ? content.slice(0, 50) + "..." : content}, ${`/chat?orderId=${order_id}`}, 'CHAT', 0, 0, ${now})
         `;
-        console.log(`[CHAT-API] Created notification ${notifId} for ${recipientId}`);
+        console.log(`[CHAT-API] Created notification ${notifId} for ${recipientId} at ${now.toISOString()}`);
       } catch (notifError) {
         console.error("Failed to create notification for chat using RAW SQL:", notifError);
       }

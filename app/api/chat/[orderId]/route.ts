@@ -44,18 +44,30 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized access" }, { status: 403 });
     }
 
-    // AUTO-READ: Mark all messages FROM the other party as read
+    // AUTO-READ: Mark all messages AND notifications FROM the other party as read
     // Using RAW SQL Template Literals for maximum reliability
     try {
-      const affected = await prisma.$executeRaw`
+      // 1. Mark Messages as read
+      const affectedMessages = await prisma.$executeRaw`
         UPDATE Message 
         SET isRead = 1 
         WHERE order_id = ${orderId} 
         AND sender_id != ${user.id} 
         AND isRead = 0
       `;
-      if (affected > 0) {
-        console.log(`[CHAT-API] Successfully marked ${affected} messages as read`);
+      
+      // 2. Mark associated Notifications as read
+      const affectedNotifs = await prisma.$executeRaw`
+        UPDATE Notification
+        SET isRead = 1
+        WHERE user_id = ${user.id}
+        AND type = 'CHAT'
+        AND link LIKE ${`%/chat?orderId=${orderId}%`}
+        AND isRead = 0
+      `;
+
+      if (affectedMessages > 0 || affectedNotifs > 0) {
+        console.log(`[CHAT-API] Auto-read: ${affectedMessages} msgs, ${affectedNotifs} notifs marked read`);
       }
     } catch (e) {
       console.error("Raw SQL Auto-read failed:", e);
