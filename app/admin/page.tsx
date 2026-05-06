@@ -2,15 +2,18 @@ import prisma from "@/lib/prisma";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import AdminDashboardView from "./AdminDashboardView";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
 
 export default async function AdminPage() {
+  const session = await getServerSession(authOptions);
   const cookieStore = await cookies();
-  const userEmail = cookieStore.get("user_email")?.value;
+  const userEmail = session?.user?.email || cookieStore.get("user_email")?.value;
 
   if (!userEmail) redirect("/login");
 
   const user = await prisma.user.findUnique({
-    where: { email: userEmail }
+    where: { email: userEmail as string }
   });
 
   if (user?.role !== "ADMIN") {

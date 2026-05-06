@@ -5,11 +5,14 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import { ClipboardCheck, AlertCircle, CheckCircle2, ChevronLeft } from "lucide-react";
 import VerificationForm from "./VerificationForm";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
 
 export default async function VerificationPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const session = await getServerSession(authOptions);
   const cookieStore = await cookies();
-  const userEmail = cookieStore.get("user_email")?.value;
+  const userEmail = session?.user?.email || cookieStore.get("user_email")?.value;
 
   if (!userEmail) redirect("/login");
 

@@ -4,18 +4,21 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import prisma from "@/lib/prisma";
 import { Sparkles, Shield, Clock, Zap, ArrowRight, CheckCircle, Flame, Calendar } from "lucide-react";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
 
 import MembershipForm from "./MembershipForm";
 
 export default async function MembershipPage(props: { searchParams: Promise<{ add?: string }> }) {
 
+  const session = await getServerSession(authOptions);
   const cookieStore = await cookies();
-  const isLoggedIn = !!cookieStore.get("user_email")?.value;
+  const userEmail = session?.user?.email || cookieStore.get("user_email")?.value;
+  const isLoggedIn = !!userEmail;
 
   if (isLoggedIn) {
-    const userEmail = cookieStore.get("user_email")?.value;
     const user = await prisma.user.findUnique({
-      where: { email: userEmail },
+      where: { email: userEmail as string },
       include: { 
         orders: { 
           where: { problem: { contains: 'Rutin' } },
