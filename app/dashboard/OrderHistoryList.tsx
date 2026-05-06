@@ -114,7 +114,7 @@ export default function OrderHistoryList({
                  opacity: 1, 
                  y: 0,
                }}
-               transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+               transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
                className="relative flex items-center gap-0 pointer-events-none group"
              >
                 {/* UNIFIED CONTAINER FOR SHADOW & ROUNDING */}
@@ -123,7 +123,7 @@ export default function OrderHistoryList({
                    {/* LEFT PANEL: ANALYSIS DETAIL */}
                    <motion.div 
                      layout
-                     className="w-[520px] bg-slate-900 border border-slate-800 rounded-[32px] shadow-[0_40px_100px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col h-fit z-20"
+                     className="w-[520px] bg-slate-900 border border-slate-800 rounded-[32px] shadow-[0_40px_100px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col h-[680px] z-20"
                    >
                       {/* Header */}
                       <div className="p-6 bg-gradient-to-br from-slate-800/40 via-transparent to-transparent border-b border-slate-800/50 relative overflow-hidden">
@@ -149,7 +149,7 @@ export default function OrderHistoryList({
                       </div>
 
                       {/* Content */}
-                      <div className="p-6 space-y-5 overflow-y-auto custom-scrollbar bg-slate-900/30 max-h-[55vh]">
+                      <div className="p-6 space-y-5 overflow-y-auto custom-scrollbar bg-slate-900/30 flex-1">
                          {/* Findings */}
                          <div className="space-y-3">
                             <p className="text-[8px] font-black text-orange-500 uppercase tracking-[0.2em]">Temuan Diagnosa</p>
@@ -287,7 +287,7 @@ export default function OrderHistoryList({
                           initial={{ opacity: 0, x: -30, scale: 0.5 }}
                           animate={{ opacity: 1, x: 0, scale: 1 }}
                           exit={{ opacity: 0, x: -30, scale: 0.5 }}
-                          transition={{ duration: 0.4, ease: "easeOut" }}
+                          transition={{ duration: 0.25, ease: "easeOut" }}
                           className="w-16 flex items-center justify-center relative"
                         >
                            {/* Vertical Dashed Line */}
@@ -308,8 +308,8 @@ export default function OrderHistoryList({
                           initial={{ x: -80, opacity: 0, scale: 0.95 }}
                           animate={{ x: 0, opacity: 1, scale: 1 }}
                           exit={{ x: -80, opacity: 0, scale: 0.95 }}
-                          transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
-                          className="w-[440px] bg-slate-900 border border-slate-800 rounded-[32px] shadow-[0_40px_100px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col h-fit z-0"
+                          transition={{ duration: 0.25, ease: "easeOut" }}
+                          className="w-[440px] bg-slate-900 border border-slate-800 rounded-[32px] shadow-[0_40px_100px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col h-[680px] z-0"
                         >
                            <div className="p-6 bg-slate-800/20 border-b border-slate-800/50 flex items-center justify-between">
                               <div className="flex items-center gap-4">
