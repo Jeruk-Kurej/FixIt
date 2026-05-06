@@ -186,13 +186,6 @@ export default function NotificationHub() {
           )}
         </div>
         
-        {notifications.length > 0 && (
-          <div className="p-3 border-t border-slate-800 bg-slate-800/20 text-center">
-             <button className="text-[10px] font-black uppercase tracking-widest text-orange-500 hover:text-orange-400 transition-colors">
-                Bersihkan Semua
-             </button>
-          </div>
-        )}
       </div>
     </div>
   );
