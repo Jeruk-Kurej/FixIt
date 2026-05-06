@@ -176,7 +176,15 @@ export default function OrderHistoryList({
                          </div>
 
                          {/* Price Summary */}
-                         <div className="bg-slate-950/60 border border-slate-800/50 rounded-xl p-5 space-y-2.5">
+                         <div className="bg-slate-950/60 border border-slate-800/50 rounded-xl p-5 space-y-2.5 relative overflow-hidden">
+                            {selectedOrder.payment_status === 'FULLY_PAID' && (
+                               <div className="absolute top-2 right-2 px-2 py-0.5 bg-emerald-500/20 border border-emerald-500/30 rounded-md">
+                                  <span className="text-[7px] font-black text-emerald-400 uppercase tracking-widest flex items-center gap-1">
+                                     <CheckCircle2 size={8} /> PAID
+                                  </span>
+                               </div>
+                            )}
+                            
                             <div className="flex justify-between text-[9px] font-bold text-slate-500 uppercase tracking-widest">
                                <span>Estimasi + Tambahan</span>
                                <span className="text-white">Rp {(selectedOrder.final_cost || selectedOrder.estimated_cost)?.toLocaleString('id-ID')}</span>
@@ -185,9 +193,27 @@ export default function OrderHistoryList({
                                <span>Sudah Dibayar (DP)</span>
                                <span className="text-blue-400">- Rp 50.000</span>
                             </div>
+
+                            {selectedOrder.payment_status === 'FULLY_PAID' && (
+                               <div className="flex justify-between text-[9px] font-bold text-slate-500 uppercase tracking-widest">
+                                  <span>Pelunasan (Verified)</span>
+                                  <span className="text-emerald-400">- Rp {Math.max(0, (selectedOrder.final_cost || selectedOrder.estimated_cost) - 50000).toLocaleString('id-ID')}</span>
+                               </div>
+                            )}
+
                             <div className="pt-2.5 border-t border-slate-800/50 flex justify-between items-center">
-                               <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">Sisa Pelunasan</span>
-                               <span className="text-lg font-black text-emerald-400">Rp {Math.max(0, (selectedOrder.final_cost || selectedOrder.estimated_cost) - 50000).toLocaleString('id-ID')}</span>
+                               <span className={cn(
+                                 "text-[9px] font-black uppercase tracking-widest",
+                                 selectedOrder.payment_status === 'FULLY_PAID' ? "text-emerald-500" : "text-orange-500"
+                               )}>
+                                  {selectedOrder.payment_status === 'FULLY_PAID' ? "Status Pembayaran" : "Sisa Pelunasan"}
+                               </span>
+                               <span className={cn(
+                                 "font-black transition-all",
+                                 selectedOrder.payment_status === 'FULLY_PAID' ? "text-lg text-emerald-400" : "text-lg text-orange-400"
+                               )}>
+                                  {selectedOrder.payment_status === 'FULLY_PAID' ? "LUNAS" : `Rp ${Math.max(0, (selectedOrder.final_cost || selectedOrder.estimated_cost) - 50000).toLocaleString('id-ID')}`}
+                               </span>
                             </div>
                          </div>
                       </div>
@@ -203,22 +229,13 @@ export default function OrderHistoryList({
 
                          {selectedOrder.status === 'WORKING' && !showPaymentInModal && (
                            <div className="flex gap-2">
-                              {selectedOrder.payment_status === 'FULLY_PAID' || ((selectedOrder.final_cost || selectedOrder.estimated_cost) - 50000) <= 0 ? (
+                              {/* 1. Payment Action (Always accessible) */}
+                              {selectedOrder.payment_status === 'FULLY_PAID' ? (
                                  <button 
-                                   disabled={isFinishing}
-                                   onClick={async () => {
-                                      setIsFinishing(true);
-                                      try {
-                                         const res = await fetch(`/api/orders/${selectedOrder.id}/finish`, { method: 'POST' });
-                                         if (res.ok) {
-                                            setSelectedOrder(null);
-                                            window.location.reload();
-                                         }
-                                      } catch (err) {} finally { setIsFinishing(false); }
-                                   }}
-                                   className="px-6 py-3 bg-blue-500 hover:bg-blue-600 rounded-xl text-[9px] font-black text-white uppercase tracking-[0.2em] transition-all shadow-lg shadow-blue-500/20 active:scale-95 flex items-center justify-center gap-2"
+                                   onClick={() => setShowPaymentInModal(true)}
+                                   className="px-6 py-3 bg-slate-800 hover:bg-slate-700 rounded-xl text-[9px] font-black text-slate-300 uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2 group/btn"
                                  >
-                                   {isFinishing ? "..." : "Konfirmasi Selesai"}
+                                   Detail Pembayaran <ArrowRight size={14} className="group-hover/btn:translate-x-1 transition-transform" />
                                  </button>
                               ) : selectedOrder.payments?.some((p: any) => p.payment_type === 'FINAL_BALANCE' && p.status === 'PENDING') ? (
                                  <button 
@@ -233,6 +250,27 @@ export default function OrderHistoryList({
                                    className="px-6 py-3 bg-orange-500 hover:bg-orange-600 rounded-xl text-[9px] font-black text-white uppercase tracking-[0.2em] transition-all shadow-lg shadow-orange-500/20 active:scale-95 flex items-center justify-center gap-2 group/btn"
                                  >
                                    Bayar Pelunasan <ArrowRight size={14} className="group-hover/btn:translate-x-1 transition-transform" />
+                                 </button>
+                              )}
+
+                              {/* 2. Finish Action (Only if Fully Paid or Zero Balance) */}
+                              {(selectedOrder.payment_status === 'FULLY_PAID' || ((selectedOrder.final_cost || selectedOrder.estimated_cost) - 50000) <= 0) && (
+                                 <button 
+                                   disabled={isFinishing}
+                                   onClick={async (e) => {
+                                      e.stopPropagation();
+                                      setIsFinishing(true);
+                                      try {
+                                         const res = await fetch(`/api/orders/${selectedOrder.id}/finish`, { method: 'POST' });
+                                         if (res.ok) {
+                                            setSelectedOrder(null);
+                                            window.location.reload();
+                                         }
+                                      } catch (err) {} finally { setIsFinishing(false); }
+                                   }}
+                                   className="px-6 py-3 bg-emerald-500 hover:bg-emerald-600 rounded-xl text-[9px] font-black text-white uppercase tracking-[0.2em] transition-all shadow-lg shadow-emerald-500/20 active:scale-95 flex items-center justify-center gap-2"
+                                 >
+                                   {isFinishing ? "..." : "Konfirmasi Selesai"}
                                  </button>
                               )}
                            </div>
