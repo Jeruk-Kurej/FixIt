@@ -473,16 +473,23 @@ export default function OrderHistoryList({
                       </div>
 
                       <div className="flex flex-col gap-2">
-                        {/* Rejection Alert */}
-                        {order.payments?.some((p: any) => p.status === 'INVALID') && (
+                        {/* Rejection Alert - Only show if NOT superseded by a PENDING or VALID payment of same type */}
+                        {order.payments?.some((p: any) => {
+                          if (p.status !== 'INVALID') return false;
+                          // Check if there is a newer/other payment of the same type that is PENDING or VALID
+                          const isSuperseded = order.payments.some((p2: any) => 
+                            p2.type === p.type && (p2.status === 'VALID' || p2.status === 'PENDING')
+                          );
+                          return !isSuperseded;
+                        }) && (
                           <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-2xl flex items-start gap-3 animate-in shake duration-500">
-                            <AlertCircle size={16} className="text-red-500 shrink-0 mt-0.5" />
-                            <div className="space-y-1">
-                              <p className="text-[10px] font-black text-red-500 uppercase tracking-widest">Pembayaran Ditolak</p>
-                              <p className="text-[10px] font-bold text-slate-400 leading-relaxed italic">
-                                "{order.payments.find((p: any) => p.status === 'INVALID')?.admin_notes || "Bukti transfer tidak sesuai."}"
-                              </p>
-                            </div>
+                             <AlertCircle size={16} className="text-red-500 shrink-0 mt-0.5" />
+                             <div className="space-y-1">
+                                <p className="text-[10px] font-black text-red-500 uppercase tracking-widest">Pembayaran Ditolak</p>
+                                <p className="text-[10px] font-bold text-slate-400 leading-relaxed italic">
+                                   "{order.payments.find((p: any) => p.status === 'INVALID')?.admin_notes || "Bukti transfer tidak sesuai."}"
+                                </p>
+                             </div>
                           </div>
                         )}
 
