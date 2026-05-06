@@ -1,14 +1,17 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { cookies } from "next/headers";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const untoastedOnly = searchParams.get("untoastedOnly") === "true";
   const unreadOnly = searchParams.get("unreadOnly") === "true";
 
+  const session = await getServerSession(authOptions);
   const cookieStore = await cookies();
-  const userEmail = cookieStore.get("user_email")?.value;
+  const userEmail = session?.user?.email || cookieStore.get("user_email")?.value;
 
   if (!userEmail) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -41,8 +44,9 @@ export async function GET(req: Request) {
 }
 
 export async function PATCH(request: Request) {
+  const session = await getServerSession(authOptions);
   const cookieStore = await cookies();
-  const userEmail = cookieStore.get("user_email")?.value;
+  const userEmail = session?.user?.email || cookieStore.get("user_email")?.value;
 
   if (!userEmail) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
