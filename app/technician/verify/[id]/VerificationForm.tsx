@@ -138,10 +138,10 @@ export default function VerificationForm({ order }: { order: any }) {
                 <label 
                   key={item.label} 
                   className={cn(
-                    "flex flex-col gap-4 p-5 rounded-[24px] border-2 transition-all cursor-pointer relative group overflow-hidden",
+                    "relative flex flex-col gap-4 p-6 rounded-[28px] border-2 transition-all duration-500 cursor-pointer group overflow-hidden",
                     isSelected 
-                      ? "bg-orange-500/5 border-orange-500/50 ring-4 ring-orange-500/5" 
-                      : "bg-slate-950/40 border-slate-800 hover:border-slate-700 hover:bg-slate-900/50"
+                      ? "bg-orange-500/10 border-orange-500 shadow-[0_0_30px_rgba(249,115,22,0.15)] scale-[1.02]" 
+                      : "bg-slate-950/40 border-slate-800/50 hover:border-slate-600 hover:bg-slate-900/60"
                   )}
                 >
                   <input 
@@ -151,36 +151,47 @@ export default function VerificationForm({ order }: { order: any }) {
                     onChange={() => toggleFinding(item.label)}
                   />
                   
-                  <div className="flex items-start justify-between">
+                  {/* Glass Background Highlight */}
+                  <div className={cn(
+                    "absolute inset-0 bg-gradient-to-br from-orange-500/10 to-transparent opacity-0 transition-opacity duration-500",
+                    isSelected ? "opacity-100" : "group-hover:opacity-50"
+                  )} />
+
+                  <div className="relative z-10 flex items-start justify-between">
                      <div className={cn(
-                        "p-3 rounded-xl transition-all duration-300",
-                        isSelected ? "bg-orange-500 text-white shadow-lg shadow-orange-500/30" : "bg-slate-800 text-slate-400 group-hover:bg-slate-700"
+                        "w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-500",
+                        isSelected 
+                          ? "bg-orange-500 text-white shadow-[0_8px_20px_rgba(249,115,22,0.4)] scale-110" 
+                          : "bg-slate-800 text-slate-500 group-hover:bg-slate-700 group-hover:text-slate-300"
                      )}>
-                        <Icon size={20} />
+                        <Icon size={24} className={cn(isSelected && "animate-pulse")} />
                      </div>
-                     <div className={cn(
-                        "px-2 py-1 rounded text-[8px] font-black uppercase tracking-widest border",
-                        CATEGORY_STYLES[item.category]
-                     )}>
-                        {item.category}
+                     
+                     <div className="flex flex-col items-end gap-2">
+                        <div className={cn(
+                           "px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.15em] border transition-all duration-300",
+                           CATEGORY_STYLES[item.category],
+                           isSelected && "border-white/20"
+                        )}>
+                           {item.category}
+                        </div>
                      </div>
                   </div>
 
-                  <div>
-                     <span className={cn(
-                        "text-sm font-black tracking-tight transition-colors",
-                        isSelected ? "text-orange-400" : "text-slate-300"
+                  <div className="relative z-10 mt-2">
+                     <h4 className={cn(
+                        "text-base font-black tracking-tight transition-all duration-300",
+                        isSelected ? "text-white" : "text-slate-400 group-hover:text-slate-200"
                      )}>
                         {item.label}
-                     </span>
+                     </h4>
+                     <p className={cn(
+                        "text-[10px] font-bold uppercase tracking-widest mt-1 transition-all duration-300",
+                        isSelected ? "text-orange-400/80" : "text-slate-600 group-hover:text-slate-500"
+                     )}>
+                        Technical Fault Detected
+                     </p>
                   </div>
-
-                  {/* Checkmark indicator for selected state */}
-                  {isSelected && (
-                    <div className="absolute -top-2 -right-2 w-10 h-10 bg-orange-500 rotate-45 flex items-end justify-center pb-1">
-                       <CheckCircle2 size={12} className="text-white -rotate-45 mb-1" />
-                    </div>
-                  )}
                 </label>
               );
             })}

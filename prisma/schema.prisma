@@ -133,7 +133,7 @@ model Order {
   final_cost          Int?
   createdAt           DateTime      @default(now())
   service_type        ServiceType   @default(HOME_SERVICE)
-  technical_findings  String?       @db.LongText
+   technical_findings  Json?
   technical_notes     String?       @db.Text
   payment_status      PaymentStatus @default(UNPAID)
   messages            Message[]
