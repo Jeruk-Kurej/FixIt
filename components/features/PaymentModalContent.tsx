@@ -22,6 +22,10 @@ export default function PaymentModalContent({ order, paymentType, amount, onClos
   const [status, setStatus] = useState<"IDLE" | "SUCCESS" | "ERROR">("IDLE");
   const [errorMessage, setErrorMessage] = useState("");
 
+  // Check if there's already a valid payment for this type
+  const existingPayment = order.payments?.find((p: any) => p.type === paymentType && p.status === 'VALID');
+  const isPaid = !!existingPayment;
+
   const handleCopy = () => {
     navigator.clipboard.writeText("80102938812");
     setIsCopied(true);
@@ -109,6 +113,50 @@ export default function PaymentModalContent({ order, paymentType, amount, onClos
           <p className="text-xs text-slate-400 font-medium">
             {activeTab === 'QRIS' ? 'Pembayaran QRIS sedang divalidasi.' : 'Bukti transfer terkirim. Admin akan memverifikasi.'}
           </p>
+        </div>
+      ) : isPaid ? (
+        /* READ-ONLY VIEW FOR ALREADY PAID */
+        <div className="space-y-6 animate-in fade-in duration-500">
+           <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-5 flex items-center justify-between">
+              <div>
+                 <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-1">Status Pembayaran</p>
+                 <p className="text-lg font-black text-slate-100 uppercase tracking-tight">Telah Diverifikasi</p>
+              </div>
+              <div className="w-12 h-12 bg-emerald-500 rounded-full flex items-center justify-center text-white shadow-lg shadow-emerald-500/20">
+                 <CheckCircle2 size={24} />
+              </div>
+           </div>
+
+           <div className="bg-slate-950/50 rounded-2xl p-5 border border-slate-800">
+              <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Total Terbayar</p>
+              <p className="text-3xl font-black text-white tracking-tight">{formatRupiah(amount)}</p>
+           </div>
+
+           <div className="space-y-3">
+              <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest px-1">Bukti Pembayaran</p>
+              <div className="relative group">
+                 {existingPayment.proof_url ? (
+                    <div className="border-2 border-slate-800 rounded-2xl overflow-hidden bg-slate-900 aspect-video flex items-center justify-center">
+                       <img 
+                         src={existingPayment.proof_url} 
+                         alt="Bukti Transfer" 
+                         className="w-full h-full object-contain"
+                       />
+                    </div>
+                 ) : (
+                    <div className="p-8 border-2 border-dashed border-slate-800 rounded-2xl text-center">
+                       <p className="text-[10px] font-bold text-slate-500 uppercase italic">Metode QRIS / No Proof</p>
+                    </div>
+                 )}
+              </div>
+           </div>
+
+           <button 
+             onClick={onClose}
+             className="w-full py-4 mt-4 bg-slate-800 hover:bg-slate-700 rounded-2xl text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] transition-all"
+           >
+             Tutup Detail
+           </button>
         </div>
       ) : (
         <div className="space-y-6">

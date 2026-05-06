@@ -162,11 +162,11 @@ export default function CustomerDashboardView({ user, calendarEvents, pendingMem
                   {(() => {
                     const pendingOrders = user.orders.filter((o: any) => 
                       (o.payment_status === 'UNPAID' && o.status !== 'CANCELLED') || 
-                      (o.payments && o.payments.some((p: any) => p.payment_type === 'DOWN_PAYMENT' && p.status === 'PENDING'))
+                      (o.payments && o.payments.some((p: any) => p.type === 'DOWN_PAYMENT' && p.status === 'PENDING'))
                     );
                     const activeOrders = user.orders.filter((o: any) => 
                       o.status !== 'DONE' && o.status !== 'CANCELLED' &&
-                      !((o.payment_status === 'UNPAID') || (o.payments && o.payments.some((p: any) => p.payment_type === 'DOWN_PAYMENT' && p.status === 'PENDING')))
+                      !((o.payment_status === 'UNPAID') || (o.payments && o.payments.some((p: any) => p.type === 'DOWN_PAYMENT' && p.status === 'PENDING')))
                     );
                     const hasPending = pendingOrders.length > 0;
 

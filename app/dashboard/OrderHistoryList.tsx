@@ -114,7 +114,7 @@ export default function OrderHistoryList({
                  opacity: 1, 
                  y: 0,
                }}
-               transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+               transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
                className="relative flex items-center gap-0 pointer-events-none group"
              >
                 {/* UNIFIED CONTAINER FOR SHADOW & ROUNDING */}
@@ -123,7 +123,7 @@ export default function OrderHistoryList({
                    {/* LEFT PANEL: ANALYSIS DETAIL */}
                    <motion.div 
                      layout
-                     className="w-[520px] bg-slate-900 border border-slate-800 rounded-[32px] shadow-[0_40px_100px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col h-fit z-20"
+                     className="w-[520px] bg-slate-900 border border-slate-800 rounded-[32px] shadow-[0_40px_100px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col h-[680px] z-20"
                    >
                       {/* Header */}
                       <div className="p-6 bg-gradient-to-br from-slate-800/40 via-transparent to-transparent border-b border-slate-800/50 relative overflow-hidden">
@@ -149,7 +149,7 @@ export default function OrderHistoryList({
                       </div>
 
                       {/* Content */}
-                      <div className="p-6 space-y-5 overflow-y-auto custom-scrollbar bg-slate-900/30 max-h-[55vh]">
+                      <div className="p-6 space-y-5 overflow-y-auto custom-scrollbar bg-slate-900/30 flex-1">
                          {/* Findings */}
                          <div className="space-y-3">
                             <p className="text-[8px] font-black text-orange-500 uppercase tracking-[0.2em]">Temuan Diagnosa</p>
@@ -176,7 +176,8 @@ export default function OrderHistoryList({
                          </div>
 
                          {/* Price Summary */}
-                         <div className="bg-slate-950/60 border border-slate-800/50 rounded-xl p-5 space-y-2.5">
+                         <div className="bg-slate-950/60 border border-slate-800/50 rounded-xl p-5 space-y-2.5 relative overflow-hidden">
+                            
                             <div className="flex justify-between text-[9px] font-bold text-slate-500 uppercase tracking-widest">
                                <span>Estimasi + Tambahan</span>
                                <span className="text-white">Rp {(selectedOrder.final_cost || selectedOrder.estimated_cost)?.toLocaleString('id-ID')}</span>
@@ -185,9 +186,27 @@ export default function OrderHistoryList({
                                <span>Sudah Dibayar (DP)</span>
                                <span className="text-blue-400">- Rp 50.000</span>
                             </div>
+                             {selectedOrder.payment_status === 'FULLY_PAID' && (
+                                <div className="flex justify-between text-[9px] font-bold text-slate-500 uppercase tracking-widest">
+                                   <span>Pelunasan (Verified)</span>
+                                   <span className="text-emerald-400">- Rp {Math.max(0, (selectedOrder.final_cost || selectedOrder.estimated_cost) - 50000).toLocaleString('id-ID')}</span>
+                                </div>
+                             )}
+
+
                             <div className="pt-2.5 border-t border-slate-800/50 flex justify-between items-center">
-                               <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">Sisa Pelunasan</span>
-                               <span className="text-lg font-black text-emerald-400">Rp {Math.max(0, (selectedOrder.final_cost || selectedOrder.estimated_cost) - 50000).toLocaleString('id-ID')}</span>
+                               <span className={cn(
+                                 "text-[9px] font-black uppercase tracking-widest",
+                                 selectedOrder.payment_status === 'FULLY_PAID' ? "text-emerald-500" : "text-orange-500"
+                               )}>
+                                  {selectedOrder.payment_status === 'FULLY_PAID' ? "Status Pembayaran" : "Sisa Pelunasan"}
+                               </span>
+                               <span className={cn(
+                                 "font-black transition-all",
+                                 selectedOrder.payment_status === 'FULLY_PAID' ? "text-lg text-emerald-400" : "text-lg text-orange-400"
+                               )}>
+                                  {selectedOrder.payment_status === 'FULLY_PAID' ? "LUNAS" : `Rp ${Math.max(0, (selectedOrder.final_cost || selectedOrder.estimated_cost) - 50000).toLocaleString('id-ID')}`}
+                               </span>
                             </div>
                          </div>
                       </div>
@@ -203,24 +222,15 @@ export default function OrderHistoryList({
 
                          {selectedOrder.status === 'WORKING' && !showPaymentInModal && (
                            <div className="flex gap-2">
-                              {selectedOrder.payment_status === 'FULLY_PAID' || ((selectedOrder.final_cost || selectedOrder.estimated_cost) - 50000) <= 0 ? (
+                              {/* 1. Payment Action (Always accessible) */}
+                              {selectedOrder.payment_status === 'FULLY_PAID' ? (
                                  <button 
-                                   disabled={isFinishing}
-                                   onClick={async () => {
-                                      setIsFinishing(true);
-                                      try {
-                                         const res = await fetch(`/api/orders/${selectedOrder.id}/finish`, { method: 'POST' });
-                                         if (res.ok) {
-                                            setSelectedOrder(null);
-                                            window.location.reload();
-                                         }
-                                      } catch (err) {} finally { setIsFinishing(false); }
-                                   }}
-                                   className="px-6 py-3 bg-blue-500 hover:bg-blue-600 rounded-xl text-[9px] font-black text-white uppercase tracking-[0.2em] transition-all shadow-lg shadow-blue-500/20 active:scale-95 flex items-center justify-center gap-2"
+                                   onClick={() => setShowPaymentInModal(true)}
+                                   className="px-6 py-3 bg-slate-800 hover:bg-slate-700 rounded-xl text-[9px] font-black text-slate-300 uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2 group/btn"
                                  >
-                                   {isFinishing ? "..." : "Konfirmasi Selesai"}
+                                   Detail Pembayaran <ArrowRight size={14} className="group-hover/btn:translate-x-1 transition-transform" />
                                  </button>
-                              ) : selectedOrder.payments?.some((p: any) => p.payment_type === 'FINAL_BALANCE' && p.status === 'PENDING') ? (
+                              ) : selectedOrder.payments?.some((p: any) => p.type === 'FINAL_BALANCE' && p.status === 'PENDING') ? (
                                  <button 
                                    disabled
                                    className="px-6 py-3 bg-slate-800 rounded-xl text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2 cursor-not-allowed border border-slate-700"
@@ -233,6 +243,27 @@ export default function OrderHistoryList({
                                    className="px-6 py-3 bg-orange-500 hover:bg-orange-600 rounded-xl text-[9px] font-black text-white uppercase tracking-[0.2em] transition-all shadow-lg shadow-orange-500/20 active:scale-95 flex items-center justify-center gap-2 group/btn"
                                  >
                                    Bayar Pelunasan <ArrowRight size={14} className="group-hover/btn:translate-x-1 transition-transform" />
+                                 </button>
+                              )}
+
+                              {/* 2. Finish Action (Only if Fully Paid or Zero Balance) */}
+                              {(selectedOrder.payment_status === 'FULLY_PAID' || ((selectedOrder.final_cost || selectedOrder.estimated_cost) - 50000) <= 0) && (
+                                 <button 
+                                   disabled={isFinishing}
+                                   onClick={async (e) => {
+                                      e.stopPropagation();
+                                      setIsFinishing(true);
+                                      try {
+                                         const res = await fetch(`/api/orders/${selectedOrder.id}/finish`, { method: 'POST' });
+                                         if (res.ok) {
+                                            setSelectedOrder(null);
+                                            window.location.reload();
+                                         }
+                                      } catch (err) {} finally { setIsFinishing(false); }
+                                   }}
+                                   className="px-6 py-3 bg-emerald-500 hover:bg-emerald-600 rounded-xl text-[9px] font-black text-white uppercase tracking-[0.2em] transition-all shadow-lg shadow-emerald-500/20 active:scale-95 flex items-center justify-center gap-2"
+                                 >
+                                   {isFinishing ? "..." : "Konfirmasi Selesai"}
                                  </button>
                               )}
                            </div>
@@ -256,7 +287,7 @@ export default function OrderHistoryList({
                           initial={{ opacity: 0, x: -30, scale: 0.5 }}
                           animate={{ opacity: 1, x: 0, scale: 1 }}
                           exit={{ opacity: 0, x: -30, scale: 0.5 }}
-                          transition={{ duration: 0.4, ease: "easeOut" }}
+                          transition={{ duration: 0.25, ease: "easeOut" }}
                           className="w-16 flex items-center justify-center relative"
                         >
                            {/* Vertical Dashed Line */}
@@ -277,8 +308,8 @@ export default function OrderHistoryList({
                           initial={{ x: -80, opacity: 0, scale: 0.95 }}
                           animate={{ x: 0, opacity: 1, scale: 1 }}
                           exit={{ x: -80, opacity: 0, scale: 0.95 }}
-                          transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
-                          className="w-[440px] bg-slate-900 border border-slate-800 rounded-[32px] shadow-[0_40px_100px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col h-fit z-0"
+                          transition={{ duration: 0.25, ease: "easeOut" }}
+                          className="w-[440px] bg-slate-900 border border-slate-800 rounded-[32px] shadow-[0_40px_100px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col h-[680px] z-0"
                         >
                            <div className="p-6 bg-slate-800/20 border-b border-slate-800/50 flex items-center justify-between">
                               <div className="flex items-center gap-4">
@@ -296,7 +327,6 @@ export default function OrderHistoryList({
                               <button 
                                 onClick={() => {
                                    setShowPaymentInModal(false);
-                                   setSelectedOrder(null);
                                 }}
                                 className="w-9 h-9 flex items-center justify-center bg-slate-800/50 hover:bg-red-500/20 rounded-full text-slate-400 hover:text-red-400 transition-all border border-slate-700/50"
                               >
@@ -311,7 +341,6 @@ export default function OrderHistoryList({
                                  paymentType="FINAL_BALANCE"
                                  onClose={() => {
                                     setShowPaymentInModal(false);
-                                    setSelectedOrder(null);
                                  }}
                               />
                            </div>
@@ -551,17 +580,14 @@ export default function OrderHistoryList({
                           {/* 2. Final Balance Status during WORKING phase */}
                           {!needsDP && order.status === 'WORKING' && (
                             <div className="flex items-center gap-1.5 shrink-0">
-                              {order.payments?.some((p: any) => p.payment_type === 'FINAL_BALANCE' && p.status === 'PENDING') ? (
+                              {order.payments?.some((p: any) => p.type === 'FINAL_BALANCE' && p.status === 'PENDING') ? (
                                 <div className="px-2 py-1 bg-blue-500/10 border border-blue-500/20 rounded-full flex items-center gap-1.5 shrink-0">
                                   <div className="w-1 h-1 rounded-full bg-blue-500 animate-pulse" />
                                   <span className="text-[8px] font-black uppercase text-blue-400 tracking-tighter">Verifikasi Lunas</span>
                                 </div>
                               ) : (
                                  order.payment_status === 'FULLY_PAID' && (
-                                    <div className="px-2 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full flex items-center gap-1.5 shrink-0">
-                                      <CheckCircle2 size={10} className="text-emerald-500" />
-                                      <span className="text-[8px] font-black uppercase text-emerald-500 tracking-tighter">Lunas</span>
-                                    </div>
+                                    null
                                  )
                               )}
                             </div>
