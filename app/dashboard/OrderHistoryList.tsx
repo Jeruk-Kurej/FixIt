@@ -92,86 +92,98 @@ export default function OrderHistoryList({
         {/* Findings Modal - Teleported to Body via Portal for True Full Screen Focus */}
         {typeof document !== "undefined" && selectedOrder && createPortal(
           <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-             {/* Deep Focus Backdrop */}
              <div 
-               className="absolute inset-0 bg-slate-950/90 backdrop-blur-md transition-all duration-500"
+               className="absolute inset-0 bg-slate-950/80 backdrop-blur-md"
                onClick={() => setSelectedOrder(null)}
              />
              
-             {/* Content Modal - Centered and Larger */}
-             <div className="relative w-full max-w-xl bg-slate-900 border border-slate-800 rounded-[32px] shadow-[0_30px_100px_rgba(0,0,0,0.8)] overflow-hidden animate-in fade-in zoom-in duration-300">
-                {/* Header with Background Gradient */}
-                <div className="p-8 bg-gradient-to-b from-slate-800/50 to-transparent border-b border-slate-800/50">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-5">
-                      <div className="w-16 h-16 bg-orange-500 rounded-3xl flex items-center justify-center text-white shadow-2xl shadow-orange-500/40 rotate-3">
-                        <ClipboardCheck size={32} />
+             <div className="relative w-full max-w-2xl bg-slate-900 border border-slate-800 rounded-[40px] shadow-[0_40px_120px_rgba(0,0,0,0.9)] overflow-hidden animate-in fade-in zoom-in duration-200">
+                {/* Header with Premium Gradient */}
+                <div className="p-10 bg-gradient-to-br from-slate-800/40 via-transparent to-transparent border-b border-slate-800/50 relative overflow-hidden">
+                   <div className="absolute top-0 right-0 p-16 opacity-[0.03] pointer-events-none rotate-12">
+                      <ClipboardCheck size={200} />
+                   </div>
+
+                   <div className="flex items-center justify-between relative z-10">
+                    <div className="flex items-center gap-6">
+                      <div className="w-20 h-20 bg-orange-500 rounded-[28px] flex items-center justify-center text-white shadow-[0_15px_40px_rgba(249,115,22,0.4)] rotate-3">
+                        <ClipboardCheck size={40} />
                       </div>
                       <div>
-                        <h3 className="text-2xl font-black text-white tracking-tight">Detail Analisis</h3>
-                        <p className="text-xs font-bold text-slate-500 uppercase tracking-[0.3em]">Order ID: {selectedOrder.id.slice(0, 12)}</p>
+                        <h3 className="text-3xl font-black text-white tracking-tight">Detail Analisis</h3>
+                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em] mt-1">
+                           Transparency Report • #{selectedOrder.id.slice(0, 8)}
+                        </p>
                       </div>
                     </div>
                     <button 
                       onClick={() => setSelectedOrder(null)}
-                      className="w-10 h-10 flex items-center justify-center bg-slate-800 hover:bg-red-500/20 rounded-full text-slate-400 hover:text-red-400 transition-all border border-slate-700/50"
+                      className="w-12 h-12 flex items-center justify-center bg-slate-800 hover:bg-slate-700 rounded-full text-slate-400 hover:text-white transition-all border border-slate-700/50"
                     >
-                      <X size={20} />
+                      <X size={24} />
                     </button>
                   </div>
                 </div>
 
-                <div className="p-8 space-y-8 max-h-[70vh] overflow-y-auto custom-scrollbar">
-                   {/* Summary Section */}
-                   <div className="space-y-3">
-                      <p className="text-[10px] font-black text-orange-500 uppercase tracking-[0.3em]">Ringkasan Temuan</p>
-                      <div className="p-6 bg-slate-800/30 border border-slate-800/80 rounded-[24px] text-lg leading-relaxed text-slate-200 font-medium italic">
-                         "{selectedOrder.technical_findings?.summary || "Tidak ada ringkasan temuan..."}"
+                <div className="p-10 space-y-10 max-h-[65vh] overflow-y-auto custom-scrollbar bg-slate-900/30">
+                   
+                   {/* Results Grid */}
+                   <div className="space-y-6">
+                      <div className="flex items-center justify-between">
+                         <p className="text-[10px] font-black text-orange-500 uppercase tracking-[0.3em]">Temuan Diagnosa</p>
+                         <span className="px-3 py-1 bg-emerald-500/10 text-emerald-500 text-[8px] font-black rounded-full border border-emerald-500/20 uppercase tracking-widest">
+                            Verified by Specialist
+                         </span>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                         {Array.isArray(selectedOrder.technical_findings) ? (
+                           selectedOrder.technical_findings.map((item: string) => (
+                             <div key={item} className="flex items-center gap-4 p-5 bg-slate-950/50 border border-slate-800 rounded-3xl">
+                                <div className="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center text-slate-400">
+                                   <AlertCircle size={20} />
+                                </div>
+                                <span className="text-[13px] font-black text-slate-300 tracking-tight leading-snug">{item}</span>
+                             </div>
+                           ))
+                         ) : (
+                           <div className="col-span-full p-10 bg-slate-950/30 border border-dashed border-slate-800 rounded-3xl text-center">
+                              <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest italic">Belum ada data temuan spesifik</p>
+                           </div>
+                         )}
                       </div>
                    </div>
-                   
-                   {/* Checklist Grid */}
-                   {selectedOrder.technical_findings?.checklist && (
-                     <div className="space-y-4">
-                        <p className="text-[10px] font-black text-blue-500 uppercase tracking-[0.3em]">Checklist Kondisi Unit</p>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                           {Object.entries(selectedOrder.technical_findings.checklist).map(([key, val]: any) => (
-                             <div key={key} className="flex items-center justify-between p-4 bg-slate-800/20 rounded-2xl border border-slate-800/40 hover:border-slate-700 transition-colors">
-                                <span className="text-[11px] font-black text-slate-400 uppercase tracking-wider">{key.replace(/_/g, ' ')}</span>
-                                {val ? (
-                                  <div className="flex items-center gap-2 text-emerald-400">
-                                     <span className="text-[8px] font-black uppercase tracking-tighter">Normal</span>
-                                     <CheckCircle2 size={16} />
-                                  </div>
-                                ) : (
-                                  <div className="flex items-center gap-2 text-orange-400">
-                                     <span className="text-[8px] font-black uppercase tracking-tighter">Bermasalah</span>
-                                     <AlertCircle size={16} />
-                                  </div>
-                                )}
-                             </div>
-                           ))}
-                        </div>
-                     </div>
-                   )}
+
+                   {/* Recommendations / Notes */}
+                   <div className="space-y-4">
+                      <p className="text-[10px] font-black text-blue-500 uppercase tracking-[0.3em]">Catatan & Rekomendasi</p>
+                      <div className="p-8 bg-slate-800/30 border border-slate-800/50 rounded-[32px] relative overflow-hidden group">
+                         <div className="absolute top-0 right-0 p-4 opacity-5">
+                            <Wrench size={40} />
+                         </div>
+                         <p className="text-base text-slate-300 font-medium leading-relaxed italic relative z-10">
+                            "{selectedOrder.technical_notes || "Unit dalam pengecekan mendalam..."}"
+                         </p>
+                      </div>
+                   </div>
                 </div>
 
-                {/* Footer Section */}
-                <div className="p-8 bg-slate-950/50 border-t border-slate-800 flex items-center justify-between">
-                   <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 bg-slate-800 rounded-full border border-slate-700 flex items-center justify-center text-slate-400">
-                         <Wrench size={16} />
+                {/* Footer with Professional Badge */}
+                <div className="p-10 bg-slate-950/80 border-t border-slate-800/50 flex items-center justify-between">
+                   <div className="flex items-center gap-5">
+                      <div className="w-12 h-12 bg-slate-800 rounded-2xl border border-slate-700 flex items-center justify-center text-slate-500 shadow-xl">
+                         <Wrench size={20} />
                       </div>
                       <div className="flex flex-col">
-                         <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Dianalisis Oleh</span>
-                         <p className="text-sm font-black text-white">{selectedOrder.technician?.user?.name || "Joko Teknisi"}</p>
+                         <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Diagnosed By Specialist</span>
+                         <p className="text-base font-black text-white">{selectedOrder.technician?.user?.name || "Master Technician"}</p>
                       </div>
                    </div>
                    <button 
                      onClick={() => setSelectedOrder(null)}
-                     className="px-10 py-3 bg-white hover:bg-slate-200 rounded-2xl text-xs font-black text-slate-950 uppercase tracking-widest transition-all shadow-xl active:scale-95"
+                     className="px-12 py-4 bg-white hover:bg-slate-100 rounded-2xl text-[10px] font-black text-slate-950 uppercase tracking-[0.2em] transition-all shadow-[0_15px_30px_rgba(255,255,255,0.1)] active:scale-95"
                    >
-                     Tutup Laporan
+                     Selesai & Tutup
                    </button>
                 </div>
              </div>
