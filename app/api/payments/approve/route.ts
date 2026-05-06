@@ -4,16 +4,31 @@ import { cookies } from "next/headers";
 
 export async function POST(req: NextRequest) {
   try {
-    const { paymentId } = await req.json();
+    const { paymentId, action, adminNotes } = await req.json();
 
     if (!paymentId) {
       return NextResponse.json({ error: "Missing paymentId" }, { status: 400 });
     }
 
+    if (action === "REJECT") {
+      // 1. Mark payment as INVALID and add notes
+      await prisma.payment.update({
+        where: { id: paymentId },
+        data: { 
+          status: "INVALID",
+          admin_notes: adminNotes || "Bukti transfer tidak valid atau kurang."
+        }
+      });
+      
+      return NextResponse.json({ success: true, message: "Payment rejected" });
+    }
+
+    // --- APPROVE LOGIC ---
+    
     // 1. Update the payment status to VALID
     const payment = await prisma.payment.update({
       where: { id: paymentId },
-      data: { status: "VALID" },
+      data: { status: "VALID", admin_notes: null },
       include: { order: true }
     });
 
@@ -35,7 +50,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (err: any) {
-    console.error("Approve Payment Error:", err);
+    console.error("Process Payment Error:", err);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }

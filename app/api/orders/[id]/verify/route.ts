@@ -40,12 +40,18 @@ export async function POST(
 
     const finalTotal = (existingOrder.estimated_cost || 0) + (Number(additionalCost) || 0);
 
+    // LOGIC: If there is additional cost, the order is no longer "FULLY_PAID" 
+    // (even if it was before due to initial full payment).
+    // We must reset it to DP_PAID so the user can pay the remaining balance.
+    const newPaymentStatus = Number(additionalCost) > 0 ? "DP_PAID" : existingOrder.payment_status;
+
     const updatedOrder = await prisma.order.update({
       where: { id: orderId },
       data: {
         technical_findings: findings,
         technical_notes: notes,
         final_cost: finalTotal,
+        payment_status: newPaymentStatus as any,
         status: "WORKING"
       }
     });

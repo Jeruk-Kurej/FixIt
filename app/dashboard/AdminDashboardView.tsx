@@ -57,13 +57,20 @@ export default function AdminDashboardView({
     }
   };
 
-  const handleApprovePayment = async (paymentId: string) => {
+  const handleProcessPayment = async (paymentId: string, action: 'APPROVE' | 'REJECT') => {
+    let adminNotes = "";
+    if (action === 'REJECT') {
+      const reason = prompt("Alasan penolakan (misal: Nominal kurang, Gambar tidak jelas):");
+      if (!reason) return; // Cancel if no reason provided
+      adminNotes = reason;
+    }
+
     setApprovingPaymentId(paymentId);
     try {
       const res = await fetch("/api/payments/approve", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ paymentId }),
+        body: JSON.stringify({ paymentId, action, adminNotes }),
       });
       if (res.ok) {
         router.refresh();
@@ -196,11 +203,18 @@ export default function AdminDashboardView({
                           </button>
                         )}
                         <Button 
-                          onClick={() => handleApprovePayment(p.id)}
+                          onClick={() => handleProcessPayment(p.id, 'REJECT')}
+                          disabled={approvingPaymentId === p.id}
+                          className="flex-1 py-3.5 bg-red-500/10 text-red-500 border border-red-500/20 rounded-xl font-black text-[10px] uppercase hover:bg-red-500 hover:text-white transition-all"
+                        >
+                          Reject
+                        </Button>
+                        <Button 
+                          onClick={() => handleProcessPayment(p.id, 'APPROVE')}
                           disabled={approvingPaymentId === p.id}
                           className="flex-1 py-3.5 bg-emerald-500 text-white rounded-xl font-black text-[10px] uppercase shadow-lg shadow-emerald-500/20"
                         >
-                          {approvingPaymentId === p.id ? "..." : "Konfirmasi Lunas"}
+                          {approvingPaymentId === p.id ? "..." : "Confirm"}
                         </Button>
                       </div>
                     </div>

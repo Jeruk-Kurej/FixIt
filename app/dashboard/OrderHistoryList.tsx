@@ -176,39 +176,59 @@ export default function OrderHistoryList({
                          </div>
 
                          {/* Price Summary */}
-                         <div className="bg-slate-950/60 border border-slate-800/50 rounded-xl p-5 space-y-2.5 relative overflow-hidden">
-                            
-                            <div className="flex justify-between text-[9px] font-bold text-slate-500 uppercase tracking-widest">
-                               <span>Estimasi + Tambahan</span>
-                               <span className="text-white">Rp {(selectedOrder.final_cost || selectedOrder.estimated_cost)?.toLocaleString('id-ID')}</span>
-                            </div>
-                            <div className="flex justify-between text-[9px] font-bold text-slate-500 uppercase tracking-widest">
-                               <span>Sudah Dibayar (DP)</span>
-                               <span className="text-blue-400">- Rp 50.000</span>
-                            </div>
-                             {selectedOrder.payment_status === 'FULLY_PAID' && (
-                                <div className="flex justify-between text-[9px] font-bold text-slate-500 uppercase tracking-widest">
-                                   <span>Pelunasan (Verified)</span>
-                                   <span className="text-emerald-400">- Rp {Math.max(0, (selectedOrder.final_cost || selectedOrder.estimated_cost) - 50000).toLocaleString('id-ID')}</span>
-                                </div>
-                             )}
+                          <div className="bg-slate-950/60 border border-slate-800/50 rounded-xl p-5 space-y-2.5 relative overflow-hidden">
+                             
+                             <div className="flex justify-between text-[9px] font-bold text-slate-500 uppercase tracking-widest">
+                                <span>Estimasi + Tambahan</span>
+                                <span className="text-white">Rp {(selectedOrder.final_cost || selectedOrder.estimated_cost)?.toLocaleString('id-ID')}</span>
+                             </div>
+                             <div className="flex justify-between text-[9px] font-bold text-slate-500 uppercase tracking-widest">
+                                <span>Sudah Dibayar (DP)</span>
+                                <span className="text-blue-400">- Rp 50.000</span>
+                             </div>
 
+                             {/* REAL CHECK: Only show verified if there's actually a VALID final payment in the database */}
+                             {(() => {
+                               const validFinalPayment = selectedOrder.payments?.find((p: any) => p.type === 'FINAL_BALANCE' && p.status === 'VALID');
+                               const hasInvalidFinalPayment = selectedOrder.payments?.some((p: any) => p.type === 'FINAL_BALANCE' && p.status === 'INVALID');
+                               const totalCost = (selectedOrder.final_cost || selectedOrder.estimated_cost) || 0;
+                               const remainingToPay = Math.max(0, totalCost - 50000);
+                               const isTrulyPaid = selectedOrder.payment_status === 'FULLY_PAID' && !!validFinalPayment;
 
-                            <div className="pt-2.5 border-t border-slate-800/50 flex justify-between items-center">
-                               <span className={cn(
-                                 "text-[9px] font-black uppercase tracking-widest",
-                                 selectedOrder.payment_status === 'FULLY_PAID' ? "text-emerald-500" : "text-orange-500"
-                               )}>
-                                  {selectedOrder.payment_status === 'FULLY_PAID' ? "Status Pembayaran" : "Sisa Pelunasan"}
-                               </span>
-                               <span className={cn(
-                                 "font-black transition-all",
-                                 selectedOrder.payment_status === 'FULLY_PAID' ? "text-lg text-emerald-400" : "text-lg text-orange-400"
-                               )}>
-                                  {selectedOrder.payment_status === 'FULLY_PAID' ? "LUNAS" : `Rp ${Math.max(0, (selectedOrder.final_cost || selectedOrder.estimated_cost) - 50000).toLocaleString('id-ID')}`}
-                               </span>
-                            </div>
-                         </div>
+                               return (
+                                 <>
+                                   {validFinalPayment && (
+                                      <div className="flex justify-between text-[9px] font-bold text-slate-500 uppercase tracking-widest animate-in fade-in duration-500">
+                                         <span>Pelunasan (Verified)</span>
+                                         <span className="text-emerald-400">- Rp {validFinalPayment.amount.toLocaleString('id-ID')}</span>
+                                      </div>
+                                   )}
+
+                                   <div className="pt-2.5 border-t border-slate-800/50 flex justify-between items-center">
+                                      <span className={cn(
+                                        "text-[9px] font-black uppercase tracking-widest",
+                                        isTrulyPaid ? "text-emerald-500" : "text-orange-500"
+                                      )}>
+                                         {isTrulyPaid ? "Status Pembayaran" : "Sisa Pelunasan"}
+                                      </span>
+                                      <span className={cn(
+                                        "font-black transition-all",
+                                        isTrulyPaid ? "text-lg text-emerald-400" : "text-lg text-orange-400"
+                                      )}>
+                                         {isTrulyPaid ? "LUNAS" : `Rp ${remainingToPay.toLocaleString('id-ID')}`}
+                                      </span>
+                                   </div>
+                                   
+                                   {hasInvalidFinalPayment && !validFinalPayment && (
+                                      <div className="mt-2 p-2 bg-red-500/10 border border-red-500/20 rounded-lg flex items-center gap-2">
+                                         <AlertCircle size={10} className="text-red-500" />
+                                         <span className="text-[8px] font-bold text-red-400 uppercase tracking-tight">Pelunasan Ditolak Admin</span>
+                                      </div>
+                                   )}
+                                 </>
+                               );
+                             })()}
+                          </div>
                       </div>
 
                       {/* Footer Actions */}
@@ -453,6 +473,19 @@ export default function OrderHistoryList({
                         </div>
 
                         <div className="flex flex-col gap-2">
+                           {/* Rejection Alert */}
+                           {order.payments?.some((p: any) => p.status === 'INVALID') && (
+                             <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-2xl flex items-start gap-3 animate-in shake duration-500">
+                                <AlertCircle size={16} className="text-red-500 shrink-0 mt-0.5" />
+                                <div className="space-y-1">
+                                   <p className="text-[10px] font-black text-red-500 uppercase tracking-widest">Pembayaran Ditolak</p>
+                                   <p className="text-[10px] font-bold text-slate-400 leading-relaxed italic">
+                                      "{order.payments.find((p: any) => p.status === 'INVALID')?.admin_notes || "Bukti transfer tidak sesuai."}"
+                                   </p>
+                                </div>
+                             </div>
+                           )}
+
                            {/* Technician Search Status Label (Only in Active View and if DP is Paid) */}
                            {showActiveOnly && order.status !== 'DONE' && order.payment_status !== 'UNPAID' && (
                              <div className="w-fit">
