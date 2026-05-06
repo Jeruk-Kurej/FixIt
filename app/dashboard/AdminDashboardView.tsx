@@ -3,7 +3,7 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import { useState } from "react";
-import { User, Zap, ShieldCheck, Star, CheckCircle, Wallet, Settings, Activity, History } from "lucide-react";
+import { User, Zap, ShieldCheck, Star, CheckCircle, Wallet, Settings, Activity, History, ExternalLink } from "lucide-react";
 
 import { useRouter } from "next/navigation";
 
@@ -224,79 +224,91 @@ export default function AdminDashboardView({
                  <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                        <thead>
-                          <tr className="border-b border-slate-800/50 bg-slate-800/10">
-                             <th className="p-4 text-[9px] font-black text-slate-500 uppercase tracking-widest">Waktu</th>
-                             <th className="p-4 text-[9px] font-black text-slate-500 uppercase tracking-widest">Tipe</th>
-                             <th className="p-4 text-[9px] font-black text-slate-500 uppercase tracking-widest">User</th>
-                             <th className="p-4 text-[9px] font-black text-slate-500 uppercase tracking-widest">Detail</th>
-                             <th className="p-4 text-[9px] font-black text-slate-500 uppercase tracking-widest text-right">Status</th>
-                          </tr>
-                       </thead>
-                       <tbody className="divide-y divide-slate-800/30">
-                          {/* Verified Payments */}
-                          {verifiedPayments.map((p: any) => (
-                             <tr key={p.id} className="hover:bg-slate-800/20 transition-colors group">
-                                <td className="p-4 text-[10px] text-slate-500 font-medium">
-                                   {new Date(p.createdAt).toLocaleString('id-ID', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
-                                </td>
-                                <td className="p-4">
-                                   <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-500 text-[8px] font-black rounded uppercase tracking-tighter">
-                                      {p.type === 'DOWN_PAYMENT' ? 'DP Payment' : 'Final Balance'}
-                                   </span>
-                                </td>
-                                <td className="p-4">
-                                   <p className="text-[10px] font-black text-slate-200 uppercase">{p.order?.user?.name}</p>
-                                   <p className="text-[8px] text-slate-600 truncate max-w-[150px]">{p.order?.user?.email}</p>
-                                </td>
-                                <td className="p-4">
-                                   <div className="flex items-center gap-3">
-                                      <p className="text-[10px] font-black text-slate-300">Rp {p.amount.toLocaleString('id-ID')}</p>
-                                      <a href={p.proof_url} target="_blank" className="text-[8px] text-blue-500 hover:underline font-black uppercase">View Proof</a>
-                                   </div>
-                                </td>
-                                <td className="p-4 text-right">
-                                   <div className="flex items-center justify-end gap-1 text-emerald-500 font-black text-[9px] uppercase">
-                                      <CheckCircle size={10} />
-                                      Verified
-                                   </div>
+                           <tr className="border-b border-slate-800/50 bg-slate-800/10">
+                              <th className="p-4 text-[9px] font-black text-slate-500 uppercase tracking-widest">Waktu</th>
+                              <th className="p-4 text-[9px] font-black text-slate-500 uppercase tracking-widest">Produk</th>
+                              <th className="p-4 text-[9px] font-black text-slate-500 uppercase tracking-widest">Kategori</th>
+                              <th className="p-4 text-[9px] font-black text-slate-500 uppercase tracking-widest">Jenis Pembayaran</th>
+                              <th className="p-4 text-[9px] font-black text-slate-500 uppercase tracking-widest">User</th>
+                              <th className="p-4 text-[9px] font-black text-slate-500 uppercase tracking-widest text-right">Detail</th>
+                           </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-800/30">
+                           {/* Verified Payments */}
+                           {verifiedPayments.map((p: any) => (
+                              <tr key={p.id} className="hover:bg-slate-800/20 transition-colors group">
+                                 <td className="p-4 text-[10px] text-slate-500 font-medium">
+                                    {new Date(p.createdAt).toLocaleString('id-ID', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                                 </td>
+                                 <td className="p-4 text-[10px] font-black text-slate-300 uppercase">
+                                    {p.order?.appliance?.appliance_type?.name || "General Service"}
+                                 </td>
+                                 <td className="p-4">
+                                    <span className="px-2 py-0.5 bg-blue-500/10 text-blue-500 text-[8px] font-black rounded uppercase tracking-tighter">
+                                       Servis
+                                    </span>
+                                 </td>
+                                 <td className="p-4">
+                                    <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-500 text-[8px] font-black rounded uppercase tracking-tighter">
+                                       {p.method ? `${p.method} • ` : ''}{p.type.replace('_', ' ')}
+                                    </span>
+                                 </td>
+                                 <td className="p-4">
+                                    <p className="text-[10px] font-black text-slate-200 uppercase">{p.order?.user?.name}</p>
+                                    <p className="text-[8px] text-slate-600 truncate max-w-[150px]">{p.order?.user?.email}</p>
+                                 </td>
+                                 <td className="p-4 text-right">
+                                    <div className="flex flex-col items-end gap-1">
+                                       <p className="text-[10px] font-black text-emerald-500">Rp {p.amount.toLocaleString('id-ID')}</p>
+                                       {p.proof_url && (
+                                         <a href={p.proof_url} target="_blank" className="text-[8px] text-blue-500 hover:underline font-black uppercase flex items-center gap-1">
+                                            Bukti <ExternalLink size={8} />
+                                         </a>
+                                       )}
+                                    </div>
+                                 </td>
+                              </tr>
+                           ))}
+
+                           {/* Verified Memberships */}
+                           {verifiedMemberships.map((m: any) => (
+                              <tr key={m.id} className="hover:bg-slate-800/20 transition-colors">
+                                 <td className="p-4 text-[10px] text-slate-500 font-medium">
+                                    {new Date(m.createdAt).toLocaleString('id-ID', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                                 </td>
+                                 <td className="p-4 text-[10px] font-black text-slate-300 uppercase">
+                                    Smart Care {m.appliance_name}
+                                 </td>
+                                 <td className="p-4">
+                                    <span className="px-2 py-0.5 bg-orange-500/10 text-orange-500 text-[8px] font-black rounded uppercase tracking-tighter">
+                                       Membership
+                                    </span>
+                                 </td>
+                                 <td className="p-4">
+                                    <span className="px-2 py-0.5 bg-slate-800 text-slate-400 text-[8px] font-black rounded uppercase tracking-tighter">
+                                       Membership Fee
+                                    </span>
+                                 </td>
+                                 <td className="p-4">
+                                    <p className="text-[10px] font-black text-slate-200 uppercase">{m.user?.name}</p>
+                                    <p className="text-[8px] text-slate-600 truncate max-w-[150px]">{m.user?.email}</p>
+                                 </td>
+                                 <td className="p-4 text-right">
+                                    <div className="flex items-center justify-end gap-1 text-emerald-500 font-black text-[9px] uppercase">
+                                       <CheckCircle size={10} />
+                                       Verified
+                                    </div>
+                                 </td>
+                              </tr>
+                           ))}
+
+                           {verifiedPayments.length === 0 && verifiedMemberships.length === 0 && (
+                             <tr>
+                                <td colSpan={6} className="p-10 text-center text-[10px] text-slate-600 font-black uppercase tracking-[0.2em]">
+                                   No transaction history recorded yet
                                 </td>
                              </tr>
-                          ))}
-
-                          {/* Verified Memberships */}
-                          {verifiedMemberships.map((m: any) => (
-                             <tr key={m.id} className="hover:bg-slate-800/20 transition-colors">
-                                <td className="p-4 text-[10px] text-slate-500 font-medium">
-                                   {new Date(m.createdAt).toLocaleString('id-ID', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
-                                </td>
-                                <td className="p-4">
-                                   <span className="px-2 py-0.5 bg-orange-500/10 text-orange-500 text-[8px] font-black rounded uppercase tracking-tighter">
-                                      Membership
-                                   </span>
-                                </td>
-                                <td className="p-4">
-                                   <p className="text-[10px] font-black text-slate-200 uppercase">{m.user?.name}</p>
-                                   <p className="text-[8px] text-slate-600 truncate max-w-[150px]">{m.user?.email}</p>
-                                </td>
-                                <td className="p-4 text-[10px] text-slate-400 font-bold uppercase tracking-tight">
-                                   Smart Care {m.appliance_name}
-                                </td>
-                                <td className="p-4 text-right">
-                                   <div className="flex items-center justify-end gap-1 text-emerald-500 font-black text-[9px] uppercase">
-                                      <CheckCircle size={10} />
-                                      Verified
-                                   </div>
-                                </td>
-                             </tr>
-                          ))}
-
-                          {verifiedPayments.length === 0 && verifiedMemberships.length === 0 && (
-                            <tr>
-                               <td colSpan={5} className="p-10 text-center text-[10px] text-slate-600 font-black uppercase tracking-[0.2em]">
-                                  No transaction history recorded yet
-                               </td>
-                            </tr>
-                          )}
+                           )}
                        </tbody>
                     </table>
                  </div>

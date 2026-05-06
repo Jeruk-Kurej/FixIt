@@ -18,8 +18,10 @@ export default function PaymentModal({ isOpen, onClose, order, paymentType, amou
   const [activeTab, setActiveTab] = useState<"BANK" | "QRIS">("BANK");
   const [isCopied, setIsCopied] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
   const [proofUrl, setProofUrl] = useState("");
   const [status, setStatus] = useState<"IDLE" | "SUCCESS" | "ERROR">("IDLE");
+  const [errorMessage, setErrorMessage] = useState("");
 
   // Body Scroll Lock
   useEffect(() => {
@@ -41,47 +43,73 @@ export default function PaymentModal({ isOpen, onClose, order, paymentType, amou
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setProofUrl(URL.createObjectURL(file)); // Show preview
+    const selectedFile = e.target.files?.[0];
+    if (selectedFile) {
+      setFile(selectedFile);
+      setProofUrl(URL.createObjectURL(selectedFile)); // Show preview
     }
   };
 
   const handleRemoveFile = () => {
+    setFile(null);
     setProofUrl("");
-    // Also reset the actual input so user can re-upload same file if they want
     const input = document.getElementById('proof-upload-input') as HTMLInputElement;
     if (input) input.value = '';
   };
 
   const handleUpload = async () => {
-    // If Bank Transfer, proof is required. If QRIS, we might allow manual confirmation
-    if (activeTab === 'BANK' && !proofUrl) {
+    if (activeTab === 'BANK' && !file) {
       alert("Harap upload bukti transfer bank Anda bro!");
       return;
     }
 
     setIsUploading(true);
+    setStatus("IDLE");
+    setErrorMessage("");
+
     try {
+      let uploadedUrl = null;
+
+      // Local File Upload Logic
+      if (activeTab === 'BANK' && file) {
+        const formData = new FormData();
+        formData.append("file", file);
+        
+        const uploadRes = await fetch(`/api/upload`, {
+          method: "POST",
+          body: formData
+        });
+
+        if (!uploadRes.ok) throw new Error("Gagal mengunggah file ke server lokal.");
+        const uploadData = await uploadRes.json();
+        uploadedUrl = uploadData.url;
+      }
+
       const res = await fetch("/api/payments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           orderId: order.id,
-          amount,
+          amount: Number(amount),
           type: paymentType,
-          method: activeTab, // Track if it was BANK or QRIS
-          proofUrl: proofUrl ? "https://res.cloudinary.com/demo/image/upload/v1312461204/sample.jpg" : null
+          method: activeTab,
+          proofUrl: uploadedUrl
         })
       });
 
-      if (!res.ok) throw new Error("Gagal");
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.details || errorData.error || "Gagal menyimpan data pembayaran.");
+      }
+      
       setStatus("SUCCESS");
       setTimeout(() => {
         onClose();
         window.location.reload();
       }, 2000);
-    } catch (err) {
+    } catch (err: any) {
+      console.error("Payment Error:", err);
+      setErrorMessage(err.message || "Terjadi kesalahan sistem. Coba lagi nanti.");
       setStatus("ERROR");
     } finally {
       setIsUploading(false);
@@ -271,13 +299,13 @@ export default function PaymentModal({ isOpen, onClose, order, paymentType, amou
               {status === 'ERROR' && (
                 <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-3 text-red-400 text-[10px] font-bold">
                   <AlertCircle size={16} />
-                  Gagal mengirim bukti. Coba beberapa saat lagi.
+                  {errorMessage}
                 </div>
               )}
 
               <Button 
                 onClick={handleUpload}
-                disabled={isUploading || (activeTab === 'BANK' && !proofUrl)}
+                disabled={isUploading || (activeTab === 'BANK' && !file)}
                 className={cn(
                   "w-full py-4 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] shadow-2xl transition-all active:scale-[0.98]",
                   activeTab === 'QRIS' ? "bg-emerald-600 hover:bg-emerald-700 shadow-emerald-500/20" : "bg-orange-500 hover:bg-orange-600 shadow-orange-500/20"

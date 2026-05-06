@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { orderId, amount, type, proofUrl } = await req.json();
+    const { orderId, amount, type, method, proofUrl } = await req.json();
 
     if (!orderId || !amount || !type) {
       return NextResponse.json({ error: "Data tidak lengkap" }, { status: 400 });
@@ -26,6 +26,7 @@ export async function POST(req: NextRequest) {
         order_id: orderId,
         amount,
         type,
+        method,
         proof_url: proofUrl,
         status: "PENDING"
       }
@@ -36,8 +37,15 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true, payment });
   } catch (err: any) {
-    console.error("Payment API Error:", err);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    console.error("❌ Payment API Error Details:", {
+      message: err.message,
+      stack: err.stack,
+      code: err.code
+    });
+    return NextResponse.json({ 
+      error: "Gagal menyimpan ke database", 
+      details: err.message 
+    }, { status: 500 });
   }
 }
 

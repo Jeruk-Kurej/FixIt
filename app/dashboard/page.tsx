@@ -76,7 +76,10 @@ export default async function DashboardPage() {
     where: { status: 'VALID' },
     include: {
       order: {
-        include: { user: true }
+        include: { 
+          user: true,
+          appliance: { include: { appliance_type: true } }
+        }
       }
     },
     orderBy: { createdAt: 'desc' },
