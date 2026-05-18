@@ -31,6 +31,7 @@ export default async function DashboardPage() {
     include: {
       technician: {
         include: {
+          specialties: true,
           orders: {
             orderBy: { createdAt: "desc" },
             include: {

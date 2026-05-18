@@ -80,13 +80,14 @@ model Membership {
 }
 
 model Technician {
-  id           String  @id @default(uuid())
-  user_id      String  @unique
-  rating       Float   @default(5)
-  is_available Boolean @default(true)
+  id           String   @id @default(uuid())
+  user_id      String   @unique
+  rating       Float    @default(5)
+  is_available Boolean         @default(true)
   orders       Order[]
   reviews      Review[]
-  user         User    @relation(fields: [user_id], references: [id])
+  user         User            @relation(fields: [user_id], references: [id])
+  specialties  ApplianceType[]
 }
 
 model ApplianceType {
@@ -95,6 +96,7 @@ model ApplianceType {
   base_service_fee Int
   appliances       Appliance[]
   serviceTasks     ServiceTask[]
+  technicians      Technician[]
 }
 
 model Appliance {
@@ -133,7 +135,7 @@ model Order {
   final_cost          Int?
   createdAt           DateTime      @default(now())
   service_type        ServiceType   @default(HOME_SERVICE)
-   technical_findings  Json?
+  technical_findings  Json?
   technical_notes     String?       @db.Text
   payment_status      PaymentStatus @default(UNPAID)
   messages            Message[]
@@ -150,14 +152,14 @@ model Order {
 }
 
 model Review {
-  id            String   @id @default(uuid())
-  order_id      String   @unique
+  id            String     @id @default(uuid())
+  order_id      String     @unique
   technician_id String
   user_id       String
-  rating        Int      @default(5)
-  comment       String?  @db.Text
-  createdAt     DateTime @default(now())
-  order         Order    @relation(fields: [order_id], references: [id])
+  rating        Int        @default(5)
+  comment       String?    @db.Text
+  createdAt     DateTime   @default(now())
+  order         Order      @relation(fields: [order_id], references: [id])
   technician    Technician @relation(fields: [technician_id], references: [id])
   user          User       @relation(fields: [user_id], references: [id])
 

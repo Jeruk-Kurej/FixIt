@@ -15,12 +15,17 @@ interface TechnicianDashboardViewProps {
 }
 
 export default async function TechnicianDashboardView({ user, tech }: TechnicianDashboardViewProps) {
-  // 1. Get Incoming Orders (Only those that have been paid/verified)
+  // 1. Get Incoming Orders (Only those that have been paid/verified AND match tech specialties)
+  const specialtyIds = tech.specialties?.map((s: any) => s.id) || [];
+  
   const incomingOrders = await prisma.order.findMany({
     where: { 
       status: 'ACCEPTED',
       technician_id: null,
-      payment_status: { in: ['DP_PAID', 'FULLY_PAID'] }
+      payment_status: { in: ['DP_PAID', 'FULLY_PAID'] },
+      appliance: {
+        appliance_type_id: { in: specialtyIds.length > 0 ? specialtyIds : ['none'] } // If no specialties, show none
+      }
     },
     include: {
       user: true,
@@ -68,6 +73,9 @@ export default async function TechnicianDashboardView({ user, tech }: Technician
             <h1 className="text-xl font-black tracking-tight text-slate-50 flex items-center gap-3">
               Halo, {user.name}
             </h1>
+            <a href="/technician/profile" className="px-3 py-1.5 rounded-full bg-slate-800/60 border border-slate-700/50 hover:bg-orange-500/10 hover:border-orange-500/30 text-slate-300 hover:text-orange-400 text-[10px] font-bold uppercase tracking-widest transition-all">
+              Edit Profil
+            </a>
           </div>
           
           <div className="flex gap-4">
