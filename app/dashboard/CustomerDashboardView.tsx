@@ -66,7 +66,7 @@ export default function CustomerDashboardView({ user, calendarEvents, pendingMem
   };
 
   return (
-    <div className="h-[calc(100vh-64px)] flex flex-col overflow-hidden bg-slate-950/20 relative">
+    <div className="min-h-[calc(100vh-64px)] lg:h-[calc(100vh-64px)] flex flex-col overflow-y-auto lg:overflow-hidden bg-slate-950/20 relative">
       
       {/* Premium Ambient Glow - The "Sultan" Touch */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -74,7 +74,7 @@ export default function CustomerDashboardView({ user, calendarEvents, pendingMem
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-500/10 blur-[120px] rounded-full animate-pulse" style={{ animationDelay: '2s' }} />
       </div>
 
-      <div className="w-full px-4 flex flex-col h-full relative z-10 pt-4 pb-4">
+      <div className="w-full px-4 flex flex-col h-auto lg:h-full relative z-10 pt-4 pb-4">
         
         {/* Header Section */}
         <div className="mb-4 flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0 px-2">
@@ -118,7 +118,7 @@ export default function CustomerDashboardView({ user, calendarEvents, pendingMem
 
 
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 flex-grow overflow-hidden min-h-0 px-2 pb-4 w-full">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 flex-grow lg:overflow-hidden min-h-0 px-2 pb-4 w-full">
             <div className="lg:col-span-7 h-full">
               <ServiceCalendar events={calendarEvents} />
             </div>
