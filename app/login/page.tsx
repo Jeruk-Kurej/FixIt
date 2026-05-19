@@ -3,11 +3,12 @@
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import Button from "@/components/ui/Button";
 
 function LoginForm() {
   const router = useRouter();
+  const { data: session, status } = useSession();
   const searchParams = useSearchParams();
   const urlError = searchParams.get("error");
   
@@ -15,6 +16,16 @@ function LoginForm() {
   const [password, setPassword] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  // Redirect if already logged in
+  useEffect(() => {
+    const isCredentialsLoggedIn = typeof document !== "undefined" && 
+      document.cookie.split(";").some((item) => item.trim().startsWith("user_email="));
+    
+    if (status === "authenticated" || isCredentialsLoggedIn) {
+      router.push("/dashboard");
+    }
+  }, [status, router]);
 
   useEffect(() => {
     if (urlError) {
@@ -46,8 +57,7 @@ function LoginForm() {
       sessionStorage.setItem("fixit_logged_in", "true");
 
       // Redirect to consolidated dashboard
-      router.push("/dashboard");
-      router.refresh();
+      window.location.href = "/dashboard";
 
 
     } catch (err: any) {
