@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
+import { signOut } from "next-auth/react";
 
 interface NavLinksProps {
   isLoggedIn: boolean;
@@ -60,7 +61,7 @@ export default function NavLinks({ isLoggedIn, role }: NavLinksProps) {
       </div>
 
       {/* Mobile Hamburger Button */}
-      <div className="md:hidden flex items-center justify-center px-2">
+      <div className="md:hidden flex items-center justify-end flex-1 px-2">
         <button
           onClick={() => setIsOpen(!isOpen)}
           className="text-slate-300 hover:text-orange-500 p-2 focus:outline-none transition-colors rounded-lg bg-slate-800/40 border border-slate-700/50"
@@ -91,6 +92,42 @@ export default function NavLinks({ isLoggedIn, role }: NavLinksProps) {
                 </Link>
               );
             })}
+
+            {/* Divider */}
+            <div className="h-px bg-slate-800/85 my-2" />
+
+            {/* Mobile Auth Buttons */}
+            {!isLoggedIn ? (
+              <div className="flex flex-col gap-2 pt-1">
+                <Link
+                  href="/login"
+                  onClick={() => setIsOpen(false)}
+                  className="w-full text-center py-2.5 rounded-xl text-xs font-bold border border-slate-700 bg-slate-800/40 text-slate-300 hover:bg-slate-800 transition-all"
+                >
+                  Masuk
+                </Link>
+                <Link
+                  href="/register"
+                  onClick={() => setIsOpen(false)}
+                  className="w-full text-center py-2.5 rounded-xl text-xs font-bold bg-orange-500 text-white hover:bg-orange-600 shadow-md shadow-orange-500/10 transition-all"
+                >
+                  Daftar
+                </Link>
+              </div>
+            ) : (
+              <div className="pt-1">
+                <button
+                  onClick={async () => {
+                    setIsOpen(false);
+                    await signOut({ redirect: false });
+                    window.location.href = "/api/auth/logout?redirect=/?logout=true";
+                  }}
+                  className="w-full text-center py-2.5 rounded-xl text-xs font-bold border border-red-500/30 bg-red-500/5 text-red-400 hover:bg-red-500/10 transition-all"
+                >
+                  Keluar
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}

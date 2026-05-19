@@ -37,12 +37,18 @@ export default async function Navbar() {
           </Link>
         </div>
         
+        {/* Mobile Notification Hub */}
+        {isLoggedIn && (
+          <div className="md:hidden flex items-center shrink-0 mr-1">
+            <NotificationHub />
+          </div>
+        )}
+
         {/* Navigation Links */}
         <NavLinks isLoggedIn={isLoggedIn} role={userRole} />
 
-        
-        {/* Action Buttons */}
-        <div className="flex items-center space-x-3 shrink-0 lg:w-[180px] justify-end">
+        {/* Action Buttons (Desktop Only) */}
+        <div className="hidden md:flex items-center space-x-3 shrink-0 lg:w-[180px] justify-end">
           {!isLoggedIn ? (
             <>
               <Button href="/login" variant="ghost">
@@ -58,7 +64,6 @@ export default async function Navbar() {
               <LogoutButton />
             </>
           )}
-
         </div>
       </div>
     </nav>
