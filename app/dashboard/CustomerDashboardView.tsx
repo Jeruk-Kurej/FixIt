@@ -118,45 +118,43 @@ export default function CustomerDashboardView({ user, calendarEvents, pendingMem
 
 
 
-        <div className="flex-grow overflow-hidden min-h-0 px-2">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 h-full min-h-0 pb-4">
-                <div className="lg:col-span-7 h-full">
-                  <ServiceCalendar events={calendarEvents} />
-                </div>
-                <div className="lg:col-span-5 h-full flex flex-col min-h-0">
-                  {(() => {
-                    const pendingOrders = user.orders.filter((o: any) => 
-                      (o.payment_status === 'UNPAID' && o.status !== 'CANCELLED') || 
-                      (o.payments && o.payments.some((p: any) => 
-                        (p.type === 'DOWN_PAYMENT' && p.status === 'PENDING') || 
-                        (p.status === 'INVALID' && !o.payments.some((p2: any) => p2.type === p.type && (p2.status === 'VALID' || p2.status === 'PENDING')))
-                      ))
-                    );
-                    const activeOrders = user.orders.filter((o: any) => 
-                      o.status !== 'DONE' && o.status !== 'CANCELLED' &&
-                      !((o.payment_status === 'UNPAID') || (o.payments && o.payments.some((p: any) => p.type === 'DOWN_PAYMENT' && p.status === 'PENDING')))
-                    );
-                    const hasPending = pendingOrders.length > 0;
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 flex-grow overflow-hidden min-h-0 px-2 pb-4 w-full">
+            <div className="lg:col-span-7 h-full">
+              <ServiceCalendar events={calendarEvents} />
+            </div>
+            <div className="lg:col-span-5 h-full flex flex-col min-h-0">
+              {(() => {
+                const pendingOrders = user.orders.filter((o: any) => 
+                  (o.payment_status === 'UNPAID' && o.status !== 'CANCELLED') || 
+                  (o.payments && o.payments.some((p: any) => 
+                    (p.type === 'DOWN_PAYMENT' && p.status === 'PENDING') || 
+                    (p.status === 'INVALID' && !o.payments.some((p2: any) => p2.type === p.type && (p2.status === 'VALID' || p2.status === 'PENDING')))
+                  ))
+                );
+                const activeOrders = user.orders.filter((o: any) => 
+                  o.status !== 'DONE' && o.status !== 'CANCELLED' &&
+                  !((o.payment_status === 'UNPAID') || (o.payments && o.payments.some((p: any) => p.type === 'DOWN_PAYMENT' && p.status === 'PENDING')))
+                );
+                const hasPending = pendingOrders.length > 0;
 
-                    return (
-                      <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-md overflow-hidden flex flex-col h-full shadow-2xl">
-                        {hasPending ? (
-                          <SidebarTabbedOrders 
-                            pendingOrders={pendingOrders} 
-                            activeOrders={activeOrders} 
-                          />
-                        ) : (
-                          <OrderHistoryList 
-                            orders={activeOrders} 
-                            isCompact={true} 
-                            title="Pesanan Aktif"
-                            showActiveOnly={true} 
-                          />
-                        )}
-                      </Card>
-                    );
-                  })()}
-                </div>
+                return (
+                  <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-md overflow-hidden flex flex-col h-full shadow-2xl">
+                    {hasPending ? (
+                      <SidebarTabbedOrders 
+                        pendingOrders={pendingOrders} 
+                        activeOrders={activeOrders} 
+                      />
+                    ) : (
+                      <OrderHistoryList 
+                        orders={activeOrders} 
+                        isCompact={true} 
+                        title="Pesanan Aktif"
+                        showActiveOnly={true} 
+                      />
+                    )}
+                  </Card>
+                );
+              })()}
             </div>
         </div>
 
