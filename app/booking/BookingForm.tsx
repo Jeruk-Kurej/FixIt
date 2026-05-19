@@ -57,6 +57,7 @@ function BookingFormInner({ applianceTypes = [] }: BookingFormProps) {
   const [phone, setPhone] = useState("");
   const [serviceType, setServiceType] = useState<"HOME_SERVICE" | "WORKSHOP_VISIT">("HOME_SERVICE");
   const [address, setAddress] = useState("");
+  const [showStep2Errors, setShowStep2Errors] = useState(false);
 
   // Step 3: Jadwal
   const [scheduledDate, setScheduledDate] = useState("");
@@ -122,9 +123,23 @@ function BookingFormInner({ applianceTypes = [] }: BookingFormProps) {
         }
       }
     }
-    if (step === 2 && (!name || !email || !phone || (serviceType === "HOME_SERVICE" && !address))) {
-      setErrorMsg("Harap lengkapi data kontak dan alamat.");
-      return;
+    if (step === 2) {
+      if (!name || !email || !phone || (serviceType === "HOME_SERVICE" && !address)) {
+        setErrorMsg("Harap lengkapi data kontak dan alamat.");
+        setShowStep2Errors(true);
+        return;
+      }
+      if (phone.length < 10) {
+        setErrorMsg("Nomor HP minimal 10 digit.");
+        setShowStep2Errors(true);
+        return;
+      }
+      if (phone.length > 15) {
+        setErrorMsg("Nomor HP maksimal 15 digit.");
+        setShowStep2Errors(true);
+        return;
+      }
+      setShowStep2Errors(false);
     }
     if (step === 3 && !scheduledDate) {
       setErrorMsg("Harap pilih tanggal servis.");
@@ -426,18 +441,43 @@ function BookingFormInner({ applianceTypes = [] }: BookingFormProps) {
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="space-y-1">
                           <label className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Nama Lengkap *</label>
-                          <input required type="text" value={name} onChange={(e) => setName(e.target.value)} className="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:border-orange-500 outline-none" />
+                          <input 
+                            required 
+                            type="text" 
+                            value={name} 
+                            onChange={(e) => setName(e.target.value)} 
+                            className={`w-full bg-slate-900/50 border rounded-xl px-4 py-3 text-slate-200 focus:border-orange-500 outline-none transition-colors ${
+                              showStep2Errors && !name ? "border-red-500 bg-red-500/5 focus:border-red-500" : "border-slate-700"
+                            }`} 
+                          />
                         </div>
                         <div className="space-y-1">
                           <label className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Nomor WhatsApp *</label>
-                          <input required type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:border-orange-500 outline-none" />
+                          <input 
+                            required 
+                            type="tel" 
+                            value={phone} 
+                            onChange={(e) => setPhone(e.target.value)} 
+                            className={`w-full bg-slate-900/50 border rounded-xl px-4 py-3 text-slate-200 focus:border-orange-500 outline-none transition-colors ${
+                              showStep2Errors && (!phone || phone.length < 10 || phone.length > 15) ? "border-red-500 bg-red-500/5 focus:border-red-500" : "border-slate-700"
+                            }`} 
+                          />
                         </div>
                       </div>
                       
                       {serviceType === "HOME_SERVICE" ? (
                         <div className="space-y-1 animate-in fade-in zoom-in-95">
                           <label className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Alamat Kunjungan *</label>
-                          <textarea required rows={3} value={address} onChange={(e) => setAddress(e.target.value)} className="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:border-orange-500 outline-none" placeholder="Tuliskan alamat lengkap..." />
+                          <textarea 
+                            required 
+                            rows={3} 
+                            value={address} 
+                            onChange={(e) => setAddress(e.target.value)} 
+                            className={`w-full bg-slate-900/50 border rounded-xl px-4 py-3 text-slate-200 focus:border-orange-500 outline-none transition-colors ${
+                              showStep2Errors && !address ? "border-red-500 bg-red-500/5 focus:border-red-500" : "border-slate-700"
+                            }`} 
+                            placeholder="Tuliskan alamat lengkap..." 
+                          />
                         </div>
                       ) : (
                         <div className="p-4 rounded-xl bg-blue-500/10 border border-blue-500/20 animate-in fade-in zoom-in-95">
