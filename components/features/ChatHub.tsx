@@ -76,17 +76,17 @@ export default function ChatHub({ initialOrders, currentUserId, compact = false,
 
   return (
     <div className={cn(
-      "h-full flex",
-      !compact && "container mx-auto px-4 py-8 h-[calc(100vh-120px)]"
+      "h-full flex w-full max-w-full overflow-hidden",
+      !compact && "container mx-auto px-4 py-4 sm:py-8 h-[calc(100vh-120px)]"
     )}>
       <div className={cn(
-        "flex-grow flex overflow-hidden",
+        "flex-grow flex overflow-hidden w-full",
         !compact ? "bg-slate-800/40 border border-slate-700/50 rounded-3xl shadow-2xl backdrop-blur-md" : "bg-transparent"
       )}>
         
         {/* Left Sidebar: Conversation List */}
         <div className={cn(
-          "border-r border-slate-700/50 flex flex-col bg-slate-900/50 transition-all duration-300",
+          "border-r border-slate-700/50 flex flex-col bg-slate-900/50 transition-all duration-300 min-w-0",
           compact ? "w-[60px] sm:w-[70px]" : "w-full sm:w-[350px]",
           selectedOrderId ? "hidden sm:flex" : "flex"
         )}>
@@ -183,7 +183,7 @@ export default function ChatHub({ initialOrders, currentUserId, compact = false,
 
         {/* Right Area: Chat Content */}
         <div className={cn(
-          "flex-grow flex flex-col relative bg-slate-900/30",
+          "flex-grow flex flex-col relative bg-slate-900/30 min-w-0",
           selectedOrderId ? "flex" : "hidden sm:flex"
         )}>
           {selectedOrder ? (
@@ -308,7 +308,7 @@ function ChatContent({ orderId, currentUserId, title, compact = false }: { order
 
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full min-w-0">
       <div ref={scrollRef} className={cn("flex-grow overflow-y-auto p-6 space-y-4 custom-scrollbar", compact && "p-4 space-y-3")}>
         {messages.map((msg, idx) => {
           const isMe = msg.sender_id === currentUserId;

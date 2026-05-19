@@ -126,7 +126,7 @@ export default function NotificationHub() {
 
       {/* Dropdown Content */}
       <div className={cn(
-        "absolute right-0 mt-4 w-[320px] sm:w-[400px] bg-slate-900 border border-slate-800 shadow-[0_20px_50px_rgba(0,0,0,0.5)] rounded-3xl overflow-hidden transition-all duration-300 z-[60] origin-top-right",
+        "absolute left-0 sm:left-auto sm:right-0 mt-4 w-[280px] xs:w-[320px] sm:w-[400px] bg-slate-900 border border-slate-800 shadow-[0_20px_50px_rgba(0,0,0,0.5)] rounded-3xl overflow-hidden transition-all duration-300 z-[60] origin-top-left sm:origin-top-right",
         isOpen ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-95 -translate-y-2 pointer-events-none"
       )}>
         <div className="p-5 border-b border-slate-800 bg-slate-800/20 flex items-center justify-between">

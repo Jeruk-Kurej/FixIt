@@ -70,7 +70,7 @@ export default async function ChatPage({ searchParams }: { searchParams: Promise
   });
 
   return (
-    <div className="min-h-[calc(100vh-64px)] bg-slate-900 text-slate-50">
+    <div className="min-h-[calc(100vh-64px)] w-full max-w-full overflow-x-hidden bg-slate-900 text-slate-50">
       <ChatHub 
         initialOrders={JSON.parse(JSON.stringify(sortedOrders))} 
         currentUserId={user.id} 
