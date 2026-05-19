@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
     });
 
     const response = NextResponse.json({ success: true, message: "Pendaftaran berhasil" });
-    response.cookies.set("user_email", newUser.email, { path: "/", maxAge: 60 * 60 * 24 * 7 }); // 7 hari
+    response.cookies.set("user_email", newUser.email || "", { path: "/", maxAge: 60 * 60 * 24 * 7 }); // 7 hari
     return response;
   } catch (err: any) {
     console.error("Register Error:", err);

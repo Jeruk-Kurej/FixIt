@@ -1,13 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import Button from "@/components/ui/Button";
-import { useEffect } from "react";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const urlError = searchParams.get("error");
@@ -187,5 +186,17 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-[calc(100vh-64px)] w-full flex items-center justify-center relative overflow-hidden py-12 px-4 bg-slate-900">
+        <div className="text-slate-400 text-sm animate-pulse">Memuat halaman masuk...</div>
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
   );
 }
