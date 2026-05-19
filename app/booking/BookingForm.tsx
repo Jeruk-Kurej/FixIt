@@ -328,7 +328,7 @@ function BookingFormInner({ applianceTypes = [] }: BookingFormProps) {
                     )}
 
                     {isNewAppliance && (
-                      <div className="space-y-4 mb-6 p-5 bg-slate-900/30 border border-slate-800 rounded-2xl animate-in fade-in slide-in-from-top-2">
+                      <div className="space-y-4 animate-in fade-in slide-in-from-top-2">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div className="space-y-1">
                             <label className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Jenis Barang *</label>

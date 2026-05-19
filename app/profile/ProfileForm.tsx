@@ -20,14 +20,16 @@ export default function ProfileForm({ initialName, initialPhone, initialAddress,
   const [age, setAge] = useState(initialAge ? String(initialAge) : "");
   const [gender, setGender] = useState(initialGender || "");
   const [isUpdating, setIsUpdating] = useState(false);
-  const [msg, setMsg] = useState("");
-
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsUpdating(true);
-    setMsg("");
 
     try {
+      const parsedAge = age ? parseInt(age) : null;
+      if (parsedAge !== null && parsedAge < 0) {
+        throw new Error("Umur tidak boleh bernilai negatif.");
+      }
+
       const res = await fetch("/api/auth/profile", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -35,7 +37,7 @@ export default function ProfileForm({ initialName, initialPhone, initialAddress,
           name,
           phone, 
           address, 
-          age: age ? parseInt(age) : null, 
+          age: parsedAge, 
           gender 
         }),
       });
@@ -43,17 +45,41 @@ export default function ProfileForm({ initialName, initialPhone, initialAddress,
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Gagal memperbarui profil.");
 
-      setMsg("Profil Anda berhasil diperbarui!");
+      window.dispatchEvent(
+        new CustomEvent("show-local-toast", {
+          detail: {
+            type: "success",
+            message: "Profil Anda berhasil diperbarui!",
+          },
+        })
+      );
       router.refresh();
     } catch (err: any) {
-      setMsg(err.message);
+      window.dispatchEvent(
+        new CustomEvent("show-local-toast", {
+          detail: {
+            type: "error",
+            message: err.message || "Gagal memperbarui profil.",
+          },
+        })
+      );
     } finally {
       setIsUpdating(false);
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
+    if (e.key === "Enter") {
+      const target = e.target as HTMLElement;
+      if (target.tagName === "INPUT" || target.tagName === "SELECT") {
+        e.preventDefault();
+        target.blur();
+      }
+    }
+  };
+
   return (
-    <form onSubmit={handleSave} className="space-y-6">
+    <form onSubmit={handleSave} onKeyDown={handleKeyDown} className="space-y-6">
       <div className="space-y-4">
         <div className="space-y-2">
           <label className="text-sm font-medium text-slate-300">Nama Lengkap</label>
@@ -82,6 +108,7 @@ export default function ProfileForm({ initialName, initialPhone, initialAddress,
             <label className="text-sm font-medium text-slate-300">Umur</label>
             <input 
               type="number" 
+              min="0"
               value={age}
               onChange={(e) => setAge(e.target.value)}
               placeholder="Umur"
@@ -115,11 +142,7 @@ export default function ProfileForm({ initialName, initialPhone, initialAddress,
         </div>
       </div>
 
-      {msg && (
-        <div className={msg.includes("berhasil") ? "p-3 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-xl text-sm" : "p-3 bg-red-500/10 border border-red-500/30 text-red-400 rounded-xl text-sm"}>
-          {msg}
-        </div>
-      )}
+
 
       <div className="pt-4 border-t border-slate-800">
         <Button type="submit" variant="primary" className="w-full py-3 rounded-xl font-bold" disabled={isUpdating}>
