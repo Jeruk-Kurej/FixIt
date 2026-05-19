@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { MessageSquare, User as UserIcon, Search, ChevronRight, Clock, Send } from "lucide-react";
+import { MessageSquare, User as UserIcon, Search, ChevronRight, Clock, Send, ArrowLeft } from "lucide-react";
 import ChatUI from "./ChatUI";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
@@ -24,15 +24,22 @@ export default function ChatHub({ initialOrders, currentUserId, compact = false,
   
   const [orders, setOrders] = useState<any[]>(initialOrders);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(
-    initialSelectedOrderId || (initialOrders.length > 0 ? initialOrders[0].id : null)
+    initialSelectedOrderId || null
   );
+
+  // Auto-select first chat only on desktop screens
+  useEffect(() => {
+    if (!initialSelectedOrderId && initialOrders.length > 0 && window.innerWidth >= 640) {
+      setSelectedOrderId(initialOrders[0].id);
+    }
+  }, [initialOrders, initialSelectedOrderId]);
 
   // URL LISTENER: Switch chat if URL orderId changes (e.g. from notification)
   useEffect(() => {
     if (urlOrderId && urlOrderId !== selectedOrderId) {
       setSelectedOrderId(urlOrderId);
     }
-  }, [urlOrderId]);
+  }, [urlOrderId, selectedOrderId]);
 
   const selectedOrder = orders.find(o => o.id === selectedOrderId);
 
@@ -80,7 +87,8 @@ export default function ChatHub({ initialOrders, currentUserId, compact = false,
         {/* Left Sidebar: Conversation List */}
         <div className={cn(
           "border-r border-slate-700/50 flex flex-col bg-slate-900/50 transition-all duration-300",
-          compact ? "w-[60px] sm:w-[70px]" : "w-full sm:w-[350px]"
+          compact ? "w-[60px] sm:w-[70px]" : "w-full sm:w-[350px]",
+          selectedOrderId ? "hidden sm:flex" : "flex"
         )}>
           <div className={cn("p-4 border-b border-slate-700/50", compact && "p-3 flex justify-center")}>
             {!compact ? (
@@ -174,7 +182,10 @@ export default function ChatHub({ initialOrders, currentUserId, compact = false,
         </div>
 
         {/* Right Area: Chat Content */}
-        <div className="flex-grow flex flex-col relative bg-slate-900/30">
+        <div className={cn(
+          "flex-grow flex flex-col relative bg-slate-900/30",
+          selectedOrderId ? "flex" : "hidden sm:flex"
+        )}>
           {selectedOrder ? (
             <div className="h-full flex flex-col">
               {/* Specialized Header for Hub */}
@@ -183,6 +194,14 @@ export default function ChatHub({ initialOrders, currentUserId, compact = false,
                 compact && "p-4"
               )}>
                 <div className="flex items-center gap-3">
+                  {/* Back Button (Mobile Only) */}
+                  <button
+                    onClick={() => setSelectedOrderId(null)}
+                    className="sm:hidden text-slate-400 hover:text-slate-100 p-2 mr-1 rounded-xl bg-slate-800 border border-slate-700 active:scale-95 transition-all"
+                  >
+                    <ArrowLeft size={16} />
+                  </button>
+
                   <div className={cn(
                     "bg-orange-500/10 rounded-xl flex items-center justify-center text-orange-500 border border-orange-500/10",
                     compact ? "w-8 h-8" : "w-12 h-12"
@@ -200,10 +219,7 @@ export default function ChatHub({ initialOrders, currentUserId, compact = false,
                 </div>
               </div>
 
-              {/* Integrated ChatUI (Modified for Hub use or wrapped) */}
-              {/* Note: We use fixed version of ChatUI but here we want it integrated. 
-                  Let's create a specialized 'IntegratedChat' or reuse ChatUI with 'integrated' prop. 
-              */}
+              {/* Integrated ChatUI */}
               <div className="flex-grow overflow-hidden">
                 <ChatContent 
                   orderId={selectedOrder.id} 

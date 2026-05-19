@@ -30,7 +30,8 @@ export async function GET() {
           { user_id: user.id },
           { technician_id: user.technician?.id || "" }
         ],
-        status: { in: ['ACCEPTED', 'WORKING', 'DONE'] }
+        status: { in: ['ACCEPTED', 'WORKING', 'DONE'] },
+        technician_id: { not: null }
       },
       include: {
         user: true,
