@@ -76,9 +76,35 @@ export default function ChatHub({ initialOrders, currentUserId, compact = false,
 
   return (
     <div className={cn(
-      "flex w-full max-w-full overflow-hidden",
+      "chat-hub-container flex w-full max-w-full overflow-hidden",
       !compact ? "container mx-auto px-4 py-4 sm:py-6 h-full min-h-0" : "h-full"
     )}>
+      {!selectedOrderId ? (
+        <style dangerouslySetInnerHTML={{ __html: `
+          .chat-page-container {
+            min-height: calc(100vh - 64px) !important;
+            height: auto !important;
+            overflow: visible !important;
+          }
+          .chat-hub-container {
+            height: 600px !important;
+            min-height: 500px !important;
+          }
+        `}} />
+      ) : (
+        <style dangerouslySetInnerHTML={{ __html: `
+          footer {
+            display: none !important;
+          }
+          .chat-page-container {
+            height: calc(100vh - 64px) !important;
+            overflow: hidden !important;
+          }
+          .chat-hub-container {
+            height: 100% !important;
+          }
+        `}} />
+      )}
       <div className={cn(
         "flex-grow flex overflow-hidden w-full",
         !compact ? "bg-slate-800/40 border border-slate-700/50 rounded-3xl shadow-2xl backdrop-blur-md" : "bg-transparent"

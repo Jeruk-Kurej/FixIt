@@ -4,15 +4,15 @@ export default function Footer() {
   return (
     <footer className="w-full border-t border-slate-800 bg-slate-900 mt-20">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div className="md:col-span-1">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+          <div className="col-span-2 md:col-span-1">
             <h3 className="text-xl font-bold text-white mb-4">FixIt</h3>
             <p className="text-slate-400 text-sm leading-relaxed">
               Platform servis elektronik premium dengan estimasi transparan, teknisi terpercaya, dan jadwal cerdas.
             </p>
           </div>
           
-          <div>
+          <div className="col-span-1">
             <h4 className="text-slate-50 font-semibold mb-4">Layanan</h4>
             <ul className="space-y-2 text-sm text-slate-400">
               <li><Link href="/about-us" className="hover:text-orange-500 transition-colors">About Us</Link></li>
@@ -21,7 +21,7 @@ export default function Footer() {
             </ul>
           </div>
 
-          <div>
+          <div className="col-span-1">
             <h4 className="text-slate-50 font-semibold mb-4">Perusahaan</h4>
             <ul className="space-y-2 text-sm text-slate-400">
               <li><Link href="/contact" className="hover:text-orange-500 transition-colors">Contact</Link></li>
@@ -29,7 +29,7 @@ export default function Footer() {
             </ul>
           </div>
 
-          <div>
+          <div className="col-span-2 md:col-span-1">
             <h4 className="text-slate-50 font-semibold mb-4">Hubungi Kami</h4>
             <ul className="space-y-2 text-sm text-slate-400">
               <li>cs@fixit.com</li>
