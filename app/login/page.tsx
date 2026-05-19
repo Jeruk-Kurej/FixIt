@@ -102,7 +102,7 @@ function LoginForm() {
             </button>
             <button
               type="button"
-              onClick={() => autofillUser("admin@fixit.com", "password_admin")}
+              onClick={() => autofillUser("admin@fixit.com", "admin123")}
               className="px-2 py-2 bg-slate-900/60 hover:bg-slate-900 border border-slate-700/80 rounded-xl text-[10px] font-medium text-slate-300 hover:text-orange-400 transition-all text-center"
             >
               Admin (FixIt)
