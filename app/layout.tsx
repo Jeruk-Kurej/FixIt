@@ -18,6 +18,10 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://fix-it-project.vercel.app"),
   title: "FixIt - Servis Mewah Tanpa Drama",
   description: "Platform terpercaya untuk servis dan pemeliharaan barang elektronik rumah tangga dengan transparansi biaya penuh dan teknisi tersertifikasi.",
+  icons: {
+    icon: "/images/logo/logo-fixit.png",
+    apple: "/images/logo/logo-fixit.png",
+  },
   openGraph: {
     title: "FixIt - Servis Mewah Tanpa Drama",
     description: "Platform terpercaya untuk servis dan pemeliharaan barang elektronik rumah tangga dengan transparansi biaya penuh dan teknisi tersertifikasi.",
