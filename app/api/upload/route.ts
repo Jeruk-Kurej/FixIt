@@ -58,10 +58,19 @@ export async function POST(req: NextRequest) {
           success: true,
           url: uploadResult.secure_url,
         });
-      } catch (cloudErr) {
-        console.error("Cloudinary upload failed, falling back to local storage:", cloudErr);
-        // Fall through to local fallback if cloud upload fails
+      } catch (cloudErr: any) {
+        console.error("Cloudinary upload failed:", cloudErr);
+        return NextResponse.json({ 
+          error: `Gagal upload ke Cloudinary: ${cloudErr.message || cloudErr}` 
+        }, { status: 500 });
       }
+    }
+
+    // If running on Vercel but Cloudinary is not configured, throw a clear error
+    if (process.env.VERCEL === "1") {
+      return NextResponse.json({ 
+        error: "Cloudinary belum dikonfigurasi di Vercel. Silakan isi CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, dan CLOUDINARY_API_SECRET di Settings Vercel Anda." 
+      }, { status: 400 });
     }
 
     // LOCAL FALLBACK (Only for development, will fail on Vercel if folder is read-only)
