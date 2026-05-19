@@ -119,10 +119,10 @@ export default function CustomerDashboardView({ user, calendarEvents, pendingMem
 
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 flex-grow lg:overflow-hidden min-h-0 px-2 pb-4 w-full">
-            <div className="lg:col-span-7 h-full">
+            <div className="lg:col-span-7 h-full order-2 lg:order-1">
               <ServiceCalendar events={calendarEvents} />
             </div>
-            <div className="lg:col-span-5 h-full flex flex-col min-h-0">
+            <div className="lg:col-span-5 h-full flex flex-col min-h-0 order-1 lg:order-2">
               {(() => {
                 const pendingOrders = user.orders.filter((o: any) => 
                   (o.payment_status === 'UNPAID' && o.status !== 'CANCELLED') || 
