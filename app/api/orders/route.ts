@@ -17,6 +17,7 @@ export async function POST(req: NextRequest) {
     }
 
     const { name, email, phone, address, appliance, brand, problem, serviceType, estimatedCost, scheduled_date_time } = validationResult.data;
+    const { applianceName, applianceId } = body;
 
     // 1. Cari atau Buat Akun Pengguna (berdasarkan Email)
     const user = await prisma.user.upsert({
@@ -41,34 +42,40 @@ export async function POST(req: NextRequest) {
     // Check if user is a premium member
     const isMember = user.memberships && user.memberships.length > 0;
 
-    // Cari atau buat master data ApplianceType
-    let appType = await prisma.applianceType.findFirst({
-      where: { name: appliance }
-    });
-    if (!appType) {
-      appType = await prisma.applianceType.create({
-        data: {
-          name: appliance,
-          base_service_fee: 100000,
-        }
-      });
-    }
+    let targetApplianceId = applianceId;
 
-    // 2. Daftarkan Barang Elektronik ke akun pengguna
-    const newAppliance = await prisma.appliance.create({
-      data: {
-        user_id: user.id,
-        appliance_type_id: appType.id,
-        brand: brand || "General",
-        model_number: "N/A",
-      },
-    });
+    if (!targetApplianceId) {
+      // Cari atau buat master data ApplianceType
+      let appType = await prisma.applianceType.findFirst({
+        where: { name: appliance }
+      });
+      if (!appType) {
+        appType = await prisma.applianceType.create({
+          data: {
+            name: appliance,
+            base_service_fee: 100000,
+          }
+        });
+      }
+
+      // 2. Daftarkan Barang Elektronik ke akun pengguna
+      const newAppliance = await prisma.appliance.create({
+        data: {
+          user_id: user.id,
+          appliance_type_id: appType.id,
+          name: applianceName || appliance, // Store specific name or fallback to category
+          brand: brand || "General",
+          model_number: "N/A",
+        },
+      });
+      targetApplianceId = newAppliance.id;
+    }
 
     // 3. Simpan Riwayat Pesanan
     const newOrder = await prisma.order.create({
       data: {
         user_id: user.id,
-        appliance_id: newAppliance.id,
+        appliance_id: targetApplianceId,
         status: "PENDING",
         payment_status: isMember ? "FULLY_PAID" : "UNPAID",
         problem: problem,

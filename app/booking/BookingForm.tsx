@@ -6,7 +6,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import { formatRupiah } from "@/lib/utils";
 import { bookingSchema } from "@/lib/validations";
-import { Calendar, Clock, Contact, Laptop, ChevronRight, ChevronLeft, CheckCircle2 } from "lucide-react";
+import { Calendar, Clock, Contact, Laptop, ChevronRight, ChevronLeft, CheckCircle2, Plus } from "lucide-react";
 import PremiumCalendar from "@/components/features/PremiumCalendar";
 
 function BookingFormInner() {
@@ -19,9 +19,13 @@ function BookingFormInner() {
 
   // Step 1: Detail Barang
   const [appliance, setAppliance] = useState(searchParams.get("appliance") || "");
+  const [applianceName, setApplianceName] = useState("");
   const [brand, setBrand] = useState(searchParams.get("brand") || "");
   const [problem, setProblem] = useState(searchParams.get("problem") || "");
   const [estimatedCost, setEstimatedCost] = useState(searchParams.get("maxCost") || "150000");
+
+  const [userAppliances, setUserAppliances] = useState<any[]>([]);
+  const [selectedApplianceId, setSelectedApplianceId] = useState<string>("NEW");
 
   // Step 2: Kontak & Layanan
   const [name, setName] = useState("");
@@ -49,6 +53,9 @@ function BookingFormInner() {
           setEmail(data.user.email || "");
           setPhone(data.user.phone || "");
           setAddress(data.user.address || "");
+          if (data.user.appliances && data.user.appliances.length > 0) {
+            setUserAppliances(data.user.appliances);
+          }
         }
       } catch (err) {
         console.error("Failed to fetch profile for pre-fill:", err);
@@ -57,11 +64,23 @@ function BookingFormInner() {
     fetchProfile();
   }, []);
 
+  useEffect(() => {
+    setTimeout(() => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 50);
+  }, [step]);
+
   const nextStep = () => {
     setErrorMsg("");
-    if (step === 1 && (!appliance || !problem)) {
-      setErrorMsg("Harap isi jenis barang dan keluhan.");
-      return;
+    if (step === 1) {
+      if (selectedApplianceId === "NEW" && (!appliance || !applianceName || !problem)) {
+        setErrorMsg("Harap isi jenis barang, nama lokasi, dan keluhan.");
+        return;
+      }
+      if (selectedApplianceId !== "NEW" && !problem) {
+        setErrorMsg("Harap isi keluhan barang Anda.");
+        return;
+      }
     }
     if (step === 2 && (!name || !email || !phone || (serviceType === "HOME_SERVICE" && !address))) {
       setErrorMsg("Harap lengkapi data kontak dan alamat.");
@@ -74,7 +93,9 @@ function BookingFormInner() {
     setStep(step + 1);
   };
 
-  const prevStep = () => setStep(step - 1);
+  const prevStep = () => {
+    setStep(step - 1);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,12 +109,13 @@ function BookingFormInner() {
       email,
       phone,
       address: serviceType === "HOME_SERVICE" ? address : null,
-      appliance,
-      brand: brand || "General",
+      appliance: selectedApplianceId !== "NEW" ? userAppliances.find(a => a.id === selectedApplianceId)?.appliance_type?.name : appliance,
+      brand: selectedApplianceId !== "NEW" ? userAppliances.find(a => a.id === selectedApplianceId)?.brand : (brand || "General"),
       problem,
       serviceType,
       estimatedCost: estimatedCost || "150000",
       scheduled_date_time: fullDateTime,
+      // Pass our custom fields that won't be caught by validation or will be merged
     };
 
     // Validasi Zod Client-Side
@@ -107,10 +129,17 @@ function BookingFormInner() {
     }
 
     try {
+      // Append our custom data to the validated payload
+      const payload = {
+        ...validationResult.data,
+        applianceName: selectedApplianceId === "NEW" ? applianceName : undefined,
+        applianceId: selectedApplianceId !== "NEW" ? selectedApplianceId : undefined,
+      };
+
       const response = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(validationResult.data),
+        body: JSON.stringify(payload),
       });
 
       const data = await response.json();
@@ -183,29 +212,86 @@ function BookingFormInner() {
                       <div className="p-2 bg-orange-500/10 rounded-lg text-orange-400"><Laptop size={20} /></div>
                       <h3 className="text-lg font-bold">Informasi Barang Elektronik</h3>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div className="space-y-1">
-                        <label className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Jenis Barang *</label>
-                        <input
-                          required
-                          type="text"
-                          value={appliance}
-                          onChange={(e) => setAppliance(e.target.value)}
-                          placeholder="Contoh: AC, Kulkas, TV..."
-                          className="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:border-orange-500 outline-none placeholder-slate-600 transition-all"
-                        />
+                    {userAppliances.length > 0 && (
+                      <div className="space-y-3 mb-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                        <label className="text-xs text-slate-400 font-semibold uppercase tracking-wider block">Pilih Barang</label>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          {userAppliances.map((ua) => (
+                            <button
+                              key={ua.id}
+                              type="button"
+                              onClick={() => setSelectedApplianceId(ua.id)}
+                              className={`p-3 rounded-xl border-2 text-left transition-all flex items-center gap-3 ${
+                                selectedApplianceId === ua.id ? "border-orange-500 bg-orange-500/10" : "border-slate-800 bg-slate-900/50 hover:border-slate-700"
+                              }`}
+                            >
+                              <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${selectedApplianceId === ua.id ? "bg-orange-500 text-white" : "bg-slate-800 text-slate-400"}`}>
+                                <Laptop size={14} />
+                              </div>
+                              <div className="min-w-0">
+                                <p className="text-sm font-bold text-slate-200 truncate">{ua.name || ua.appliance_type.name}</p>
+                                <p className="text-[10px] text-slate-500 truncate">{ua.appliance_type.name} • {ua.brand}</p>
+                              </div>
+                            </button>
+                          ))}
+                          <button
+                            type="button"
+                            onClick={() => setSelectedApplianceId("NEW")}
+                            className={`p-3 rounded-xl border-2 border-dashed text-left transition-all flex items-center gap-3 ${
+                              selectedApplianceId === "NEW" ? "border-orange-500 bg-orange-500/5" : "border-slate-700 bg-slate-900/30 hover:border-slate-600"
+                            }`}
+                          >
+                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${selectedApplianceId === "NEW" ? "bg-orange-500 text-white" : "bg-slate-800 text-slate-400"}`}>
+                              <Plus size={14} />
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-sm font-bold text-slate-200">Barang Baru</p>
+                              <p className="text-[10px] text-slate-500">Daftarkan servis baru</p>
+                            </div>
+                          </button>
+                        </div>
                       </div>
-                      <div className="space-y-1">
-                        <label className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Merek (Opsional)</label>
-                        <input
-                          type="text"
-                          value={brand}
-                          onChange={(e) => setBrand(e.target.value)}
-                          placeholder="Contoh: LG, Samsung, Sharp..."
-                          className="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:border-orange-500 outline-none placeholder-slate-600 transition-all"
-                        />
+                    )}
+
+                    {selectedApplianceId === "NEW" && (
+                      <div className="space-y-4 mb-6 p-5 bg-slate-900/30 border border-slate-800 rounded-2xl animate-in fade-in slide-in-from-top-2">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div className="space-y-1">
+                            <label className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Jenis Barang *</label>
+                            <input
+                              required
+                              type="text"
+                              value={appliance}
+                              onChange={(e) => setAppliance(e.target.value)}
+                              placeholder="Contoh: AC, Kulkas..."
+                              className="w-full bg-slate-900/80 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:border-orange-500 outline-none placeholder-slate-600 transition-all"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Nama/Lokasi *</label>
+                            <input
+                              required
+                              type="text"
+                              value={applianceName}
+                              onChange={(e) => setApplianceName(e.target.value)}
+                              placeholder="Contoh: AC Kamar Utama"
+                              className="w-full bg-slate-900/80 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:border-orange-500 outline-none placeholder-slate-600 transition-all"
+                            />
+                          </div>
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Merek (Opsional)</label>
+                          <input
+                            type="text"
+                            value={brand}
+                            onChange={(e) => setBrand(e.target.value)}
+                            placeholder="Contoh: LG, Samsung..."
+                            className="w-full bg-slate-900/80 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:border-orange-500 outline-none placeholder-slate-600 transition-all"
+                          />
+                        </div>
                       </div>
-                    </div>
+                    )}
+
                     <div className="space-y-1">
                       <label className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Keluhan / Kerusakan *</label>
                       <textarea
@@ -341,8 +427,11 @@ function BookingFormInner() {
                 {/* STEP 4: SUMMARY & CONFIRM */}
                 {step === 4 && (
                   <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500 text-center">
-                    <div className="w-20 h-20 bg-orange-500/10 rounded-full flex items-center justify-center mx-auto text-orange-500 mb-2">
-                      <CheckCircle2 size={48} />
+                    <div className="relative w-24 h-24 mx-auto mb-2 flex items-center justify-center">
+                      <div className="absolute inset-0 bg-orange-500/20 rounded-full animate-ping opacity-75" />
+                      <div className="relative w-20 h-20 bg-orange-500/10 rounded-full flex items-center justify-center text-orange-500 border border-orange-500/20 shadow-[0_0_30px_rgba(249,115,22,0.3)]">
+                        <CheckCircle2 size={48} />
+                      </div>
                     </div>
                     <div>
                       <h3 className="text-xl font-bold">Konfirmasi Pesanan</h3>
@@ -352,7 +441,13 @@ function BookingFormInner() {
                     <div className="bg-slate-900/50 rounded-2xl p-6 text-left space-y-4 border border-slate-800">
                       <div className="flex justify-between items-start">
                         <span className="text-xs text-slate-500 font-bold uppercase">Barang</span>
-                        <span className="text-sm font-semibold text-slate-200">{appliance} {brand && `(${brand})`}</span>
+                        <span className="text-sm font-semibold text-slate-200">
+                          {selectedApplianceId !== "NEW" 
+                            ? userAppliances.find(a => a.id === selectedApplianceId)?.name || userAppliances.find(a => a.id === selectedApplianceId)?.appliance_type.name
+                            : applianceName || appliance
+                          } 
+                          {brand && ` (${brand})`}
+                        </span>
                       </div>
                       <div className="flex justify-between items-start border-t border-slate-800 pt-3">
                         <span className="text-xs text-slate-500 font-bold uppercase">Metode</span>

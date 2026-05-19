@@ -103,6 +103,7 @@ model Appliance {
   id                String        @id @default(uuid())
   user_id           String
   appliance_type_id String
+  name              String?
   brand             String
   model_number      String?
   appliance_type    ApplianceType @relation(fields: [appliance_type_id], references: [id])

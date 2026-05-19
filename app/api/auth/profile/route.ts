@@ -25,6 +25,11 @@ export async function GET(req: NextRequest) {
         age: true,
         gender: true,
         role: true,
+        appliances: {
+          include: {
+            appliance_type: true,
+          }
+        }
       }
     });
 

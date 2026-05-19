@@ -462,10 +462,13 @@ export default function OrderHistoryList({
                     <div className="min-w-0 flex-grow flex flex-col gap-1.5">
                       <div className="flex flex-wrap items-center gap-2 min-w-0">
                         <h4 className={cn(
-                          "font-black text-slate-100 truncate leading-tight",
+                          "font-black text-slate-100 truncate leading-tight flex flex-col gap-0.5",
                           isCompact ? "text-[11px]" : "text-base"
                         )}>
-                          {order.appliance?.appliance_type?.name}
+                          <span>{order.appliance?.appliance_type?.name}</span>
+                          {order.appliance?.name && order.appliance?.name !== order.appliance?.appliance_type?.name && (
+                            <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">{order.appliance?.name}</span>
+                          )}
                         </h4>
                         {order.payment_status === 'FULLY_PAID' && order.payments?.some((p: any) => p.type === 'FINAL_BALANCE' && p.status === 'VALID') && (
                           <span className="px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-500 text-[8px] font-black uppercase tracking-tighter shrink-0 border border-emerald-500/10">Lunas</span>
