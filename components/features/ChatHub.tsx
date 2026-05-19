@@ -187,32 +187,26 @@ export default function ChatHub({ initialOrders, currentUserId, compact = false,
           selectedOrderId ? "flex" : "hidden sm:flex"
         )}>
           {selectedOrder ? (
-            <div className="h-full flex flex-col">
+            <div className="h-full flex flex-col w-full min-w-0">
               {/* Specialized Header for Hub */}
               <div className={cn(
-                "p-6 border-b border-slate-700/50 flex items-center justify-between bg-slate-800/20 backdrop-blur-md",
+                "p-4 sm:p-6 border-b border-slate-700/50 flex items-center justify-between bg-slate-800/20 backdrop-blur-md w-full min-w-0",
                 compact && "p-4"
               )}>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 min-w-0 flex-1">
                   {/* Back Button (Mobile Only) */}
                   <button
                     onClick={() => setSelectedOrderId(null)}
-                    className="sm:hidden text-slate-400 hover:text-slate-100 p-2 mr-1 rounded-xl bg-slate-800 border border-slate-700 active:scale-95 transition-all"
+                    className="sm:hidden text-slate-400 hover:text-slate-100 p-2 mr-1 rounded-xl bg-slate-800 border border-slate-700 active:scale-95 transition-all shrink-0"
                   >
                     <ArrowLeft size={16} />
                   </button>
 
-                  <div className={cn(
-                    "bg-orange-500/10 rounded-xl flex items-center justify-center text-orange-500 border border-orange-500/10",
-                    compact ? "w-8 h-8" : "w-12 h-12"
-                  )}>
-                    <MessageSquare size={compact ? 16 : 24} />
-                  </div>
-                  <div className="min-w-0">
-                    <h3 className={cn("font-black text-slate-100 truncate", compact ? "text-sm" : "text-lg")}>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="font-black text-slate-100 truncate text-sm sm:text-lg">
                       {selectedOrder.technician?.user_id === currentUserId ? selectedOrder.user?.name : (selectedOrder.technician?.user?.name || "Teknisi FixIt")}
                     </h3>
-                    <p className={cn("text-slate-500 font-bold uppercase tracking-[0.1em] truncate", compact ? "text-[8px]" : "text-xs")}>
+                    <p className="text-slate-500 font-bold uppercase tracking-[0.1em] truncate text-[9px] sm:text-xs mt-0.5">
                       {selectedOrder.appliance?.appliance_type?.name} • {selectedOrder.status}
                     </p>
                   </div>
@@ -308,7 +302,7 @@ function ChatContent({ orderId, currentUserId, title, compact = false }: { order
 
 
   return (
-    <div className="flex flex-col h-full min-w-0">
+    <div className="flex flex-col h-full min-w-0 w-full">
       <div ref={scrollRef} className={cn("flex-grow overflow-y-auto p-6 space-y-4 custom-scrollbar", compact && "p-4 space-y-3")}>
         {messages.map((msg, idx) => {
           const isMe = msg.sender_id === currentUserId;
