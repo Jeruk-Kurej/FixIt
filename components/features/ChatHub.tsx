@@ -76,8 +76,8 @@ export default function ChatHub({ initialOrders, currentUserId, compact = false,
 
   return (
     <div className={cn(
-      "h-full flex w-full max-w-full overflow-hidden",
-      !compact && "container mx-auto px-4 py-4 sm:py-8 h-[calc(100vh-120px)]"
+      "flex w-full max-w-full overflow-hidden",
+      !compact ? "container mx-auto px-4 py-4 sm:py-6 h-full min-h-0" : "h-full"
     )}>
       <div className={cn(
         "flex-grow flex overflow-hidden w-full",

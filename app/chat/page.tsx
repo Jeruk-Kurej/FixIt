@@ -70,7 +70,8 @@ export default async function ChatPage({ searchParams }: { searchParams: Promise
   });
 
   return (
-    <div className="min-h-[calc(100vh-64px)] w-full max-w-full overflow-x-hidden bg-slate-900 text-slate-50">
+    <div className="h-[calc(100vh-64px)] w-full max-w-full overflow-hidden bg-slate-900 text-slate-50 flex flex-col">
+      <style dangerouslySetInnerHTML={{ __html: 'footer { display: none !important; }' }} />
       <ChatHub 
         initialOrders={JSON.parse(JSON.stringify(sortedOrders))} 
         currentUserId={user.id} 
