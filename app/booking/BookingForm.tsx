@@ -62,6 +62,7 @@ function BookingFormInner({ applianceTypes = [] }: BookingFormProps) {
   // Step 3: Jadwal
   const [scheduledDate, setScheduledDate] = useState("");
   const [scheduledTime, setScheduledTime] = useState("09:00");
+  const [showStep3Errors, setShowStep3Errors] = useState(false);
 
   // Step 4: Submit & Status
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -141,9 +142,13 @@ function BookingFormInner({ applianceTypes = [] }: BookingFormProps) {
       }
       setShowStep2Errors(false);
     }
-    if (step === 3 && !scheduledDate) {
-      setErrorMsg("Harap pilih tanggal servis.");
-      return;
+    if (step === 3) {
+      if (!scheduledDate) {
+        setErrorMsg("Harap pilih tanggal servis.");
+        setShowStep3Errors(true);
+        return;
+      }
+      setShowStep3Errors(false);
     }
     setStep(step + 1);
   };
@@ -511,7 +516,12 @@ function BookingFormInner({ applianceTypes = [] }: BookingFormProps) {
                         <label className="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-2 block px-1">Pilih Tanggal Servis *</label>
                         <PremiumCalendar
                           selectedDate={scheduledDate}
-                          onChange={(date) => setScheduledDate(date)}
+                          onChange={(date) => {
+                            setScheduledDate(date);
+                            setShowStep3Errors(false);
+                            setErrorMsg("");
+                          }}
+                          hasError={showStep3Errors && !scheduledDate}
                         />
                       </div>
                       <div className="space-y-2">
