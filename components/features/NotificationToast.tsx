@@ -117,7 +117,17 @@ export default function NotificationToast() {
     const interval = setInterval(fetchNotifs, 2000);
     fetchNotifs();
 
-    return () => clearInterval(interval);
+    // Listen for local custom toasts
+    const handleLocalToast = (e: any) => {
+      setActiveToast(e.detail);
+      setTimeout(() => setActiveToast(null), 5000);
+    };
+    window.addEventListener("show-local-toast", handleLocalToast);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("show-local-toast", handleLocalToast);
+    };
   }, [seenIds, pathname]);
 
   return (

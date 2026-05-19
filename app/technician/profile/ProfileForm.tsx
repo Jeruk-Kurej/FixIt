@@ -38,8 +38,6 @@ export default function ProfileForm({ initialData, applianceTypes }: ProfileForm
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setErrorMsg("");
-    setSuccessMsg("");
 
     try {
       const res = await fetch("/api/technician/profile", {
@@ -51,10 +49,25 @@ export default function ProfileForm({ initialData, applianceTypes }: ProfileForm
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Gagal menyimpan profil.");
 
-      setSuccessMsg("Profil berhasil diperbarui!");
+      window.dispatchEvent(new CustomEvent("show-local-toast", {
+        detail: {
+          id: Date.now().toString(),
+          title: "Berhasil! 🎉",
+          message: "Profil Anda telah berhasil diperbarui.",
+          type: "SYSTEM"
+        }
+      }));
+      
       router.refresh();
     } catch (err: any) {
-      setErrorMsg(err.message);
+      window.dispatchEvent(new CustomEvent("show-local-toast", {
+        detail: {
+          id: Date.now().toString(),
+          title: "Gagal Menyimpan",
+          message: err.message,
+          type: "SYSTEM"
+        }
+      }));
     } finally {
       setIsLoading(false);
     }
@@ -118,18 +131,6 @@ export default function ProfileForm({ initialData, applianceTypes }: ProfileForm
           })}
         </div>
       </div>
-
-      {errorMsg && (
-        <div className="p-3 bg-red-500/10 border border-red-500/30 text-red-400 rounded-xl text-sm">
-          {errorMsg}
-        </div>
-      )}
-      
-      {successMsg && (
-        <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-xl text-sm">
-          {successMsg}
-        </div>
-      )}
 
       <div className="pt-4">
         <Button type="submit" variant="primary" className="w-full py-3 rounded-xl font-bold" disabled={isLoading}>
