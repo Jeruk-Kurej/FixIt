@@ -45,17 +45,12 @@ export async function POST(req: NextRequest) {
     let targetApplianceId = applianceId;
 
     if (!targetApplianceId) {
-      // Cari atau buat master data ApplianceType
+      // Cari master data ApplianceType (harus sudah ada di database)
       let appType = await prisma.applianceType.findFirst({
         where: { name: appliance }
       });
       if (!appType) {
-        appType = await prisma.applianceType.create({
-          data: {
-            name: appliance,
-            base_service_fee: 100000,
-          }
-        });
+        return NextResponse.json({ error: "Jenis barang elektronik tidak didukung." }, { status: 400 });
       }
 
       // 2. Daftarkan Barang Elektronik ke akun pengguna
