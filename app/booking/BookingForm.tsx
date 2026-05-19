@@ -125,20 +125,37 @@ function BookingFormInner({ applianceTypes = [] }: BookingFormProps) {
       }
     }
     if (step === 2) {
-      if (!name || !email || !phone || (serviceType === "HOME_SERVICE" && !address)) {
-        setErrorMsg("Harap lengkapi data kontak dan alamat.");
+      if (!name || name.trim().length < 3) {
+        setErrorMsg("Nama lengkap minimal 3 karakter.");
+        setShowStep2Errors(true);
+        return;
+      }
+      if (!phone) {
+        setErrorMsg("Nomor WhatsApp wajib diisi.");
         setShowStep2Errors(true);
         return;
       }
       if (phone.length < 10) {
-        setErrorMsg("Nomor HP minimal 10 digit.");
+        setErrorMsg("Nomor WhatsApp minimal 10 digit.");
         setShowStep2Errors(true);
         return;
       }
       if (phone.length > 15) {
-        setErrorMsg("Nomor HP maksimal 15 digit.");
+        setErrorMsg("Nomor WhatsApp maksimal 15 digit.");
         setShowStep2Errors(true);
         return;
+      }
+      if (serviceType === "HOME_SERVICE") {
+        if (!address || address.trim() === "") {
+          setErrorMsg("Alamat kunjungan wajib diisi.");
+          setShowStep2Errors(true);
+          return;
+        }
+        if (address.trim().length < 10) {
+          setErrorMsg("Alamat lengkap minimal 10 karakter agar teknisi mudah menemukan lokasi.");
+          setShowStep2Errors(true);
+          return;
+        }
       }
       setShowStep2Errors(false);
     }
@@ -452,7 +469,7 @@ function BookingFormInner({ applianceTypes = [] }: BookingFormProps) {
                             value={name} 
                             onChange={(e) => setName(e.target.value)} 
                             className={`w-full bg-slate-900/50 border rounded-xl px-4 py-3 text-slate-200 focus:border-orange-500 outline-none transition-colors ${
-                              showStep2Errors && !name ? "border-red-500 bg-red-500/5 focus:border-red-500" : "border-slate-700"
+                              showStep2Errors && (!name || name.trim().length < 3) ? "border-red-500 bg-red-500/5 focus:border-red-500" : "border-slate-700"
                             }`} 
                           />
                         </div>
@@ -479,7 +496,7 @@ function BookingFormInner({ applianceTypes = [] }: BookingFormProps) {
                             value={address} 
                             onChange={(e) => setAddress(e.target.value)} 
                             className={`w-full bg-slate-900/50 border rounded-xl px-4 py-3 text-slate-200 focus:border-orange-500 outline-none transition-colors ${
-                              showStep2Errors && !address ? "border-red-500 bg-red-500/5 focus:border-red-500" : "border-slate-700"
+                              showStep2Errors && (!address || address.trim().length < 10) ? "border-red-500 bg-red-500/5 focus:border-red-500" : "border-slate-700"
                             }`} 
                             placeholder="Tuliskan alamat lengkap..." 
                           />
