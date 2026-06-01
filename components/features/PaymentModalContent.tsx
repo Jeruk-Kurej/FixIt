@@ -67,7 +67,10 @@ export default function PaymentModalContent({ order, paymentType, amount, onClos
           body: formData
         });
 
-        if (!uploadRes.ok) throw new Error("Gagal mengunggah file ke server lokal.");
+        if (!uploadRes.ok) {
+          const errData = await uploadRes.json().catch(() => ({}));
+          throw new Error(errData.error || "Gagal mengunggah file.");
+        }
         const uploadData = await uploadRes.json();
         uploadedUrl = uploadData.url;
       }

@@ -5,7 +5,6 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import SmartReminderAlert from "@/components/features/SmartReminderAlert";
 
 import Button from "@/components/ui/Button";
-import ProfileEditor from "@/components/features/ProfileEditor";
 import ServiceCalendar from "@/components/features/ServiceCalendar";
 import OrderHistoryList from "./OrderHistoryList";
 import FloatingChatWidget from "@/components/features/FloatingChatWidget";
@@ -67,7 +66,7 @@ export default function CustomerDashboardView({ user, calendarEvents, pendingMem
   };
 
   return (
-    <div className="h-[calc(100vh-64px)] flex flex-col overflow-hidden bg-slate-950/20 relative">
+    <div className="min-h-[calc(100vh-64px)] lg:h-[calc(100vh-64px)] flex flex-col overflow-y-auto lg:overflow-hidden bg-slate-950/20 relative">
       
       {/* Premium Ambient Glow - The "Sultan" Touch */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -75,124 +74,88 @@ export default function CustomerDashboardView({ user, calendarEvents, pendingMem
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-500/10 blur-[120px] rounded-full animate-pulse" style={{ animationDelay: '2s' }} />
       </div>
 
-      <div className="w-full px-4 flex flex-col h-full relative z-10 pt-4 pb-4">
+      <div className="w-full px-4 flex flex-col h-auto lg:h-full relative z-10 pt-4 pb-4">
         
         {/* Header Section */}
-        <div className="mb-4 flex items-center justify-between gap-4 shrink-0 px-2">
+        <div className="mb-4 flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0 px-2">
           <div className="flex items-center gap-4">
             <h1 className="text-xl font-black tracking-tight text-slate-50 flex items-center gap-3">
               Halo, {user.name}
             </h1>
+            <a href="/profile" className="px-3 py-1.5 rounded-full bg-slate-800/60 border border-slate-700/50 hover:bg-orange-500/10 hover:border-orange-500/30 text-slate-300 hover:text-orange-400 text-[10px] font-bold uppercase tracking-widest transition-all">
+              Edit Profil
+            </a>
           </div>
           
-          <Button href="/booking" variant="primary" className="shadow-[0_10px_20px_rgba(249,115,22,0.15)] px-6 py-2 text-[10px] font-black uppercase tracking-wider">
+          <Button href="/booking" variant="primary" className="shadow-[0_10px_20px_rgba(249,115,22,0.15)] px-6 py-2 text-[10px] font-black uppercase tracking-wider shrink-0 w-full md:w-auto text-center justify-center">
             Pesan Servis Baru
           </Button>
         </div>
 
-
-
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 flex-grow overflow-hidden min-h-0">
-
-          
-          {/* Sidebar (3/12) */}
-          <div className="md:col-span-3 flex flex-col gap-4 h-full min-h-0">
-            
-            {/* Profile Section - Now Larger & More Clear */}
-            <Card className="border-slate-800 bg-slate-900/40 backdrop-blur-md shadow-2xl overflow-hidden flex flex-col flex-grow min-h-0">
-              <CardHeader className="border-b border-slate-800 p-4 bg-slate-800/20 shrink-0">
-                <CardTitle className="text-[9px] font-black uppercase tracking-widest text-slate-500 flex items-center gap-2">
-                  <User size={12} className="text-blue-400" />
-                  Profil & Pengaturan
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-5 overflow-y-auto custom-scrollbar flex-grow bg-slate-900/10">
-                 <div className="space-y-8 pt-4">
-                   <div>
-                     <p className="text-[8px] text-slate-600 font-black uppercase tracking-[0.2em] mb-2">Nama Lengkap</p>
-                     <p className="text-sm font-black text-slate-100">{user.name}</p>
+        {/* Slim & Compact Membership Banner - Moved to top */}
+        <div className="mb-4 px-2">
+          <Card className="border-orange-500/20 bg-gradient-to-r from-slate-900 to-slate-950 p-4 relative overflow-hidden group">
+             <div className="absolute top-1/2 -right-4 -translate-y-1/2 opacity-5 group-hover:opacity-10 transition-opacity">
+                <Zap size={60} className="text-orange-500" />
+             </div>
+             
+             <div className="relative z-10 flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                   <div className="p-2 bg-orange-500/10 rounded-lg text-orange-500 shrink-0">
+                      <ShieldCheck size={16} />
                    </div>
-
                    <div>
-                     <p className="text-[8px] text-slate-600 font-black uppercase tracking-[0.2em] mb-1">Email Terdaftar</p>
-                     <p className="text-[11px] font-bold text-slate-400 truncate">{user.email}</p>
+                      <h4 className="text-[11px] font-black text-slate-100 uppercase tracking-wider">Premium</h4>
+                      <p className="text-[8px] text-slate-500 font-bold">Gratis Kunjungan & Garansi</p>
                    </div>
-                   <hr className="border-slate-800" />
-                   <ProfileEditor 
-                     initialPhone={user.phone || ""} 
-                     initialAddress={user.address || ""}
-                     initialAge={user.age}
-                     initialGender={user.gender}
-                   />
-
-                 </div>
-              </CardContent>
-            </Card>
-
-            {/* Slim & Compact Membership Banner */}
-            <Card className="border-orange-500/20 bg-gradient-to-r from-slate-900 to-slate-950 p-4 shrink-0 relative overflow-hidden group">
-               <div className="absolute top-1/2 -right-4 -translate-y-1/2 opacity-5 group-hover:opacity-10 transition-opacity">
-                  <Zap size={60} className="text-orange-500" />
-               </div>
-               
-               <div className="relative z-10 flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-3">
-                     <div className="p-2 bg-orange-500/10 rounded-lg text-orange-500 shrink-0">
-                        <ShieldCheck size={16} />
-                     </div>
-                     <div>
-                        <h4 className="text-[11px] font-black text-slate-100 uppercase tracking-wider">Premium</h4>
-                        <p className="text-[8px] text-slate-500 font-bold">Gratis Kunjungan & Garansi</p>
-                     </div>
-                  </div>
-                  <Button variant="outline" href="/membership" className="border-orange-500/30 text-orange-500 hover:bg-orange-500/10 text-[8px] font-black uppercase px-4 py-1.5 rounded-lg shrink-0">
-                     Buka
-                  </Button>
-               </div>
-            </Card>
-          </div>
-
-          {/* Col 2: Main Workspace (9/12) */}
-          <div className="md:col-span-9 flex flex-col gap-4 h-full min-h-0">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 flex-grow min-h-0">
-                <div className="lg:col-span-9 h-full">
-                  <ServiceCalendar events={calendarEvents} />
                 </div>
-                <div className="lg:col-span-3 h-full flex flex-col min-h-0 pb-4">
-                  {(() => {
-                    const pendingOrders = user.orders.filter((o: any) => 
-                      (o.payment_status === 'UNPAID' && o.status !== 'CANCELLED') || 
-                      (o.payments && o.payments.some((p: any) => p.type === 'DOWN_PAYMENT' && p.status === 'PENDING'))
-                    );
-                    const activeOrders = user.orders.filter((o: any) => 
-                      o.status !== 'DONE' && o.status !== 'CANCELLED' &&
-                      !((o.payment_status === 'UNPAID') || (o.payments && o.payments.some((p: any) => p.type === 'DOWN_PAYMENT' && p.status === 'PENDING')))
-                    );
-                    const hasPending = pendingOrders.length > 0;
+                <Button variant="outline" href="/membership" className="border-orange-500/30 text-orange-500 hover:bg-orange-500/10 text-[8px] font-black uppercase px-4 py-1.5 rounded-lg shrink-0">
+                   Buka
+                </Button>
+             </div>
+          </Card>
+        </div>
 
-                    return (
-                      <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-md overflow-hidden flex flex-col h-full shadow-2xl">
-                        {hasPending ? (
-                          <SidebarTabbedOrders 
-                            pendingOrders={pendingOrders} 
-                            activeOrders={activeOrders} 
-                          />
-                        ) : (
-                          <OrderHistoryList 
-                            orders={activeOrders} 
-                            isCompact={true} 
-                            title="Pesanan Aktif"
-                            showActiveOnly={true} 
-                          />
-                        )}
-                      </Card>
-                    );
-                  })()}
-                </div>
+
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 flex-grow lg:overflow-hidden min-h-0 px-2 pb-4 w-full">
+            <div className="lg:col-span-7 h-full order-2 lg:order-1">
+              <ServiceCalendar events={calendarEvents} />
             </div>
+            <div className="lg:col-span-5 h-full flex flex-col min-h-0 order-1 lg:order-2">
+              {(() => {
+                const pendingOrders = user.orders.filter((o: any) => 
+                  (o.payment_status === 'UNPAID' && o.status !== 'CANCELLED') || 
+                  (o.payments && o.payments.some((p: any) => 
+                    (p.type === 'DOWN_PAYMENT' && p.status === 'PENDING') || 
+                    (p.status === 'INVALID' && !o.payments.some((p2: any) => p2.type === p.type && (p2.status === 'VALID' || p2.status === 'PENDING')))
+                  ))
+                );
+                const activeOrders = user.orders.filter((o: any) => 
+                  o.status !== 'DONE' && o.status !== 'CANCELLED' &&
+                  !((o.payment_status === 'UNPAID') || (o.payments && o.payments.some((p: any) => p.type === 'DOWN_PAYMENT' && p.status === 'PENDING')))
+                );
+                const hasPending = pendingOrders.length > 0;
 
-          </div>
-
+                return (
+                  <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-md overflow-hidden flex flex-col h-full shadow-2xl">
+                    {hasPending ? (
+                      <SidebarTabbedOrders 
+                        pendingOrders={pendingOrders} 
+                        activeOrders={activeOrders} 
+                      />
+                    ) : (
+                      <OrderHistoryList 
+                        orders={activeOrders} 
+                        isCompact={true} 
+                        title="Pesanan Aktif"
+                        showActiveOnly={true} 
+                      />
+                    )}
+                  </Card>
+                );
+              })()}
+            </div>
         </div>
 
       </div>

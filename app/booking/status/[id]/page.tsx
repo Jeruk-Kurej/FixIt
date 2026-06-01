@@ -28,6 +28,12 @@ export default function OrderStatusPage({ params }: OrderStatusProps) {
       }
 
       setOrder(data.order);
+      
+      // LOGIC: If DP is not paid, searching doesn't even start. 
+      // Redirect to dashboard where they can see the "Menunggu Aksi" tab.
+      if (data.order?.payment_status === 'UNPAID') {
+        router.push('/dashboard');
+      }
     } catch (err: any) {
       setErrorMsg(err.message);
     } finally {

@@ -22,9 +22,10 @@ import { cn } from "@/lib/utils";
 interface PremiumCalendarProps {
   selectedDate: string; // ISO format or YYYY-MM-DD
   onChange: (date: string) => void;
+  hasError?: boolean;
 }
 
-export default function PremiumCalendar({ selectedDate, onChange }: PremiumCalendarProps) {
+export default function PremiumCalendar({ selectedDate, onChange, hasError }: PremiumCalendarProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const today = startOfToday();
   const selected = selectedDate ? new Date(selectedDate) : null;
@@ -135,7 +136,10 @@ export default function PremiumCalendar({ selectedDate, onChange }: PremiumCalen
   };
 
   return (
-    <div className="w-full bg-slate-900/80 border border-slate-800 rounded-[32px] shadow-2xl overflow-hidden backdrop-blur-xl">
+    <div className={cn(
+      "w-full bg-slate-900/80 border rounded-[32px] shadow-2xl overflow-hidden backdrop-blur-xl transition-colors",
+      hasError ? "border-red-500 bg-red-500/5" : "border-slate-800"
+    )}>
       {renderHeader()}
       {renderDays()}
       {renderCells()}

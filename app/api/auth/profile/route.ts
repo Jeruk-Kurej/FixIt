@@ -25,6 +25,11 @@ export async function GET(req: NextRequest) {
         age: true,
         gender: true,
         role: true,
+        appliances: {
+          include: {
+            appliance_type: true,
+          }
+        }
       }
     });
 
@@ -48,11 +53,12 @@ export async function PATCH(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { phone, address, age, gender } = body;
+    const { name, phone, address, age, gender } = body;
 
     const user = await prisma.user.update({
       where: { email: userEmail },
       data: {
+        name: name || undefined,
         phone: phone || null,
         address: address || null,
         age: age ? parseInt(age) : null,

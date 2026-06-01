@@ -22,6 +22,8 @@ export default async function HistoryPage() {
       orders: {
         include: {
           appliance: { include: { appliance_type: true } },
+          technician: { include: { user: true } },
+          payments: { orderBy: { createdAt: "desc" } },
           review: true
         },
         orderBy: { createdAt: "desc" }

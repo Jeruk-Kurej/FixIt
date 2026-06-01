@@ -75,6 +75,42 @@ export default function ReviewModal({ isOpen, onClose, order }: ReviewModalProps
         </div>
 
         <div className="p-6 space-y-8">
+          {/* Technician Profile Card */}
+          {order.technician && (
+            <div className="bg-slate-800/40 border border-slate-800/80 rounded-2xl p-4 flex items-center gap-4">
+              <div className="relative shrink-0">
+                {order.technician.user?.image ? (
+                  <img 
+                    src={order.technician.user.image} 
+                    alt={order.technician.user.name || "Teknisi"} 
+                    className="w-12 h-12 rounded-full object-cover border border-slate-700"
+                  />
+                ) : (
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-orange-500 to-amber-400 flex items-center justify-center text-slate-950 font-black text-lg">
+                    {(order.technician.user?.name || "T")[0].toUpperCase()}
+                  </div>
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Teknisi Anda</span>
+                  {order.technician.rating && (
+                    <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-500 text-[9px] font-bold border border-amber-500/20">
+                      <Star size={8} className="fill-amber-500" />
+                      <span>{order.technician.rating.toFixed(1)}</span>
+                    </div>
+                  )}
+                </div>
+                <h4 className="text-sm font-black text-slate-200 truncate mt-1">
+                  {order.technician.user?.name || "Teknisi FixIt"}
+                </h4>
+                <p className="text-[10px] text-slate-500 font-bold mt-0.5 truncate">
+                  Telah menyelesaikan perbaikan {order.appliance?.appliance_type?.name} Anda.
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Rating Stars */}
           <div className="flex flex-col items-center gap-4">
             <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Kualitas Layanan</p>

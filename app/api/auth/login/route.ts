@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
         email: user.email
       }
     });
-    response.cookies.set("user_email", user.email, { path: "/", maxAge: 60 * 60 * 24 * 7 }); // 7 hari
+    response.cookies.set("user_email", user.email || "", { path: "/", maxAge: 60 * 60 * 24 * 7 }); // 7 hari
     response.cookies.set("user_role", user.role, { path: "/", maxAge: 60 * 60 * 24 * 7 }); // 7 hari
 
 

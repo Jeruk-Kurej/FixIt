@@ -15,12 +15,17 @@ interface TechnicianDashboardViewProps {
 }
 
 export default async function TechnicianDashboardView({ user, tech }: TechnicianDashboardViewProps) {
-  // 1. Get Incoming Orders (Only those that have been paid/verified)
+  // 1. Get Incoming Orders (Only those that have been paid/verified AND match tech specialties)
+  const specialtyIds = tech.specialties?.map((s: any) => s.id) || [];
+  
   const incomingOrders = await prisma.order.findMany({
     where: { 
       status: 'ACCEPTED',
       technician_id: null,
-      payment_status: { in: ['DP_PAID', 'FULLY_PAID'] }
+      payment_status: { in: ['DP_PAID', 'FULLY_PAID'] },
+      appliance: {
+        appliance_type_id: { in: specialtyIds.length > 0 ? specialtyIds : ['none'] } // If no specialties, show none
+      }
     },
     include: {
       user: true,
@@ -59,8 +64,8 @@ export default async function TechnicianDashboardView({ user, tech }: Technician
     }));
 
   return (
-    <div className="h-[calc(100vh-64px)] flex flex-col overflow-hidden bg-slate-950/20">
-      <div className="w-full px-4 flex flex-col h-full relative z-10 pt-4 pb-4">
+    <div className="min-h-[calc(100vh-64px)] lg:h-[calc(100vh-64px)] flex flex-col overflow-y-auto lg:overflow-hidden bg-slate-950/20">
+      <div className="w-full px-4 flex flex-col h-auto lg:h-full relative z-10 pt-4 pb-4">
         
         {/* Very Slim Header */}
         <div className="mb-4 flex items-center justify-between gap-4 shrink-0 px-2">
@@ -68,6 +73,9 @@ export default async function TechnicianDashboardView({ user, tech }: Technician
             <h1 className="text-xl font-black tracking-tight text-slate-50 flex items-center gap-3">
               Halo, {user.name}
             </h1>
+            <a href="/technician/profile" className="px-3 py-1.5 rounded-full bg-slate-800/60 border border-slate-700/50 hover:bg-orange-500/10 hover:border-orange-500/30 text-slate-300 hover:text-orange-400 text-[10px] font-bold uppercase tracking-widest transition-all">
+              Edit Profil
+            </a>
           </div>
           
           <div className="flex gap-4">
@@ -83,14 +91,14 @@ export default async function TechnicianDashboardView({ user, tech }: Technician
         </div>
 
         {/* Unified Layout: Sidebar + Main Content */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 flex-grow overflow-hidden min-h-0">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 flex-grow md:overflow-hidden min-h-0">
 
           
           {/* Sidebar (3/12) */}
-          <div className="md:col-span-3 flex flex-col gap-4 h-full min-h-0">
+          <div className="md:col-span-3 flex flex-col gap-4 md:h-full min-h-0">
             
             {/* Shortened Incoming Feed */}
-            <Card className="border-slate-800 bg-slate-900/40 backdrop-blur-md shadow-2xl overflow-hidden flex flex-col h-[45%] shrink-0">
+            <Card className="border-slate-800 bg-slate-900/40 backdrop-blur-md shadow-2xl overflow-hidden flex flex-col h-auto min-h-[250px] md:h-[45%] shrink-0">
               <CardHeader className="border-b border-slate-800 p-3 bg-slate-800/20 shrink-0">
                 <CardTitle className="text-[9px] font-black uppercase tracking-widest text-slate-500 flex items-center gap-2">
                    🔥 Pesanan Baru
@@ -164,12 +172,12 @@ export default async function TechnicianDashboardView({ user, tech }: Technician
           </div>
 
           {/* Main Content Area (9/12) */}
-          <div className="md:col-span-9 flex flex-col gap-4 h-full min-h-0">
-             <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 h-full min-h-0">
-                <div className="lg:col-span-9 h-full">
-                  <ServiceCalendar events={calendarEvents} />
+          <div className="md:col-span-9 flex flex-col gap-4 md:h-full min-h-0">
+             <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:h-full min-h-0">
+                <div className="lg:col-span-9 lg:h-full">
+                   <ServiceCalendar events={calendarEvents} />
                 </div>
-                <div className="lg:col-span-3 h-full">
+                <div className="lg:col-span-3 lg:h-full">
                   <ActiveTasksList orders={myAcceptedOrders} />
                 </div>
 

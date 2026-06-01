@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { MessageSquare, User as UserIcon, Search, ChevronRight, Clock, Send } from "lucide-react";
+import { MessageSquare, User as UserIcon, Search, ChevronRight, Clock, Send, ArrowLeft } from "lucide-react";
 import ChatUI from "./ChatUI";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
@@ -24,15 +24,22 @@ export default function ChatHub({ initialOrders, currentUserId, compact = false,
   
   const [orders, setOrders] = useState<any[]>(initialOrders);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(
-    initialSelectedOrderId || (initialOrders.length > 0 ? initialOrders[0].id : null)
+    initialSelectedOrderId || null
   );
+
+  // Auto-select first chat only on desktop screens
+  useEffect(() => {
+    if (!initialSelectedOrderId && initialOrders.length > 0 && window.innerWidth >= 640) {
+      setSelectedOrderId(initialOrders[0].id);
+    }
+  }, [initialOrders, initialSelectedOrderId]);
 
   // URL LISTENER: Switch chat if URL orderId changes (e.g. from notification)
   useEffect(() => {
     if (urlOrderId && urlOrderId !== selectedOrderId) {
       setSelectedOrderId(urlOrderId);
     }
-  }, [urlOrderId]);
+  }, [urlOrderId, selectedOrderId]);
 
   const selectedOrder = orders.find(o => o.id === selectedOrderId);
 
@@ -69,18 +76,45 @@ export default function ChatHub({ initialOrders, currentUserId, compact = false,
 
   return (
     <div className={cn(
-      "h-full flex",
-      !compact && "container mx-auto px-4 py-8 h-[calc(100vh-120px)]"
+      "chat-hub-container flex w-full max-w-full overflow-hidden",
+      !compact ? "container mx-auto px-4 py-4 sm:py-6 h-full min-h-0" : "h-full"
     )}>
+      {!selectedOrderId ? (
+        <style dangerouslySetInnerHTML={{ __html: `
+          .chat-page-container {
+            min-height: calc(100vh - 64px) !important;
+            height: auto !important;
+            overflow: visible !important;
+          }
+          .chat-hub-container {
+            height: 600px !important;
+            min-height: 500px !important;
+          }
+        `}} />
+      ) : (
+        <style dangerouslySetInnerHTML={{ __html: `
+          footer {
+            display: none !important;
+          }
+          .chat-page-container {
+            height: calc(100vh - 64px) !important;
+            overflow: hidden !important;
+          }
+          .chat-hub-container {
+            height: 100% !important;
+          }
+        `}} />
+      )}
       <div className={cn(
-        "flex-grow flex overflow-hidden",
+        "flex-grow flex overflow-hidden w-full",
         !compact ? "bg-slate-800/40 border border-slate-700/50 rounded-3xl shadow-2xl backdrop-blur-md" : "bg-transparent"
       )}>
         
         {/* Left Sidebar: Conversation List */}
         <div className={cn(
-          "border-r border-slate-700/50 flex flex-col bg-slate-900/50 transition-all duration-300",
-          compact ? "w-[60px] sm:w-[70px]" : "w-full sm:w-[350px]"
+          "border-r border-slate-700/50 flex flex-col bg-slate-900/50 transition-all duration-300 min-w-0",
+          compact ? "w-[60px] sm:w-[70px]" : "w-full sm:w-[350px]",
+          selectedOrderId ? "hidden sm:flex" : "flex"
         )}>
           <div className={cn("p-4 border-b border-slate-700/50", compact && "p-3 flex justify-center")}>
             {!compact ? (
@@ -174,36 +208,38 @@ export default function ChatHub({ initialOrders, currentUserId, compact = false,
         </div>
 
         {/* Right Area: Chat Content */}
-        <div className="flex-grow flex flex-col relative bg-slate-900/30">
+        <div className={cn(
+          "flex-grow flex flex-col relative bg-slate-900/30 min-w-0",
+          selectedOrderId ? "flex" : "hidden sm:flex"
+        )}>
           {selectedOrder ? (
-            <div className="h-full flex flex-col">
+            <div className="h-full flex flex-col w-full min-w-0">
               {/* Specialized Header for Hub */}
               <div className={cn(
-                "p-6 border-b border-slate-700/50 flex items-center justify-between bg-slate-800/20 backdrop-blur-md",
+                "p-4 sm:p-6 border-b border-slate-700/50 flex items-center justify-between bg-slate-800/20 backdrop-blur-md w-full min-w-0",
                 compact && "p-4"
               )}>
-                <div className="flex items-center gap-3">
-                  <div className={cn(
-                    "bg-orange-500/10 rounded-xl flex items-center justify-center text-orange-500 border border-orange-500/10",
-                    compact ? "w-8 h-8" : "w-12 h-12"
-                  )}>
-                    <MessageSquare size={compact ? 16 : 24} />
-                  </div>
-                  <div className="min-w-0">
-                    <h3 className={cn("font-black text-slate-100 truncate", compact ? "text-sm" : "text-lg")}>
+                <div className="flex items-center gap-2 min-w-0 flex-1">
+                  {/* Back Button (Mobile Only) */}
+                  <button
+                    onClick={() => setSelectedOrderId(null)}
+                    className="sm:hidden text-slate-400 hover:text-slate-100 p-2 mr-1 rounded-xl bg-slate-800 border border-slate-700 active:scale-95 transition-all shrink-0"
+                  >
+                    <ArrowLeft size={16} />
+                  </button>
+
+                  <div className="min-w-0 flex-1">
+                    <h3 className="font-black text-slate-100 truncate text-sm sm:text-lg">
                       {selectedOrder.technician?.user_id === currentUserId ? selectedOrder.user?.name : (selectedOrder.technician?.user?.name || "Teknisi FixIt")}
                     </h3>
-                    <p className={cn("text-slate-500 font-bold uppercase tracking-[0.1em] truncate", compact ? "text-[8px]" : "text-xs")}>
+                    <p className="text-slate-500 font-bold uppercase tracking-[0.1em] truncate text-[9px] sm:text-xs mt-0.5">
                       {selectedOrder.appliance?.appliance_type?.name} • {selectedOrder.status}
                     </p>
                   </div>
                 </div>
               </div>
 
-              {/* Integrated ChatUI (Modified for Hub use or wrapped) */}
-              {/* Note: We use fixed version of ChatUI but here we want it integrated. 
-                  Let's create a specialized 'IntegratedChat' or reuse ChatUI with 'integrated' prop. 
-              */}
+              {/* Integrated ChatUI */}
               <div className="flex-grow overflow-hidden">
                 <ChatContent 
                   orderId={selectedOrder.id} 
@@ -292,7 +328,7 @@ function ChatContent({ orderId, currentUserId, title, compact = false }: { order
 
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full min-w-0 w-full">
       <div ref={scrollRef} className={cn("flex-grow overflow-y-auto p-6 space-y-4 custom-scrollbar", compact && "p-4 space-y-3")}>
         {messages.map((msg, idx) => {
           const isMe = msg.sender_id === currentUserId;

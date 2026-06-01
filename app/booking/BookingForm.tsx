@@ -6,10 +6,14 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import { formatRupiah } from "@/lib/utils";
 import { bookingSchema } from "@/lib/validations";
-import { Calendar, Clock, Contact, Laptop, ChevronRight, ChevronLeft, CheckCircle2 } from "lucide-react";
+import { Calendar, Clock, Contact, Laptop, ChevronRight, ChevronLeft, CheckCircle2, Plus, ChevronDown } from "lucide-react";
 import PremiumCalendar from "@/components/features/PremiumCalendar";
 
-function BookingFormInner() {
+interface BookingFormProps {
+  applianceTypes?: { id: string, name: string }[];
+}
+
+function BookingFormInner({ applianceTypes = [] }: BookingFormProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -19,9 +23,33 @@ function BookingFormInner() {
 
   // Step 1: Detail Barang
   const [appliance, setAppliance] = useState(searchParams.get("appliance") || "");
+  const [applianceName, setApplianceName] = useState("");
   const [brand, setBrand] = useState(searchParams.get("brand") || "");
   const [problem, setProblem] = useState(searchParams.get("problem") || "");
   const [estimatedCost, setEstimatedCost] = useState(searchParams.get("maxCost") || "150000");
+
+  const [userAppliances, setUserAppliances] = useState<any[]>([]);
+  const [selectedApplianceId, setSelectedApplianceId] = useState<string>("NEW");
+  const [isNewAppliance, setIsNewAppliance] = useState(true);
+  const [selectedApplianceSearch, setSelectedApplianceSearch] = useState("");
+
+  const getApplianceLabel = (ua: any) => {
+    const namePart = ua.name ? ` - ${ua.name}` : "";
+    const brandPart = ua.brand ? ` (${ua.brand})` : " (General)";
+    return `${ua.appliance_type.name}${namePart}${brandPart}`;
+  };
+
+  const handleApplianceSearchChange = (val: string) => {
+    setSelectedApplianceSearch(val);
+    const matched = userAppliances.find(
+      ua => getApplianceLabel(ua).toLowerCase() === val.toLowerCase()
+    );
+    if (matched) {
+      setSelectedApplianceId(matched.id);
+    } else {
+      setSelectedApplianceId("");
+    }
+  };
 
   // Step 2: Kontak & Layanan
   const [name, setName] = useState("");
@@ -29,10 +57,12 @@ function BookingFormInner() {
   const [phone, setPhone] = useState("");
   const [serviceType, setServiceType] = useState<"HOME_SERVICE" | "WORKSHOP_VISIT">("HOME_SERVICE");
   const [address, setAddress] = useState("");
+  const [showStep2Errors, setShowStep2Errors] = useState(false);
 
   // Step 3: Jadwal
   const [scheduledDate, setScheduledDate] = useState("");
   const [scheduledTime, setScheduledTime] = useState("09:00");
+  const [showStep3Errors, setShowStep3Errors] = useState(false);
 
   // Step 4: Submit & Status
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -49,6 +79,11 @@ function BookingFormInner() {
           setEmail(data.user.email || "");
           setPhone(data.user.phone || "");
           setAddress(data.user.address || "");
+          if (data.user.appliances && data.user.appliances.length > 0) {
+            setUserAppliances(data.user.appliances);
+            setIsNewAppliance(false);
+            setSelectedApplianceId(""); // Must choose one
+          }
         }
       } catch (err) {
         console.error("Failed to fetch profile for pre-fill:", err);
@@ -57,24 +92,87 @@ function BookingFormInner() {
     fetchProfile();
   }, []);
 
+  useEffect(() => {
+    setTimeout(() => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 50);
+  }, [step]);
+
   const nextStep = () => {
     setErrorMsg("");
-    if (step === 1 && (!appliance || !problem)) {
-      setErrorMsg("Harap isi jenis barang dan keluhan.");
-      return;
+    if (step === 1) {
+      if (isNewAppliance) {
+        if (!appliance || !applianceName || !problem) {
+          setErrorMsg("Harap isi jenis barang, nama lokasi, dan keluhan.");
+          return;
+        }
+        const isValid = applianceTypes.some(
+          t => t.name.toLowerCase() === appliance.toLowerCase()
+        );
+        if (!isValid) {
+          setErrorMsg("Harap pilih jenis barang yang valid dari daftar pencarian.");
+          return;
+        }
+      } else {
+        if (!selectedApplianceId) {
+          setErrorMsg("Harap pilih salah satu barang terdaftar Anda.");
+          return;
+        }
+        if (!problem) {
+          setErrorMsg("Harap isi keluhan barang Anda.");
+          return;
+        }
+      }
     }
-    if (step === 2 && (!name || !email || !phone || (serviceType === "HOME_SERVICE" && !address))) {
-      setErrorMsg("Harap lengkapi data kontak dan alamat.");
-      return;
+    if (step === 2) {
+      if (!name || name.trim().length < 3) {
+        setErrorMsg("Nama lengkap minimal 3 karakter.");
+        setShowStep2Errors(true);
+        return;
+      }
+      if (!phone) {
+        setErrorMsg("Nomor WhatsApp wajib diisi.");
+        setShowStep2Errors(true);
+        return;
+      }
+      if (phone.length < 10) {
+        setErrorMsg("Nomor WhatsApp minimal 10 digit.");
+        setShowStep2Errors(true);
+        return;
+      }
+      if (phone.length > 15) {
+        setErrorMsg("Nomor WhatsApp maksimal 15 digit.");
+        setShowStep2Errors(true);
+        return;
+      }
+      if (serviceType === "HOME_SERVICE") {
+        if (!address || address.trim() === "") {
+          setErrorMsg("Alamat kunjungan wajib diisi.");
+          setShowStep2Errors(true);
+          return;
+        }
+        if (address.trim().length < 10) {
+          setErrorMsg("Alamat lengkap minimal 10 karakter agar teknisi mudah menemukan lokasi.");
+          setShowStep2Errors(true);
+          return;
+        }
+      }
+      setShowStep2Errors(false);
     }
-    if (step === 3 && !scheduledDate) {
-      setErrorMsg("Harap pilih tanggal servis.");
-      return;
+    if (step === 3) {
+      if (!scheduledDate) {
+        setErrorMsg("Harap pilih tanggal servis.");
+        setShowStep3Errors(true);
+        return;
+      }
+      setShowStep3Errors(false);
     }
     setStep(step + 1);
   };
 
-  const prevStep = () => setStep(step - 1);
+  const prevStep = () => {
+    setStep(step - 1);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,13 +181,31 @@ function BookingFormInner() {
 
     const fullDateTime = `${scheduledDate}T${scheduledTime}:00`;
 
+    let finalApplianceId = undefined;
+    let finalApplianceBrand = brand || "General";
+    let finalApplianceName = applianceName;
+
+    if (!isNewAppliance) {
+      const matched = userAppliances.find(
+        ua => getApplianceLabel(ua).toLowerCase() === selectedApplianceSearch.toLowerCase()
+      );
+      if (matched) {
+        finalApplianceId = matched.id;
+        finalApplianceBrand = matched.brand || "General";
+      }
+    }
+
+    const matchedAppliance = !isNewAppliance && finalApplianceId
+      ? userAppliances.find(a => a.id === finalApplianceId)?.appliance_type?.name
+      : applianceTypes.find(t => t.name.toLowerCase() === appliance.toLowerCase())?.name || appliance;
+
     const formData = {
       name,
       email,
       phone,
       address: serviceType === "HOME_SERVICE" ? address : null,
-      appliance,
-      brand: brand || "General",
+      appliance: matchedAppliance,
+      brand: finalApplianceBrand,
       problem,
       serviceType,
       estimatedCost: estimatedCost || "150000",
@@ -107,10 +223,17 @@ function BookingFormInner() {
     }
 
     try {
+      // Append our custom data to the validated payload
+      const payload = {
+        ...validationResult.data,
+        applianceName: isNewAppliance ? finalApplianceName : undefined,
+        applianceId: !isNewAppliance ? finalApplianceId : undefined,
+      };
+
       const response = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(validationResult.data),
+        body: JSON.stringify(payload),
       });
 
       const data = await response.json();
@@ -183,29 +306,114 @@ function BookingFormInner() {
                       <div className="p-2 bg-orange-500/10 rounded-lg text-orange-400"><Laptop size={20} /></div>
                       <h3 className="text-lg font-bold">Informasi Barang Elektronik</h3>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div className="space-y-1">
-                        <label className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Jenis Barang *</label>
-                        <input
-                          required
-                          type="text"
-                          value={appliance}
-                          onChange={(e) => setAppliance(e.target.value)}
-                          placeholder="Contoh: AC, Kulkas, TV..."
-                          className="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:border-orange-500 outline-none placeholder-slate-600 transition-all"
-                        />
+                    {userAppliances.length > 0 && (
+                      <div className="flex bg-slate-900/50 p-1 rounded-xl border border-slate-800 gap-1 mb-6">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsNewAppliance(false);
+                            setSelectedApplianceId("");
+                          }}
+                          className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all text-center ${
+                            !isNewAppliance 
+                              ? "bg-orange-500 text-white shadow-lg shadow-orange-500/10" 
+                              : "text-slate-400 hover:text-slate-200"
+                          }`}
+                        >
+                          Barang Terdaftar
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsNewAppliance(true);
+                            setSelectedApplianceId("NEW");
+                          }}
+                          className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all text-center ${
+                            isNewAppliance 
+                              ? "bg-orange-500 text-white shadow-lg shadow-orange-500/10" 
+                              : "text-slate-400 hover:text-slate-200"
+                          }`}
+                        >
+                          Daftar Barang Baru
+                        </button>
                       </div>
-                      <div className="space-y-1">
-                        <label className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Merek (Opsional)</label>
-                        <input
-                          type="text"
-                          value={brand}
-                          onChange={(e) => setBrand(e.target.value)}
-                          placeholder="Contoh: LG, Samsung, Sharp..."
-                          className="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:border-orange-500 outline-none placeholder-slate-600 transition-all"
-                        />
+                    )}
+
+                    {!isNewAppliance && userAppliances.length > 0 && (
+                      <div className="space-y-1 mb-6 animate-in fade-in slide-in-from-top-2">
+                        <label className="text-xs text-slate-400 font-semibold uppercase tracking-wider block">Pilih Barang *</label>
+                        <div className="relative">
+                          <input
+                            required
+                            type="text"
+                            list="user-appliances"
+                            value={selectedApplianceSearch}
+                            onChange={(e) => handleApplianceSearchChange(e.target.value)}
+                            placeholder="Cari atau pilih barang Anda..."
+                            className="w-full bg-slate-900/80 border border-slate-700 rounded-xl px-4 py-3 pr-10 text-slate-200 focus:border-orange-500 outline-none placeholder-slate-600 transition-all"
+                          />
+                          <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-500">
+                            <ChevronDown size={18} />
+                          </div>
+                          <datalist id="user-appliances">
+                            {userAppliances.map((ua) => (
+                              <option key={ua.id} value={getApplianceLabel(ua)} />
+                            ))}
+                          </datalist>
+                        </div>
                       </div>
-                    </div>
+                    )}
+
+                    {isNewAppliance && (
+                      <div className="space-y-4 animate-in fade-in slide-in-from-top-2">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div className="space-y-1">
+                            <label className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Jenis Barang *</label>
+                            <div className="relative">
+                              <input
+                                required
+                                type="text"
+                                list="appliance-types"
+                                value={appliance}
+                                onChange={(e) => setAppliance(e.target.value)}
+                                placeholder="Ketik untuk mencari..."
+                                className="w-full bg-slate-900/80 border border-slate-700 rounded-xl px-4 py-3 pr-10 text-slate-200 focus:border-orange-500 outline-none placeholder-slate-600 transition-all"
+                              />
+                              <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-500">
+                                <ChevronDown size={18} />
+                              </div>
+                              <datalist id="appliance-types">
+                                {applianceTypes.map((t) => (
+                                  <option key={t.id} value={t.name} />
+                                ))}
+                              </datalist>
+                            </div>
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Nama/Lokasi *</label>
+                            <input
+                              required
+                              type="text"
+                              value={applianceName}
+                              onChange={(e) => setApplianceName(e.target.value)}
+                              placeholder="Contoh: AC Kamar Utama"
+                              className="w-full bg-slate-900/80 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:border-orange-500 outline-none placeholder-slate-600 transition-all"
+                            />
+                          </div>
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Merek (Opsional)</label>
+                          <input
+                            type="text"
+                            value={brand}
+                            onChange={(e) => setBrand(e.target.value)}
+                            placeholder="Contoh: LG, Samsung..."
+                            className="w-full bg-slate-900/80 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:border-orange-500 outline-none placeholder-slate-600 transition-all"
+                          />
+                        </div>
+                      </div>
+                    )}
+
                     <div className="space-y-1">
                       <label className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Keluhan / Kerusakan *</label>
                       <textarea
@@ -255,18 +463,43 @@ function BookingFormInner() {
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="space-y-1">
                           <label className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Nama Lengkap *</label>
-                          <input required type="text" value={name} onChange={(e) => setName(e.target.value)} className="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:border-orange-500 outline-none" />
+                          <input 
+                            required 
+                            type="text" 
+                            value={name} 
+                            onChange={(e) => setName(e.target.value)} 
+                            className={`w-full bg-slate-900/50 border rounded-xl px-4 py-3 text-slate-200 focus:border-orange-500 outline-none transition-colors ${
+                              showStep2Errors && (!name || name.trim().length < 3) ? "border-red-500 bg-red-500/5 focus:border-red-500" : "border-slate-700"
+                            }`} 
+                          />
                         </div>
                         <div className="space-y-1">
                           <label className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Nomor WhatsApp *</label>
-                          <input required type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:border-orange-500 outline-none" />
+                          <input 
+                            required 
+                            type="tel" 
+                            value={phone} 
+                            onChange={(e) => setPhone(e.target.value)} 
+                            className={`w-full bg-slate-900/50 border rounded-xl px-4 py-3 text-slate-200 focus:border-orange-500 outline-none transition-colors ${
+                              showStep2Errors && (!phone || phone.length < 10 || phone.length > 15) ? "border-red-500 bg-red-500/5 focus:border-red-500" : "border-slate-700"
+                            }`} 
+                          />
                         </div>
                       </div>
                       
                       {serviceType === "HOME_SERVICE" ? (
                         <div className="space-y-1 animate-in fade-in zoom-in-95">
                           <label className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Alamat Kunjungan *</label>
-                          <textarea required rows={3} value={address} onChange={(e) => setAddress(e.target.value)} className="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:border-orange-500 outline-none" placeholder="Tuliskan alamat lengkap..." />
+                          <textarea 
+                            required 
+                            rows={3} 
+                            value={address} 
+                            onChange={(e) => setAddress(e.target.value)} 
+                            className={`w-full bg-slate-900/50 border rounded-xl px-4 py-3 text-slate-200 focus:border-orange-500 outline-none transition-colors ${
+                              showStep2Errors && (!address || address.trim().length < 10) ? "border-red-500 bg-red-500/5 focus:border-red-500" : "border-slate-700"
+                            }`} 
+                            placeholder="Tuliskan alamat lengkap..." 
+                          />
                         </div>
                       ) : (
                         <div className="p-4 rounded-xl bg-blue-500/10 border border-blue-500/20 animate-in fade-in zoom-in-95">
@@ -300,7 +533,12 @@ function BookingFormInner() {
                         <label className="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-2 block px-1">Pilih Tanggal Servis *</label>
                         <PremiumCalendar
                           selectedDate={scheduledDate}
-                          onChange={(date) => setScheduledDate(date)}
+                          onChange={(date) => {
+                            setScheduledDate(date);
+                            setShowStep3Errors(false);
+                            setErrorMsg("");
+                          }}
+                          hasError={showStep3Errors && !scheduledDate}
                         />
                       </div>
                       <div className="space-y-2">
@@ -341,8 +579,11 @@ function BookingFormInner() {
                 {/* STEP 4: SUMMARY & CONFIRM */}
                 {step === 4 && (
                   <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500 text-center">
-                    <div className="w-20 h-20 bg-orange-500/10 rounded-full flex items-center justify-center mx-auto text-orange-500 mb-2">
-                      <CheckCircle2 size={48} />
+                    <div className="relative w-24 h-24 mx-auto mb-2 flex items-center justify-center">
+                      <div className="absolute inset-0 bg-orange-500/20 rounded-full animate-ping opacity-75" />
+                      <div className="relative w-20 h-20 bg-orange-500/10 rounded-full flex items-center justify-center text-orange-500 border border-orange-500/20 shadow-[0_0_30px_rgba(249,115,22,0.3)]">
+                        <CheckCircle2 size={48} />
+                      </div>
                     </div>
                     <div>
                       <h3 className="text-xl font-bold">Konfirmasi Pesanan</h3>
@@ -352,7 +593,13 @@ function BookingFormInner() {
                     <div className="bg-slate-900/50 rounded-2xl p-6 text-left space-y-4 border border-slate-800">
                       <div className="flex justify-between items-start">
                         <span className="text-xs text-slate-500 font-bold uppercase">Barang</span>
-                        <span className="text-sm font-semibold text-slate-200">{appliance} {brand && `(${brand})`}</span>
+                        <span className="text-sm font-semibold text-slate-200">
+                          {selectedApplianceId !== "NEW" 
+                            ? userAppliances.find(a => a.id === selectedApplianceId)?.name || userAppliances.find(a => a.id === selectedApplianceId)?.appliance_type.name
+                            : applianceName || appliance
+                          } 
+                          {brand && ` (${brand})`}
+                        </span>
                       </div>
                       <div className="flex justify-between items-start border-t border-slate-800 pt-3">
                         <span className="text-xs text-slate-500 font-bold uppercase">Metode</span>
@@ -433,10 +680,10 @@ function BookingFormInner() {
   );
 }
 
-export default function BookingForm() {
+export default function BookingForm({ applianceTypes }: BookingFormProps) {
   return (
     <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-slate-900 text-slate-50">Memuat form pemesanan...</div>}>
-      <BookingFormInner />
+      <BookingFormInner applianceTypes={applianceTypes} />
     </Suspense>
   );
 }

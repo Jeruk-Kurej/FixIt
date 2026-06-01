@@ -11,7 +11,8 @@ export async function processSmartReminders(userId: string) {
       ],
       // Only remind for orders that are confirmed (payment verified)
       payment_status: { in: ["DP_PAID", "FULLY_PAID"] },
-      status: { in: ["ACCEPTED", "WORKING", "PENDING"] }
+      status: { in: ["ACCEPTED", "WORKING"] },
+      technician_id: { not: null }
     },
     include: {
       appliance: { include: { appliance_type: true } },

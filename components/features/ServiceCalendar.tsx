@@ -95,7 +95,7 @@ export default function ServiceCalendar({ events }: ServiceCalendarProps) {
 
             <div className="grid grid-cols-7 gap-1" style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)' }}>
               {Array.from({ length: offset }).map((_, i) => (
-                <div key={`offset-${i}`} className="h-10 sm:h-12" />
+                <div key={`offset-${i}`} className="h-12 sm:h-16" />
               ))}
               {days.map(day => {
                 const dateEvents = getEventsForDate(day);
@@ -111,7 +111,7 @@ export default function ServiceCalendar({ events }: ServiceCalendarProps) {
                     key={day}
                     onClick={() => setSelectedDate(new Date(year, month, day))}
                     className={cn(
-                      "relative h-10 sm:h-12 flex flex-col items-center justify-center rounded-xl transition-all duration-300 group",
+                      "relative h-12 sm:h-16 flex flex-col items-center justify-center rounded-xl transition-all duration-300 group",
                       isSelected 
                         ? "bg-orange-500 text-white shadow-[0_8px_16px_rgba(249,115,22,0.3)] z-10" 
                         : "hover:bg-slate-700/50 text-slate-300",

@@ -31,6 +31,7 @@ export default async function DashboardPage() {
     include: {
       technician: {
         include: {
+          specialties: true,
           orders: {
             orderBy: { createdAt: "desc" },
             include: {
@@ -100,7 +101,7 @@ export default async function DashboardPage() {
   await processSmartReminders(user.id);
 
   const calendarEvents = user.orders
-    .filter(o => o.scheduled_date_time && (o.payment_status === 'DP_PAID' || o.payment_status === 'FULLY_PAID'))
+    .filter(o => o.scheduled_date_time && o.technician_id && (o.payment_status === 'DP_PAID' || o.payment_status === 'FULLY_PAID'))
     .map(o => ({
       id: o.id,
       date: new Date(o.scheduled_date_time!),

@@ -25,14 +25,15 @@ export default async function ChatPage({ searchParams }: { searchParams: Promise
     redirect("/login");
   }
 
-  // Fetch all orders where this user is involved
+  // Fetch all orders where this user is involved and a technician has been assigned
   const orders = await prisma.order.findMany({
     where: {
       OR: [
         { user_id: user.id },
         { technician_id: user.technician?.id || "" }
       ],
-      status: { in: ['ACCEPTED', 'WORKING', 'DONE'] }
+      status: { in: ['ACCEPTED', 'WORKING', 'DONE'] },
+      technician_id: { not: null }
     },
     include: {
       user: true,
@@ -69,7 +70,7 @@ export default async function ChatPage({ searchParams }: { searchParams: Promise
   });
 
   return (
-    <div className="min-h-[calc(100vh-64px)] bg-slate-900 text-slate-50">
+    <div className="chat-page-container h-[calc(100vh-64px)] w-full max-w-full overflow-hidden bg-slate-900 text-slate-50 flex flex-col">
       <ChatHub 
         initialOrders={JSON.parse(JSON.stringify(sortedOrders))} 
         currentUserId={user.id} 

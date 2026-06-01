@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import BookingForm from "./BookingForm";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
+import prisma from "@/lib/prisma";
 
 export default async function BookingPage() {
   const session = await getServerSession(authOptions);
@@ -13,5 +14,20 @@ export default async function BookingPage() {
     redirect("/login");
   }
 
-  return <BookingForm />;
+  const applianceTypes = await prisma.applianceType.findMany({
+    where: {
+      technicians: {
+        some: {}
+      }
+    },
+    select: {
+      id: true,
+      name: true
+    },
+    orderBy: {
+      name: "asc"
+    }
+  });
+
+  return <BookingForm applianceTypes={applianceTypes} />;
 }
