@@ -16,6 +16,9 @@ interface ProfileFormProps {
     name: string;
     phone: string;
     specialties: string[]; // array of IDs
+    bank_name?: string | null;
+    bank_account?: string | null;
+    bank_owner?: string | null;
   };
   applianceTypes: ApplianceType[];
 }
@@ -25,6 +28,9 @@ export default function ProfileForm({ initialData, applianceTypes }: ProfileForm
   const [name, setName] = useState(initialData.name || "");
   const [phone, setPhone] = useState(initialData.phone || "");
   const [selectedSpecialties, setSelectedSpecialties] = useState<string[]>(initialData.specialties || []);
+  const [bankName, setBankName] = useState(initialData.bank_name || "");
+  const [bankAccount, setBankAccount] = useState(initialData.bank_account || "");
+  const [bankOwner, setBankOwner] = useState(initialData.bank_owner || "");
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
@@ -43,7 +49,14 @@ export default function ProfileForm({ initialData, applianceTypes }: ProfileForm
       const res = await fetch("/api/technician/profile", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, phone, specialties: selectedSpecialties }),
+        body: JSON.stringify({ 
+          name, 
+          phone, 
+          specialties: selectedSpecialties,
+          bank_name: bankName,
+          bank_account: bankAccount,
+          bank_owner: bankOwner
+        }),
       });
 
       const data = await res.json();
@@ -129,6 +142,46 @@ export default function ProfileForm({ initialData, applianceTypes }: ProfileForm
               </button>
             );
           })}
+        </div>
+      </div>
+
+      <div className="space-y-4 pt-4 border-t border-slate-800">
+        <div>
+          <h3 className="text-sm font-medium text-slate-300">Informasi Bank (Untuk Pencairan Dana)</h3>
+          <p className="text-xs text-slate-500 mt-1">Isi data rekening Anda agar customer bisa langsung membayar ke Anda melalui Midtrans.</p>
+        </div>
+
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-slate-300">Nama Bank (Misal: BCA, Mandiri, BNI)</label>
+            <input 
+              type="text" 
+              value={bankName}
+              onChange={(e) => setBankName(e.target.value)}
+              placeholder="Contoh: BCA"
+              className="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all"
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-slate-300">Nomor Rekening</label>
+            <input 
+              type="text" 
+              value={bankAccount}
+              onChange={(e) => setBankAccount(e.target.value)}
+              placeholder="Contoh: 1234567890"
+              className="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all"
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-slate-300">Nama Pemilik Rekening</label>
+            <input 
+              type="text" 
+              value={bankOwner}
+              onChange={(e) => setBankOwner(e.target.value)}
+              placeholder="Sesuai buku tabungan"
+              className="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all"
+            />
+          </div>
         </div>
       </div>
 

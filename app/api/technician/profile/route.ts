@@ -32,7 +32,10 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       name: user.name,
       phone: user.phone,
-      specialties: user.technician.specialties.map(s => s.id)
+      specialties: user.technician.specialties.map(s => s.id),
+      bank_name: user.technician.bank_name,
+      bank_account: user.technician.bank_account,
+      bank_owner: user.technician.bank_owner,
     });
   } catch (error: any) {
     console.error("Error fetching technician profile:", error);
@@ -42,7 +45,7 @@ export async function GET(req: NextRequest) {
 
 export async function PUT(req: NextRequest) {
   try {
-    const { name, phone, specialties } = await req.json(); // specialties is an array of ApplianceType IDs
+    const { name, phone, specialties, bank_name, bank_account, bank_owner } = await req.json(); // specialties is an array of ApplianceType IDs
     const session = await getServerSession(authOptions);
     const cookieStore = await cookies();
     const userEmail = session?.user?.email || cookieStore.get("user_email")?.value;
@@ -73,6 +76,9 @@ export async function PUT(req: NextRequest) {
     const updatedTechnician = await prisma.technician.update({
       where: { id: user.technician.id },
       data: {
+        bank_name: bank_name || null,
+        bank_account: bank_account || null,
+        bank_owner: bank_owner || null,
         specialties: {
           set: specialties.map((id: string) => ({ id }))
         }

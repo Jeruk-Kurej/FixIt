@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Upload, CheckCircle2, AlertCircle, Copy, CreditCard, QrCode, Check } from "lucide-react";
+import { useState, useEffect } from "react";
+import { CheckCircle2, AlertCircle, CreditCard, ShieldCheck } from "lucide-react";
 import Button from "@/components/ui/Button";
 import { formatRupiah, cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
@@ -14,11 +14,7 @@ interface PaymentModalContentProps {
 }
 
 export default function PaymentModalContent({ order, paymentType, amount, onClose }: PaymentModalContentProps) {
-  const [activeTab, setActiveTab] = useState<"BANK" | "QRIS">("BANK");
-  const [isCopied, setIsCopied] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
-  const [file, setFile] = useState<File | null>(null);
-  const [proofUrl, setProofUrl] = useState("");
+  const [isProcessing, setIsProcessing] = useState(false);
   const [status, setStatus] = useState<"IDLE" | "SUCCESS" | "ERROR">("IDLE");
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -26,82 +22,77 @@ export default function PaymentModalContent({ order, paymentType, amount, onClos
   const existingPayment = order.payments?.find((p: any) => p.type === paymentType && p.status === 'VALID');
   const isPaid = !!existingPayment;
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText("80102938812");
-    setIsCopied(true);
-    setTimeout(() => setIsCopied(false), 2000);
-  };
+  useEffect(() => {
+    // Load Midtrans Snap script
+    const scriptUrl = "https://app.sandbox.midtrans.com/snap/snap.js";
+    // We can hardcode client key for sandbox or use NEXT_PUBLIC env
+    const clientKey = "Mid-client-MC1FOZsd50Hr5ENi"; 
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0];
-    if (selectedFile) {
-      setFile(selectedFile);
-      setProofUrl(URL.createObjectURL(selectedFile));
-    }
-  };
+    if (document.getElementById("midtrans-script")) return;
+    const script = document.createElement("script");
+    script.id = "midtrans-script";
+    script.src = scriptUrl;
+    script.setAttribute("data-client-key", clientKey);
+    script.async = true;
+    document.body.appendChild(script);
+  }, []);
 
-  const handleRemoveFile = () => {
-    setFile(null);
-    setProofUrl("");
-  };
-
-  const handleUpload = async () => {
-    if (activeTab === 'BANK' && !file) {
-      alert("Harap upload bukti transfer bank Anda bro!");
-      return;
-    }
-
-    setIsUploading(true);
+  const handlePayment = async () => {
+    setIsProcessing(true);
     setStatus("IDLE");
     setErrorMessage("");
 
     try {
-      let uploadedUrl = null;
-
-      if (activeTab === 'BANK' && file) {
-        const formData = new FormData();
-        formData.append("file", file);
-        
-        const uploadRes = await fetch(`/api/upload`, {
-          method: "POST",
-          body: formData
-        });
-
-        if (!uploadRes.ok) {
-          const errData = await uploadRes.json().catch(() => ({}));
-          throw new Error(errData.error || "Gagal mengunggah file.");
-        }
-        const uploadData = await uploadRes.json();
-        uploadedUrl = uploadData.url;
-      }
-
-      const res = await fetch("/api/payments", {
+      const res = await fetch("/api/payments/midtrans", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           orderId: order.id,
           amount: Number(amount),
           type: paymentType,
-          method: activeTab,
-          proofUrl: uploadedUrl
         })
       });
 
       if (!res.ok) {
         const errorData = await res.json();
-        throw new Error(errorData.details || errorData.error || "Gagal menyimpan data pembayaran.");
+        throw new Error(errorData.details || errorData.error || "Gagal membuat transaksi.");
       }
       
-      setStatus("SUCCESS");
-      setTimeout(() => {
-        onClose();
-        window.location.reload();
-      }, 2000);
+      const data = await res.json();
+      
+      if (!(window as any).snap) {
+        throw new Error("Sistem pembayaran belum siap, coba sesaat lagi.");
+      }
+
+      // Trigger Snap popup
+      (window as any).snap.pay(data.token, {
+        onSuccess: function (result: any) {
+          setStatus("SUCCESS");
+          setTimeout(() => {
+            onClose();
+            window.location.reload();
+          }, 2000);
+        },
+        onPending: function (result: any) {
+          alert("Pembayaran berhasil dibuat. Menunggu Anda menyelesaikan pembayaran.");
+          onClose();
+          window.location.reload();
+        },
+        onError: function (result: any) {
+          setErrorMessage("Pembayaran gagal.");
+          setStatus("ERROR");
+          setIsProcessing(false);
+        },
+        onClose: function () {
+          // User closed popup
+          setIsProcessing(false);
+        }
+      });
+      
     } catch (err: any) {
       setErrorMessage(err.message || "Terjadi kesalahan sistem.");
       setStatus("ERROR");
-    } finally {
-      setIsUploading(false);
+      setIsProcessing(false);
     }
   };
 
@@ -114,7 +105,7 @@ export default function PaymentModalContent({ order, paymentType, amount, onClos
           </div>
           <h4 className="text-xl font-black text-slate-100 mb-2">Berhasil!</h4>
           <p className="text-xs text-slate-400 font-medium">
-            {activeTab === 'QRIS' ? 'Pembayaran QRIS sedang divalidasi.' : 'Bukti transfer terkirim. Admin akan memverifikasi.'}
+            Pembayaran Anda telah diterima.
           </p>
         </div>
       ) : isPaid ? (
@@ -135,25 +126,6 @@ export default function PaymentModalContent({ order, paymentType, amount, onClos
               <p className="text-3xl font-black text-white tracking-tight">{formatRupiah(amount)}</p>
            </div>
 
-           <div className="space-y-3">
-              <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest px-1">Bukti Pembayaran</p>
-              <div className="relative group">
-                 {existingPayment.proof_url ? (
-                    <div className="border-2 border-slate-800 rounded-2xl overflow-hidden bg-slate-900 aspect-video flex items-center justify-center">
-                       <img 
-                         src={existingPayment.proof_url} 
-                         alt="Bukti Transfer" 
-                         className="w-full h-full object-contain"
-                       />
-                    </div>
-                 ) : (
-                    <div className="p-8 border-2 border-dashed border-slate-800 rounded-2xl text-center">
-                       <p className="text-[10px] font-bold text-slate-500 uppercase italic">Metode QRIS / No Proof</p>
-                    </div>
-                 )}
-              </div>
-           </div>
-
            <button 
              onClick={onClose}
              className="w-full py-4 mt-4 bg-slate-800 hover:bg-slate-700 rounded-2xl text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] transition-all"
@@ -169,90 +141,17 @@ export default function PaymentModalContent({ order, paymentType, amount, onClos
              <p className="text-3xl font-black text-orange-500 tracking-tight">{formatRupiah(amount)}</p>
           </div>
 
-          {/* Payment Method Tabs */}
-          <div className="space-y-4">
-             <div className="flex p-1 bg-slate-950 border border-slate-800 rounded-2xl">
-                <button 
-                   onClick={() => setActiveTab("BANK")}
-                   className={cn(
-                      "flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all",
-                      activeTab === 'BANK' ? "bg-slate-800 text-white shadow-lg" : "text-slate-500 hover:text-slate-300"
-                   )}
-                >
-                   <CreditCard size={12} />
-                   Transfer Bank
-                </button>
-                <button 
-                   onClick={() => setActiveTab("QRIS")}
-                   className={cn(
-                      "flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all",
-                      activeTab === 'QRIS' ? "bg-slate-800 text-white shadow-lg" : "text-slate-500 hover:text-slate-300"
-                   )}
-                >
-                   <QrCode size={12} />
-                   Scan QRIS
-                </button>
+          <div className="bg-slate-800/20 border border-slate-800 rounded-2xl p-6 text-center space-y-4">
+             <div className="w-16 h-16 bg-slate-800/50 rounded-2xl mx-auto flex items-center justify-center text-slate-400">
+                <ShieldCheck size={32} />
              </div>
-
-             <div className="relative">
-                <AnimatePresence mode="wait">
-                    <motion.div 
-                      key={activeTab}
-                      initial={{ opacity: 0, y: 5 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -5 }}
-                      transition={{ duration: 0.15 }}
-                    >
-                      {activeTab === 'BANK' ? (
-                          <div className="p-4 bg-slate-800/20 border border-slate-800 rounded-2xl flex items-center justify-between">
-                            <div>
-                                <p className="text-[8px] font-black text-slate-600 uppercase mb-0.5">Bank BCA (Admin FixIt)</p>
-                                <p className="text-sm font-black text-slate-100 tracking-tight">801 0293 8812</p>
-                            </div>
-                            <button 
-                                onClick={handleCopy}
-                                className={cn(
-                                  "p-2 rounded-xl border flex items-center gap-2 transition-all",
-                                  isCopied ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500" : "bg-slate-800 border-slate-700 text-slate-400"
-                                )}
-                            >
-                                {isCopied ? <Check size={12} /> : <Copy size={12} />}
-                            </button>
-                          </div>
-                      ) : (
-                          <div className="flex flex-col items-center gap-2 py-4 p-4 bg-white rounded-2xl border border-slate-800">
-                            <div className="w-24 h-24 bg-slate-100 rounded-lg flex items-center justify-center border border-slate-200">
-                                <QrCode size={80} className="text-slate-900" />
-                            </div>
-                            <p className="text-[10px] font-black text-slate-900">Scan QR Code untuk bayar</p>
-                          </div>
-                      )}
-                    </motion.div>
-                </AnimatePresence>
+             <div>
+                 <h4 className="text-sm font-black text-slate-100 uppercase tracking-widest">Pembayaran Aman</h4>
+                 <p className="text-xs text-slate-500 mt-2 leading-relaxed">
+                   Bayar dengan aman menggunakan Midtrans. Tersedia berbagai metode pembayaran (GoPay, Virtual Account, QRIS, dll).
+                 </p>
              </div>
           </div>
-
-          {activeTab === 'BANK' && (
-            <div className="space-y-2">
-                <div className="flex items-center justify-between px-1">
-                    <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Upload Bukti Transfer</p>
-                    {proofUrl && (
-                      <button onClick={handleRemoveFile} className="text-[8px] font-black text-red-400 uppercase">Hapus</button>
-                    )}
-                </div>
-                <label className="border-2 border-dashed border-slate-800 rounded-2xl p-4 flex flex-col items-center justify-center gap-2 hover:border-orange-500/50 hover:bg-orange-500/5 transition-all cursor-pointer bg-slate-950/20">
-                    <input type="file" className="hidden" onChange={handleFileChange} accept="image/*" />
-                    {proofUrl ? (
-                      <img src={proofUrl} alt="Proof" className="w-full h-24 object-cover rounded-lg" />
-                    ) : (
-                      <>
-                        <Upload size={16} className="text-slate-500" />
-                        <p className="text-[8px] font-black text-slate-500 uppercase">Klik untuk upload bukti</p>
-                      </>
-                    )}
-                </label>
-            </div>
-          )}
 
           {status === 'ERROR' && (
             <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-2 text-red-400 text-[9px] font-bold">
@@ -262,12 +161,17 @@ export default function PaymentModalContent({ order, paymentType, amount, onClos
           )}
 
           <Button 
-            onClick={handleUpload}
-            disabled={isUploading || (activeTab === 'BANK' && !file)}
-            className="w-full py-3.5 rounded-xl text-[9px] font-black uppercase tracking-[0.2em]"
+            onClick={handlePayment}
+            disabled={isProcessing}
+            className="w-full py-4 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2"
             variant="primary"
           >
-            {isUploading ? "Memproses..." : "Kirim Pembayaran"}
+            {isProcessing ? "Memproses..." : (
+              <>
+                <CreditCard size={14} />
+                Bayar dengan Midtrans
+              </>
+            )}
           </Button>
         </div>
       )}

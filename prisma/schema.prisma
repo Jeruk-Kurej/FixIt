@@ -80,10 +80,13 @@ model Membership {
 }
 
 model Technician {
-  id           String   @id @default(uuid())
-  user_id      String   @unique
-  rating       Float    @default(5)
+  id           String          @id @default(uuid())
+  user_id      String          @unique
+  rating       Float           @default(5)
   is_available Boolean         @default(true)
+  bank_name    String?
+  bank_account String?
+  bank_owner   String?
   orders       Order[]
   reviews      Review[]
   user         User            @relation(fields: [user_id], references: [id])
@@ -187,6 +190,7 @@ model Payment {
   type        PaymentType
   method      String?                   @db.VarChar(20)
   status      PaymentVerificationStatus @default(PENDING)
+  midtrans_id String?                   @db.VarChar(255)
   admin_notes String?                   @db.Text
   verifiedAt  DateTime?
   createdAt   DateTime                  @default(now())
